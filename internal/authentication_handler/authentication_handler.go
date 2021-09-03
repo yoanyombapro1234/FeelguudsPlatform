@@ -40,12 +40,14 @@ type AuthenticationComponent struct {
 	Client *core_auth_sdk.Client
 	// Logger is the logger object used by this component
 	Logger *zap.Logger
+	// Metric specific to this module
+	Metric *ServiceMetrics
 }
 
 var _ AuthenticationServiceInterface = (*AuthenticationComponent)(nil)
 
 // NewAuthenticationComponent returns an authentication component to the caller
-func NewAuthenticationComponent(params *AuthenticationParams) *AuthenticationComponent {
+func NewAuthenticationComponent(params *AuthenticationParams, serviceName string) *AuthenticationComponent {
 	if params == nil {
 		log.Fatal(ErrInvalidInputArguments.Error())
 	}
@@ -65,7 +67,9 @@ func NewAuthenticationComponent(params *AuthenticationParams) *AuthenticationCom
 		logger.Fatal(fmt.Sprintf("failed to actually connect to authn client. error - %s", err.Error()))
 	}
 
-	return &AuthenticationComponent{Client: authnClient, Logger: params.Logger}
+	serviceMetrics := NewServiceMetrics(serviceName)
+
+	return &AuthenticationComponent{Client: authnClient, Logger: params.Logger, Metric: serviceMetrics}
 }
 
 // ConnectToDownstreamService attempts to connect to a downstream service

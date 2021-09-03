@@ -6,17 +6,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type Telemetry struct {
-	MicroServiceMetrics *ServiceMetrics
-}
-
-// NewTelemetry initializes a new instance of the telemetry object
-func NewTelemetry(serviceName string) *Telemetry {
-	return &Telemetry{
-		MicroServiceMetrics: NewServiceMetrics(serviceName),
-	}
-}
-
 type ServiceMetrics struct {
 	ServiceName string
 	// tracks the number of grpc requests partitioned by name and status code

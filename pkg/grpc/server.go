@@ -17,8 +17,21 @@ type Server struct {
 }
 
 type Config struct {
-	Port        int    `mapstructure:"grpc-port"`
-	ServiceName string `mapstructure:"grpc-service-name"`
+	Port                        int    `mapstructure:"GRPC_PORT"`
+	ServiceName                 string `mapstructure:"GRPC_SERVICE_NAME"`
+	RpcDeadline                 int    `mapstructure:"GRPC_RPC_DEADLINE_IN_MS"`
+	RpcRetries                  int    `mapstructure:"GRPC_RPC_RETRIES"`
+	RpcRetryTimeout             int    `mapstructure:"GRPC_RPC_RETRY_TIMEOUT_IN_MS"`
+	RpcRetryBackoff             int    `mapstructure:"GRPC_RPC_RETRY_BACKOFF_IN_MS"`
+	EnableTls                   bool   `mapstructure:"GRPC_ENABLE_TLS"`
+	CertificatePath             string `mapstructure:"GRPC_CERT_PATH"`
+	EnableDelayMiddleware       bool   `mapstructure:"ENABLE_RANDOM_DELAY"`
+	EnableRandomErrorMiddleware bool   `mapstructure:"ENABLE_RANDOM_RANDOM_ERROR"`
+	MinRandomDelay              int    `mapstructure:"RANDOM_DELAY_MIN_IN_MS"`
+	MaxRandomDelay              int    `mapstructure:"RANDOM_DELAY_MAX_IN_MS"`
+	DelayUnit                   string `mapstructure:"RANDOM_DELAY_UNIT"`
+	Version                     string `mapstructure:"VERSION"`
+	MetricAddr                  string `mapstructure:"METRIC_CONNECTION_ADDRESS"`
 }
 
 func NewServer(config *Config, logger *zap.Logger) (*Server, error) {

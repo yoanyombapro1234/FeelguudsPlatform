@@ -20,6 +20,7 @@ import (
 	"github.com/stefanprodan/podinfo/pkg/fscache"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/swaggo/swag"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/authentication_handler"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -46,47 +47,48 @@ var (
 )
 
 type Config struct {
-	HttpClientTimeout         time.Duration `mapstructure:"http-client-timeout"`
-	HttpServerTimeout         time.Duration `mapstructure:"http-server-timeout"`
-	HttpServerShutdownTimeout time.Duration `mapstructure:"http-server-shutdown-timeout"`
-	BackendURL                []string      `mapstructure:"backend-url"`
-	UILogo                    string        `mapstructure:"ui-logo"`
-	UIMessage                 string        `mapstructure:"ui-message"`
-	UIColor                   string        `mapstructure:"ui-color"`
-	UIPath                    string        `mapstructure:"ui-path"`
-	DataPath                  string        `mapstructure:"data-path"`
-	ConfigPath                string        `mapstructure:"config-path"`
-	CertPath                  string        `mapstructure:"cert-path"`
-	Host                      string        `mapstructure:"host"`
-	Port                      string        `mapstructure:"port"`
-	SecurePort                string        `mapstructure:"secure-port"`
-	PortMetrics               int           `mapstructure:"port-metrics"`
-	Hostname                  string        `mapstructure:"hostname"`
-	H2C                       bool          `mapstructure:"h2c"`
-	RandomDelay               bool          `mapstructure:"random-delay"`
-	RandomDelayUnit           string        `mapstructure:"random-delay-unit"`
-	RandomDelayMin            int           `mapstructure:"random-delay-min"`
-	RandomDelayMax            int           `mapstructure:"random-delay-max"`
-	RandomError               bool          `mapstructure:"random-error"`
-	Unhealthy                 bool          `mapstructure:"unhealthy"`
-	Unready                   bool          `mapstructure:"unready"`
-	JWTSecret                 string        `mapstructure:"jwt-secret"`
-	CacheServer               string        `mapstructure:"cache-server"`
+	HttpClientTimeout         time.Duration `mapstructure:"HTTP_CLIENT_TIMEOUT_IN_MINUTES"`
+	HttpServerTimeout         time.Duration `mapstructure:"HTTP_SERVER_TIMEOUT_IN_SECONDS"`
+	HttpServerShutdownTimeout time.Duration `mapstructure:"HTTP_SERVER_SHUTDOWN_TIMEOUT_IN_SECONDS"`
+	BackendURL                []string      `mapstructure:"BACKEND_SERVICE_URLS"`
+	UILogo                    string        `mapstructure:"UI_LOGO"`
+	UIMessage                 string        `mapstructure:"UI_MESSAGE"`
+	UIColor                   string        `mapstructure:"UI_COLOR"`
+	UIPath                    string        `mapstructure:"UI_PATH"`
+	DataPath                  string        `mapstructure:"DATA_PATH"`
+	ConfigPath                string        `mapstructure:"CONFIG_PATH"`
+	CertPath                  string        `mapstructure:"CERT_PATH"`
+	Port                      string        `mapstructure:"HTTP_PORT"`
+	SecurePort                string        `mapstructure:"HTTPS_PORT"`
+	PortMetrics               int           `mapstructure:"METRICS_PORT"`
+	Hostname                  string        `mapstructure:"HOSTNAME"`
+	H2C                       bool          `mapstructure:"H2C"`
+	RandomDelay               bool          `mapstructure:"ENABLE_RANDOM_DELAY"`
+	RandomDelayUnit           string        `mapstructure:"RANDOM_DELAY_UNIT"`
+	RandomDelayMin            int           `mapstructure:"RANDOM_DELAY_MIN_IN_MS"`
+	RandomDelayMax            int           `mapstructure:"RANDOM_DELAY_MAX_IN_MS"`
+	RandomError               bool          `mapstructure:"ENABLE_RANDOM_ERROR"`
+	Unhealthy                 bool          `mapstructure:"SET_SERVICE_UNHEALTHY"`
+	Unready                   bool          `mapstructure:"SET_SERVICE_UNREADY"`
+	JWTSecret                 string        `mapstructure:"JWT_SECRET"`
+	CacheServer               string        `mapstructure:"CACHE_SERVER_ADDRESS"`
 }
 
 type Server struct {
-	router  *mux.Router
-	logger  *zap.Logger
-	config  *Config
-	pool    *redis.Pool
-	handler http.Handler
+	router        *mux.Router
+	logger        *zap.Logger
+	config        *Config
+	pool          *redis.Pool
+	handler       http.Handler
+	authComponent *authentication_handler.AuthenticationComponent
 }
 
-func NewServer(config *Config, logger *zap.Logger) (*Server, error) {
+func NewServer(config *Config, logger *zap.Logger, authCmp *authentication_handler.AuthenticationComponent) (*Server, error) {
 	srv := &Server{
-		router: mux.NewRouter(),
-		logger: logger,
-		config: config,
+		router:        mux.NewRouter(),
+		logger:        logger,
+		config:        config,
+		authComponent: authCmp,
 	}
 
 	return srv, nil
@@ -249,7 +251,7 @@ func (s *Server) startServer() *http.Server {
 	}
 
 	srv := &http.Server{
-		Addr:         s.config.Host + ":" + s.config.Port,
+		Addr:         s.config.Hostname + ":" + s.config.Port,
 		WriteTimeout: s.config.HttpServerTimeout,
 		ReadTimeout:  s.config.HttpServerTimeout,
 		IdleTimeout:  2 * s.config.HttpServerTimeout,
@@ -278,7 +280,7 @@ func (s *Server) startSecureServer() *http.Server {
 	}
 
 	srv := &http.Server{
-		Addr:         s.config.Host + ":" + s.config.SecurePort,
+		Addr:         s.config.Hostname + ":" + s.config.SecurePort,
 		WriteTimeout: s.config.HttpServerTimeout,
 		ReadTimeout:  s.config.HttpServerTimeout,
 		IdleTimeout:  2 * s.config.HttpServerTimeout,

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/stefanprodan/podinfo/pkg/version"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version"
 	"go.uber.org/zap"
 )
 
