@@ -35,4 +35,4 @@ RUN go get github.com/canthefason/go-watcher
 RUN go install github.com/canthefason/go-watcher/cmd/watcher
 
 # define container entrypoint
-ENTRYPOINT watcher -run /go/src/github.com/yoanyombapro1234/FeelguudsPlatform/cmd/feelguud_platform -watch github.com/yoanyombapro1234/FeelguudsPlatform
+ENTRYPOINT watcher -run /go/src/github.com/yoanyombapro1234/FeelguudsPlatform/cmd/feelguuds_platform -watch github.com/yoanyombapro1234/FeelguudsPlatform

@@ -16,11 +16,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
-	_ "github.com/stefanprodan/podinfo/pkg/api/docs"
-	"github.com/stefanprodan/podinfo/pkg/fscache"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/swaggo/swag"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/authentication_handler"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/pkg/fscache"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -115,8 +114,6 @@ func (s *Server) registerHandlers() {
 	s.router.HandleFunc("/cache/{key}", s.cacheDeleteHandler).Methods("DELETE")
 	s.router.HandleFunc("/cache/{key}", s.cacheReadHandler).Methods("GET").Name("cache")
 	s.router.HandleFunc("/configs", s.configReadHandler).Methods("GET")
-	s.router.HandleFunc("/token", s.tokenGenerateHandler).Methods("POST")
-	s.router.HandleFunc("/token/validate", s.tokenValidateHandler).Methods("GET")
 	s.router.HandleFunc("/api/info", s.infoHandler).Methods("GET")
 	s.router.HandleFunc("/api/echo", s.echoHandler).Methods("POST")
 	s.router.HandleFunc("/ws/echo", s.echoWsHandler)

@@ -7,9 +7,9 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/mux"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version"
 	"go.uber.org/zap"
 
-	"github.com/stefanprodan/podinfo/pkg/version"
 )
 
 // Cache godoc

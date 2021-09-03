@@ -18,15 +18,15 @@ TMP_COVERAGE := $(TMP_BASE)/coverage
 # runs an instance of the service locally
 .PHONY: run
 run:
-	go run -ldflags "-s -w -X github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version.REVISION=$(GIT_COMMIT)" cmd/feelguud_platform/* \
+	go run -ldflags "-s -w -X github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version.REVISION=$(GIT_COMMIT)" cmd/feelguuds_platform/* \
 	--level=debug --grpc-port=9999 --backend-url=https://httpbin.org/status/401 --backend-url=https://httpbin.org/status/500 \
 	--ui-logo=https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif $(EXTRA_RUN_ARGS)
 
 # builds the service as an executable
 .PHONY: build
 build:
-	GIT_COMMIT=$$(git rev-list -1 HEAD) && CGO_ENABLED=0 go build  -ldflags "-s -w -X github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version.REVISION=$(GIT_COMMIT)" -a -o ./bin/feelguud_platform ./cmd/feelguud_platform/*
-	GIT_COMMIT=$$(git rev-list -1 HEAD) && CGO_ENABLED=0 go build  -ldflags "-s -w -X github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version.REVISION=$(GIT_COMMIT)" -a -o ./bin/feelguud_platform_cli ./cmd/feelguud_platform_cli/*
+	GIT_COMMIT=$$(git rev-list -1 HEAD) && CGO_ENABLED=0 go build  -ldflags "-s -w -X github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version.REVISION=$(GIT_COMMIT)" -a -o ./bin/feelguuds_platform ./cmd/feelguuds_platform/*
+	GIT_COMMIT=$$(git rev-list -1 HEAD) && CGO_ENABLED=0 go build  -ldflags "-s -w -X github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version.REVISION=$(GIT_COMMIT)" -a -o ./bin/feelguuds_platform_cli ./cmd/feelguuds_platform_cli/*
 
 # formats the service's codebase
 .PHONY: fmt
@@ -48,18 +48,18 @@ build-container:
 # builds the final part of the docker build
 .PHONY: push-base
 build-base:
-	docker build -f Dockerfile.base -t $(DOCKER_REPOSITORY)/feelguud_platform-base:latest .
+	docker build -f Dockerfile.base -t $(DOCKER_REPOSITORY)/feelguuds_platform-base:latest .
 
 # push the base part of the docker build
 .PHONY: push-base
 push-base: build-base
-	docker push $(DOCKER_REPOSITORY)/feelguud_platform-base:latest
+	docker push $(DOCKER_REPOSITORY)/feelguuds_platform-base:latest
 
 # test the docker container (endpoint test) TODO: expand this -- perform a suite of operations against the container
 .PHONY: test-container
 test-container:
-	@docker rm -f feelguud_platform || true
-	@docker run -dp 9898:9898 --name=feelguud_platform $(DOCKER_IMAGE_NAME):$(VERSION)
+	@docker rm -f feelguuds_platform || true
+	@docker run -dp 9898:9898 --name=feelguuds_platform $(DOCKER_IMAGE_NAME):$(VERSION)
 	@docker ps
 	@TOKEN=$$(curl -sd 'test' localhost:9898/token | jq -r .token) && \
 	curl -sH "Authorization: Bearer $${TOKEN}" localhost:9898/token/validate | grep test
@@ -81,15 +81,15 @@ version-set:
 	@next="$(TAG)" && \
 	current="$(VERSION)" && \
 	sed -i '' "s/$$current/$$next/g" pkg/version/version.go && \
-	sed -i '' "s/tag: $$current/tag: $$next/g" charts/feelguud_platform/values.yaml && \
-	sed -i '' "s/tag: $$current/tag: $$next/g" charts/feelguud_platform/values-prod.yaml && \
-	sed -i '' "s/appVersion: $$current/appVersion: $$next/g" charts/feelguud_platform/Chart.yaml && \
-	sed -i '' "s/version: $$current/version: $$next/g" charts/feelguud_platform/Chart.yaml && \
-	sed -i '' "s/feelguud_platform:$$current/feelguud_platform:$$next/g" kustomize/deployment.yaml && \
-	sed -i '' "s/feelguud_platform:$$current/feelguud_platform:$$next/g" deploy/webapp/frontend/deployment.yaml && \
-	sed -i '' "s/feelguud_platform:$$current/feelguud_platform:$$next/g" deploy/webapp/backend/deployment.yaml && \
-	sed -i '' "s/feelguud_platform:$$current/feelguud_platform:$$next/g" deploy/bases/frontend/deployment.yaml && \
-	sed -i '' "s/feelguud_platform:$$current/feelguud_platform:$$next/g" deploy/bases/backend/deployment.yaml && \
+	sed -i '' "s/tag: $$current/tag: $$next/g" charts/feelguuds_platform/values.yaml && \
+	sed -i '' "s/tag: $$current/tag: $$next/g" charts/feelguuds_platform/values-prod.yaml && \
+	sed -i '' "s/appVersion: $$current/appVersion: $$next/g" charts/feelguuds_platform/Chart.yaml && \
+	sed -i '' "s/version: $$current/version: $$next/g" charts/feelguuds_platform/Chart.yaml && \
+	sed -i '' "s/feelguuds_platform:$$current/feelguuds_platform:$$next/g" kustomize/deployment.yaml && \
+	sed -i '' "s/feelguuds_platform:$$current/feelguuds_platform:$$next/g" deploy/webapp/frontend/deployment.yaml && \
+	sed -i '' "s/feelguuds_platform:$$current/feelguuds_platform:$$next/g" deploy/webapp/backend/deployment.yaml && \
+	sed -i '' "s/feelguuds_platform:$$current/feelguuds_platform:$$next/g" deploy/bases/frontend/deployment.yaml && \
+	sed -i '' "s/feelguuds_platform:$$current/feelguuds_platform:$$next/g" deploy/bases/backend/deployment.yaml && \
 	echo "Version $$next set in code, deployment, chart and kustomize"
 
 # define a release of the current code base
