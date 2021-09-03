@@ -13,6 +13,7 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
 	_ "github.com/stefanprodan/podinfo/pkg/api/docs"
@@ -92,7 +93,6 @@ func NewServer(config *Config, logger *zap.Logger) (*Server, error) {
 }
 
 func (s *Server) registerHandlers() {
-	s.router.Handle("/metrics", promhttp.Handler())
 	s.router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	s.router.HandleFunc("/", s.indexHandler).HeadersRegexp("User-Agent", "^Mozilla.*").Methods("GET")
 	s.router.HandleFunc("/", s.infoHandler).Methods("GET")
@@ -133,6 +133,15 @@ func (s *Server) registerHandlers() {
 		}
 		w.Write([]byte(doc))
 	})
+
+	// Expose the registered metrics via HTTP.
+	http.Handle("/metrics", promhttp.HandlerFor(
+		prometheus.DefaultGatherer,
+		promhttp.HandlerOpts{
+			// Opt into OpenMetrics to support exemplars.
+			EnableOpenMetrics: true,
+		},
+	))
 }
 
 func (s *Server) registerMiddlewares() {

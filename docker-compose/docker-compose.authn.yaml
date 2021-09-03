@@ -1,0 +1,72 @@
+version: '3.7'
+
+services:
+  postgres:
+    container_name: ${AUTHN_POSTGRES_CONTAINER:-postgres}
+    image: postgres
+    environment:
+      POSTGRES_DB: ${AUTHN_POSTGRES_DB_NAME:-authentication_service}
+      POSTGRES_USER: ${AUTHN_POSTGRES_USER:-authentication_service}
+      POSTGRES_PASSWORD: ${AUTHN_POSTGRES_PASSWORD:-authentication_service}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - ${AUTHN_POSTGRES_EXTERNAL_PORT:-5432}:${AUTHN_POSTGRES_INTERNAL_PORT:-5432}
+    restart: unless-stopped
+    networks:
+      - monitor-net
+
+  redis:
+    container_name: ${AUTHN_REDIS_NAME:-redis}
+    image: redis
+    networks:
+      - monitor-net
+    ports:
+      - ${AUTHN_REDIS_EXTERNAL_PORT:-6379}:${AUTHN_REDIS_INTERNAL_PORT:-6379}
+
+  # docker run -it --rm  --publish 8080:3000   -e AUTHN_URL=http://localhost:8080   -e APP_DOMAINS=localhost   -e DATABASE_URL=sqlite3://:memory:?mode=memory\&cache=shared   -e SECRET_KEY_BASE=changeme   -e HTTP_AUTH_USERNAME=hello   -e HTTP_AUTH_PASSWORD=world   --name authn_app   keratin/authn-server:latest   sh -c "./authn migrate && ./authn server"
+  auth_service:
+    container_name: ${AUTHN_SERVICE_NAME:-authentication_service}
+    image: keratin/authn-server:latest
+    ports:
+      - ${AUTHN_EXTERNAL_PORT:-8000}:${AUTHN_INTERNAL_PORT:-3000}
+    environment:
+      DATABASE_URL: postgres://${AUTHN_POSTGRES_USER:-authentication_service}:${AUTHN_POSTGRES_PASSWORD:-authentication_service}@postgres:${AUTHN_POSTGRES_EXTERNAL_PORT:-5432}/${AUTHN_POSTGRES_DB_NAME:-authentication_service}?sslmode=disable
+      AUTHN_URL: ${AUTHN_PRIVATE_BASE_URL:-http://localhost}:${AUTHN_EXTERNAL_PORT:-8000}
+      APP_DOMAINS: ${AUTHN_DOMAINS:-localhost}
+      SECRET_KEY_BASE: ${AUTHN_SECRET:-secret}
+      REDIS_URL: ${AUTHN_REDIS_URL:-redis://redis:6379/11}
+      HTTP_AUTH_USERNAME: ${AUTHN_USERNAME:-feelguuds}
+      HTTP_AUTH_PASSWORD: ${AUTHN_PASSWORD:-feelguuds}
+      ENABLE_SIGNUP: ${AUTHN_ENABLE_SIGNUP:-false}
+      ACCESS_TOKEN_TTL: ${AUTHN_ACCESS_TOKEN_TTL:-86400}
+      REFRESH_TOKEN_TTL: ${AUTHN_REFRESH_TOKEN_TTL:-2592000}
+      SESSION_KEY_SALT: ${AUTHN_SESSION_KEY_SALT:-feelguuds}
+      DB_ENCRYPTION_KEY_SALT: ${AUTHN_DB_ENCRYPTION_KEY_SALT:-feelguuds}
+      USERNAME_IS_EMAIL: ${AUTHN_USERNAME_IS_EMAIL:-true}
+      PASSWORD_POLICY_SCORE: ${AUTHN_PASSWORD_POLICY_SCORE:-2}
+      PASSWORD_CHANGE_LOGOUT: ${AUTHN_PASSWORD_CHANGE_LOGOUT:-true}
+      APP_PASSWORD_RESET_URL: ${AUTHN_APP_PASSWORD_RESET_URL}
+      PASSWORD_RESET_TOKEN_TTL: ${AUTHN_PASSWORD_RESET_TOKEN_TTL:-1800}
+      APP_PASSWORD_CHANGED_URL: ${AUTHN_APP_PASSWORD_CHANGED_URL}
+    env_file:
+      - ../env
+    depends_on:
+      - redis
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - monitor-net
+    command: sleep 10 && sh -c "./authn migrate && ./authn server"
+
+networks:
+  monitor-net:
+    driver: bridge
+
+volumes:
+  postgres:

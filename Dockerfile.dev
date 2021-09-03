@@ -7,27 +7,27 @@ ARG REVISION
 # define container level tags
 LABEL version="1.0" maintainer="Yoan Yomba <yoanyombapro@gmail.com>"
 LABEL author="Yoan Yomba"
-LABEL company="BlackSpaceInc"
-LABEL maintainer="BlackSpaceInc" \
+LABEL company="FeelGuuds"
+LABEL maintainer="FeelGuuds" \
   org.opencontainers.image.created=$BUILD_DATE \
-  org.opencontainers.image.url="https://github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service" \
-  org.opencontainers.image.source="https://github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service" \
+  org.opencontainers.image.url="https://github.com/yoanyombapro1234/FeelguudsPlatform" \
+  org.opencontainers.image.source="https://github.com/yoanyombapro1234/FeelguudsPlatform" \
   org.opencontainers.image.version=$VERSION \
   org.opencontainers.image.revision=$REVISION \
   org.opencontainers.image.vendor="FeelGuuds" \
-  org.opencontainers.image.title="authentication_handler_service" \
+  org.opencontainers.image.title="FeelGuudsPlatform" \
   org.opencontainers.image.description="Microservice For The FeelGuuds \
   Platform" \
   org.opencontainers.image.licenses="MIT"
 
 # create a directory in which to copy files on local filesystem
-RUN mkdir -p /go/src/github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service
+RUN mkdir -p /go/src/github.com/yoanyombapro1234/FeelguudsPlatform
 
 # copy files on local file system
-ADD . /go/src/github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service
+ADD . /go/src/github.com/yoanyombapro1234/FeelguudsPlatform
 
 # define execution context
-WORKDIR /go/src/github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service
+WORKDIR /go/src/github.com/yoanyombapro1234/FeelguudsPlatform
 
 # download package level dependencies
 RUN go mod download
@@ -35,4 +35,4 @@ RUN go get github.com/canthefason/go-watcher
 RUN go install github.com/canthefason/go-watcher/cmd/watcher
 
 # define container entrypoint
-ENTRYPOINT watcher -run /go/src/github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service/cmd/service -watch github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service
+ENTRYPOINT watcher -run /go/src/github.com/yoanyombapro1234/FeelguudsPlatform/cmd/service -watch github.com/yoanyombapro1234/FeelguudsPlatform
