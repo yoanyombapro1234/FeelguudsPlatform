@@ -20,4 +20,4 @@ build/
 gcloud/
 dist/
 bin/
-data/
+*/data/
