@@ -3,6 +3,7 @@ package authentication_handler
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"time"
 
@@ -67,6 +68,8 @@ func NewAuthenticationComponent(params *AuthenticationParams, serviceName string
 		logger.Fatal(fmt.Sprintf("failed to actually connect to authn client. error - %s", err.Error()))
 	}
 
+	logger.Info("successfully connected to authentication service")
+
 	serviceMetrics := NewServiceMetrics(serviceName)
 
 	return &AuthenticationComponent{Client: authnClient, Logger: params.Logger, Metric: serviceMetrics}
@@ -77,15 +80,17 @@ func ConnectToDownstreamService(logger *zap.Logger, client *core_auth_sdk.Client
 	return retry.Do(
 		func(conn chan<- interface{}) func() error {
 			return func() error {
-				data, err := client.ServerStats()
+				res, err := client.ServerStats()
 				if err != nil {
 					logger.Error("failed to connect to authentication service", zap.Error(err))
 					return err
 				}
+				body, err := io.ReadAll(res.Body)
+				res.Body.Close()
 
-				logger.Info("data", zap.Any("result", data))
+				logger.Info("data", zap.Any("result", body))
 
-				response <- data
+				response <- body
 				return nil
 			}
 		}(response),

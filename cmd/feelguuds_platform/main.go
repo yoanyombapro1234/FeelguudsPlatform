@@ -47,7 +47,7 @@ func main() {
 	fs.Duration("HTTP_SERVER_SHUTDOWN_TIMEOUT_IN_SECONDS", 5*time.Second, "server graceful shutdown timeout duration")
 	fs.String("DATA_PATH", "/data", "data local path")
 	fs.String("CONFIG_PATH", "", "config dir path")
-	fs.String("CERT_PATH", "/go/src/github.com/yoanyombapro1234/FeelGuuds/src/services/authentication_handler_service/certificate/cert",
+	fs.String("CERT_PATH", "/go/src/github.com/yoanyombapro1234/FeelguudsPlatform/certificate/cert",
 		"certificate path for HTTPS port")
 	fs.String("CONFIG_FILE", "config.yaml", "config file name")
 	fs.String("UI_PATH", "./ui", "UI local path")

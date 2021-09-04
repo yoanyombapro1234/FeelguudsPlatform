@@ -94,6 +94,13 @@ func NewServer(config *Config, logger *zap.Logger, authCmp *authentication_handl
 }
 
 func (s *Server) registerHandlers() {
+	s.router.Handle("/metrics",  promhttp.HandlerFor(
+		prometheus.DefaultGatherer,
+		promhttp.HandlerOpts{
+			// Opt into OpenMetrics to support exemplars.
+			EnableOpenMetrics: true,
+		},
+	))
 	s.router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	s.router.HandleFunc("/", s.indexHandler).HeadersRegexp("User-Agent", "^Mozilla.*").Methods("GET")
 	s.router.HandleFunc("/", s.infoHandler).Methods("GET")
@@ -132,15 +139,6 @@ func (s *Server) registerHandlers() {
 		}
 		w.Write([]byte(doc))
 	})
-
-	// Expose the registered metrics via HTTP.
-	http.Handle("/metrics", promhttp.HandlerFor(
-		prometheus.DefaultGatherer,
-		promhttp.HandlerOpts{
-			// Opt into OpenMetrics to support exemplars.
-			EnableOpenMetrics: true,
-		},
-	))
 }
 
 func (s *Server) registerMiddlewares() {
@@ -284,8 +282,8 @@ func (s *Server) startSecureServer() *http.Server {
 		Handler:      s.handler,
 	}
 
-	cert := path.Join(s.config.CertPath, "tls.crt")
-	key := path.Join(s.config.CertPath, "tls.key")
+	cert := path.Join(s.config.CertPath, "cert.pem")
+	key := path.Join(s.config.CertPath, "key.pem")
 
 	// start the server in the background
 	go func() {
