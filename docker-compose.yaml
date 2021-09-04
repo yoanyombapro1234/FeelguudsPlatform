@@ -2,11 +2,11 @@ version: '3.7'
 
 services:
   # FeelguudsPlatform
-  Platform:
+  platform:
     build:
-      context: ..
+      context: ""
       dockerfile: Dockerfile.dev
-    container_name: FeelguudsPlatform
+    container_name: feelguuds_platform
     ports:
       - "9898:9898" # http port
       - "9897:9897" # grpc port
@@ -20,7 +20,7 @@ services:
     volumes:
       - '.:/go/src/github.com/yoanyombapro1234/FeelguudsPlatform'
     env_file:
-      - ../.env
+      - .env
     depends_on:
       - auth_service
 
