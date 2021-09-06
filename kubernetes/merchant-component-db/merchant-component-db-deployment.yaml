@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.merchant.dep.yaml convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: merchant-component-db
+  name: merchant-component-db
+spec:
+  progressDeadlineSeconds: 2147483647
+  replicas: 1
+  revisionHistoryLimit: 2147483647
+  selector:
+    matchLabels:
+      io.kompose.service: merchant-component-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f docker-compose.merchant.dep.yaml convert
+        kompose.version: 1.19.0 (f63a961c)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: merchant-component-db
+    spec:
+      containers:
+        - env:
+            - name: PGDATA
+              value: /data/merchant_component_db
+            - name: POSTGRES_DB
+              value: merchant_component
+            - name: POSTGRES_PASSWORD
+              value: merchant_component
+            - name: POSTGRES_USER
+              value: merchant_component
+          image: postgres:latest
+          imagePullPolicy: Always
+          name: merchant-component-db
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /data/merchant_component_db
+              name: merchant-component-db
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: merchant-component-db
+          persistentVolumeClaim:
+            claimName: merchant-component-db
+status: {}

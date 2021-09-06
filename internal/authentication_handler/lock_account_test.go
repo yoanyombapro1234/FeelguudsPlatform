@@ -46,7 +46,7 @@ func TestLockAccount(t *testing.T){
 				t.Errorf("error should not have occured - error %s", err.Error())
 			}
 
-			if !account.Locked {
+			if account != nil && !account.Locked {
 				t.Errorf("account is not locked and should be locked")
 			}
 		}

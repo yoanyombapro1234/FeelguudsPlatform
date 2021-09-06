@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   # FeelguudsPlatform
-  platform:
+  feelguuds_platform:
     build:
       context: ""
       dockerfile: Dockerfile.dev
@@ -10,7 +10,7 @@ services:
     ports:
       - "9898:9898" # http port
       - "9897:9897" # grpc port
-    restart: unless-stopped
+    restart: always
     environment:
       - AUTHN_INTERNAL_PORT=3000
       - AUTHN_PORT=8000

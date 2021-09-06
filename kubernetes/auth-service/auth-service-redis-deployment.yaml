@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.merchant.dep.yaml
+      -f docker-compose.shopper.dep.yaml convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: auth-service-redis
+  name: auth-service-redis
+spec:
+  progressDeadlineSeconds: 2147483647
+  replicas: 1
+  revisionHistoryLimit: 2147483647
+  selector:
+    matchLabels:
+      io.kompose.service: auth-service-redis
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f
+          docker-compose.merchant.dep.yaml -f docker-compose.shopper.dep.yaml convert
+        kompose.version: 1.19.0 (f63a961c)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: auth-service-redis
+    spec:
+      containers:
+        - image: redis
+          imagePullPolicy: Always
+          name: redis
+          ports:
+            - containerPort: 6379
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}

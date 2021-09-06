@@ -9,5 +9,8 @@ services:
       - POSTGRES_PASSWORD=merchant_component
       - POSTGRES_USER=merchant_component
       - POSTGRES_DB=merchant_component
+      - PGDATA=/data/merchant_component_db
+    volumes:
+      - merchant_component_db:/data/merchant_component_db
     networks:
       - web

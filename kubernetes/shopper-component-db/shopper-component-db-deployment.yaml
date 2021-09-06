@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.shopper.dep.yaml convert
+    kompose.version: 1.19.0 (f63a961c)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: shopper-component-db
+  name: shopper-component-db
+spec:
+  progressDeadlineSeconds: 2147483647
+  replicas: 1
+  revisionHistoryLimit: 2147483647
+  selector:
+    matchLabels:
+      io.kompose.service: shopper-component-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f docker-compose.shopper.dep.yaml convert
+        kompose.version: 1.19.0 (f63a961c)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: shopper-component-db
+    spec:
+      containers:
+        - env:
+            - name: PGDATA
+              value: /data/shopper_component_db
+            - name: POSTGRES_DB
+              value: shopper_component
+            - name: POSTGRES_PASSWORD
+              value: shopper_component
+            - name: POSTGRES_USER
+              value: shopper_component
+          image: postgres:latest
+          imagePullPolicy: Always
+          name: shopper-component-db
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /data/shopper_component_db
+              name: shopper-component-db
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: shopper-component-db
+          persistentVolumeClaim:
+            claimName: shopper-component-db
+status: {}

@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  postgres:
+  auth_service_db:
     container_name: ${AUTHN_POSTGRES_CONTAINER:-postgres}
     image: postgres
     environment:
@@ -13,11 +13,11 @@ services:
       - postgres:/data/postgres
     ports:
       - ${AUTHN_POSTGRES_EXTERNAL_PORT:-5432}:${AUTHN_POSTGRES_INTERNAL_PORT:-5432}
-    restart: unless-stopped
+    restart: always
     networks:
       - monitor-net
 
-  redis:
+  auth_service_redis:
     container_name: ${AUTHN_REDIS_NAME:-redis}
     image: redis
     networks:

@@ -9,5 +9,8 @@ services:
       - POSTGRES_PASSWORD=shopper_component
       - POSTGRES_USER=shopper_component
       - POSTGRES_DB=shopper_component
+      - PGDATA=/data/shopper_component_db
+    volumes:
+      - shopper_component_db:/data/shopper_component_db
     networks:
       - web

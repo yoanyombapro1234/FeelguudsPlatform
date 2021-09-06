@@ -165,7 +165,7 @@ go-mod:
 
 .PHONY: test
 test: start-containers
-	sleep 10s
+	sleep 3s
 	echo "starting unit tests and integration tests"
 	go get github.com/mfridman/tparse
 	go test -v -race ./... -json -cover  -coverprofile cover.out | tparse -all -top
@@ -197,3 +197,31 @@ profile-heap: install-pprof start-containers
 .PHONY: install-pprof profile-goroutines
 profile-goroutines: start-containers
 	go tool pprof http://localhost:9898/debug/pprof/block
+
+# start minikube cluster
+start-minikube:
+	minikube config set memory 16384
+	minikube start
+
+# deploy artifacts to minikube cluster
+kube-deploy: start-minikube
+	kubectl apply -f ./kubernetes/auth-service/auth-service-db-deployment.yaml \
+				  -f ./kubernetes/auth-service/auth-service-db-service.yaml \
+				  -f ./kubernetes/auth-service/auth-service-deployment.yaml \
+				  -f ./kubernetes/auth-service/auth-service-env-configmap.yaml \
+				  -f ./kubernetes/auth-service/auth-service-redis-deployment.yaml \
+				  -f ./kubernetes/auth-service/auth-service-redis-service.yaml \
+				  -f ./kubernetes/auth-service/auth-service-service.yaml
+	kubectl apply -f ./kubernetes/feelguuds-platform/feelguuds-platform-claim0-persistentvolumeclaim.yaml \
+				  -f ./kubernetes/feelguuds-platform/feelguuds-platform-deployment.yaml \
+				  -f ./kubernetes/feelguuds-platform/feelguuds-platform-env-configmap.yaml \
+				  -f ./kubernetes/feelguuds-platform/feelguuds-platform-service.yaml
+	kubectl apply -f ./kubernetes/merchant-component-db/merchant-component-db-deployment.yaml \
+				  -f ./kubernetes/merchant-component-db/merchant-component-db-service.yaml \
+				  -f ./kubernetes/merchant-component-db/merchant-component-db-persistentvolumeclaim.yaml
+	kubectl apply -f ./kubernetes/shopper-component-db/shopper-component-db-deployment.yaml \
+				  -f ./kubernetes/shopper-component-db/shopper-component-db-service.yaml \
+				  -f ./kubernetes/shopper-component-db/shopper-component-db-persistentvolumeclaim.yaml
+	minikube dashboard
+
+# kubectl convert -f ./my-deployment.yaml --output-version apps/v1
