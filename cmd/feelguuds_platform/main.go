@@ -21,6 +21,8 @@ import (
 	core_logging "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging"
 	tracer "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-tracing/jaeger"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/authentication_handler"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/pkg/api"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/pkg/grpc"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/pkg/signals"
@@ -90,6 +92,20 @@ func main() {
 	fs.String("JAEGER_ENDPOINT", "http://jaeger-collector:14268/api/traces", "jaeger collector endpoint")
 	fs.Int("DOWNSTREAM_SERVICE_CONNECTION_LIMIT", 8, "max retries to perform while attempting to connect to downstream services")
 
+	// merchant component database connection configurations
+	fs.String("MERCHANT_COMPONENT_HOST", "merchant_component_db", "database host string")
+	fs.Int("MERCHANT_COMPONENT_PORT", 5432, "database port")
+	fs.String("MERCHANT_COMPONENT_USER", "merchant_component", "database user string")
+	fs.String("MERCHANT_COMPONENT_PASSWORD", "merchant_component", "database password string")
+	fs.String("MERCHANT_COMPONENT_DB_NAME", "merchant_component", "database name")
+
+	// shopper component database connection configurations
+	fs.String("SHOPPER_COMPONENT_HOST", "shopper_component_db", "database host string")
+	fs.Int("SHOPPER_COMPONENT_PORT", 5432, "database port")
+	fs.String("SHOPPER_COMPONENT_USER", "shopper_component", "database user string")
+	fs.String("SHOPPER_COMPONENT_PASSWORD", "shopper_component", "database password string")
+	fs.String("SHOPPER_COMPONENT_DB_NAME", "shopper_component", "database name")
+
 	// capture goroutines waiting on synchronization primitives
 	runtime.SetBlockProfileRate(1)
 	versionFlag := fs.BoolP("ENABLE_VERSION_FROM_FILE", "v", false, "get version number")
@@ -106,8 +122,6 @@ func main() {
 	defer logInstance.ConfigureLogger()
 	log := logInstance.Logger
 
-	authenticationComponent := InitializeAuthenticationComponent(log, serviceName)
-
 	// initialize a tracing object globally
 	tracerEngine, closer := tracer.New(serviceName, collectorEndpoint)
 	defer func(closer io.Closer) {
@@ -121,6 +135,31 @@ func main() {
 		log.Fatal("cannot initialize tracer engine")
 	}
 	opentracing.SetGlobalTracer(tracerEngine.Tracer)
+
+	// initialize authentication's account component's dependencies
+	var authenticationComponent *authentication_handler.AuthenticationComponent
+	{
+		authenticationComponent = InitializeAuthenticationComponent(log, serviceName)
+	}
+
+	var merchantAccountComponent *merchant.MerchantAccountComponent
+	// initialize merchant account component's dependencies
+	{
+		host := viper.GetString("MERCHANT_COMPONENT_HOST")
+		port := viper.GetInt("MERCHANT_COMPONENT_PORT")
+		user := viper.GetString("MERCHANT_COMPONENT_USER")
+		password := viper.GetString("MERCHANT_COMPONENT_PASSWORD")
+		dbname := viper.GetString("MERCHANT_COMPONENT_DB_NAME")
+		merchantAccountComponent = merchant.NewMerchantAccountComponent(&helper.DatabaseConnectionParams{
+			Host:         host,
+			User:         user,
+			Password:     password,
+			DatabaseName: dbname,
+			Port:         port,
+		}, log)
+
+		log.Info("successfully initialized merchant account component")
+	}
 
 	// start stress tests if any
 	numStressedCpus := viper.GetInt("NUMBER_OF_STRESSED_CPU")
@@ -144,7 +183,7 @@ func main() {
 	)
 
 	// start HTTP server
-	srv, _ := api.NewServer(&srvCfg, log, authenticationComponent)
+	srv, _ := api.NewServer(&srvCfg, log, authenticationComponent, merchantAccountComponent)
 	stopCh := signals.SetupSignalHandler()
 	srv.ListenAndServe(stopCh)
 }
@@ -173,6 +212,8 @@ func InitializeAuthenticationComponent(log *zap.Logger, serviceName string) *aut
 	privateURL := viper.GetString("PRIVATE_BASE_URL") + ":" + viper.GetString("AUTHN_INTERNAL_PORT")
 	origin := viper.GetString("AUTHN_ORIGIN")
 	issuer := viper.GetString("AUTHN_ISSUER_BASE_URL") + ":" + viper.GetString("AUTHN_EXTERNAL_PORT")
+	httpTimeout := 300 * time.Millisecond
+
 	return authentication_handler.NewAuthenticationComponent(&authentication_handler.AuthenticationParams{
 		AuthConfig: &core_auth_sdk.Config{
 			Issuer:         issuer,
@@ -190,7 +231,7 @@ func InitializeAuthenticationComponent(log *zap.Logger, serviceName string) *aut
 		},
 		Logger: log,
 		Origin: origin,
-	}, serviceName)
+	}, serviceName, httpTimeout)
 }
 
 // ValidateDelayOptions validates random delay options

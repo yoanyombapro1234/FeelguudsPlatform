@@ -107,19 +107,39 @@ swagger:
 # terminate the current set of docker containers
 .PHONY: kill-containers
 kill-containers:
-	docker-compose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.jaeger.yaml down
+	docker-compose -f docker-compose.yaml -f \
+					  docker-compose.authn.yaml -f \
+					  docker-compose.jaeger.yaml -f \
+					  docker-compose.merchant.dep.yaml -f \
+					  docker-compose.shopper.dep.yaml down
 
 # start docker containers in the backgound
 .PHONY: start-containers
 start-containers:
-	docker-compose -f docker-compose.dev.yaml -f docker-compose.authn.yaml -f docker-compose.jaeger.yaml config
-	docker-compose -f docker-compose.dev.yaml -f docker-compose.authn.yaml -f docker-compose.jaeger.yaml up --remove-orphans --detach
+	docker-compose -f docker-compose.yaml -f \
+					  docker-compose.authn.yaml -f \
+					  docker-compose.jaeger.yaml -f \
+					  docker-compose.merchant.dep.yaml -f \
+					  docker-compose.shopper.dep.yaml config
+	docker-compose -f docker-compose.yaml -f \
+				  	  docker-compose.authn.yaml -f \
+				   	  docker-compose.jaeger.yaml -f \
+				   	  docker-compose.merchant.dep.yaml -f \
+				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
 # start docker containers with logs running in the foreground
 .PHONY: start-containers-live
 start-containers-live:
-	docker-compose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.jaeger.yaml config
-	docker-compose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.jaeger.yaml up --remove-orphans
+	docker-compose -f docker-compose.yaml -f \
+					  docker-compose.authn.yaml -f \
+					  docker-compose.jaeger.yaml -f \
+					  docker-compose.merchant.dep.yaml -f \
+					  docker-compose.shopper.dep.yaml config
+	docker-compose -f docker-compose.yaml -f \
+				  	  docker-compose.authn.yaml -f \
+				   	  docker-compose.jaeger.yaml -f \
+				   	  docker-compose.merchant.dep.yaml -f \
+				   	  docker-compose.shopper.dep.yaml up --remove-orphans
 
 # Cover runs go_test on GO_PKGS and produces code coverage in multiple formats.
 # A coverage.html file for human viewing will be at $(TMP_COVERAGE)/coverage.html

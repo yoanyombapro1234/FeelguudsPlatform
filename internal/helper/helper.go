@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"bytes"
+	"encoding/json"
 	"math/rand"
 	"time"
 	"unsafe"
@@ -32,4 +34,14 @@ func GenerateRandomString(n int) string {
 	}
 
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+// CreateRequestBody creates a request object to be used in an http call
+func CreateRequestBody(body interface{}) (*bytes.Reader, error) {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.NewReader(b), nil
 }

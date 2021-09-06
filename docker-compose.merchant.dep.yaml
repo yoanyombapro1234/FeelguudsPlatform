@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  merchant_component_db:
+    image: postgres:latest
+    container_name: merchant_component_db
+    ports:
+      - "6000:5432"
+    environment:
+      - POSTGRES_PASSWORD=merchant_component
+      - POSTGRES_USER=merchant_component
+      - POSTGRES_DB=merchant_component
+    networks:
+      - web

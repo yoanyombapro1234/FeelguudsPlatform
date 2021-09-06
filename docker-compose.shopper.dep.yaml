@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  shopper_component_db:
+    image: postgres:latest
+    container_name: shopper_component_db
+    ports:
+      - "6001:5432"
+    environment:
+      - POSTGRES_PASSWORD=shopper_component
+      - POSTGRES_USER=shopper_component
+      - POSTGRES_DB=shopper_component
+    networks:
+      - web

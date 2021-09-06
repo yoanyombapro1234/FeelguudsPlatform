@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"go.uber.org/zap"
+	core_logging "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging"
 )
 
 func NewMockServer() *Server {
@@ -22,11 +22,13 @@ func NewMockServer() *Server {
 		Hostname:                  "localhost",
 	}
 
-	logger, _ := zap.NewDevelopment()
+	logInstance := core_logging.New("info")
+	defer logInstance.ConfigureLogger()
+	log := logInstance.Logger
 
 	return &Server{
 		router: mux.NewRouter(),
-		logger: logger,
+		logger: log,
 		config: config,
 	}
 }

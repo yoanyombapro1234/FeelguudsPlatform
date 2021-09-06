@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/giantswarm/retry-go"
@@ -12,15 +13,24 @@ import (
 	"go.uber.org/zap"
 )
 
+// AuthenticationServiceInterface provides an interface definition specific to authentication
 type AuthenticationServiceInterface interface {
 	AuthenticateAccount(ctx context.Context, email, password string) (string, error)
+	AuthenticateAccountHandler(w http.ResponseWriter, r *http.Request)
 	CreateAccount(ctx context.Context, email, password string, accountLocked bool) (uint32, error)
+	CreateAccountHandler(w http.ResponseWriter, r *http.Request)
 	DeleteAccount(ctx context.Context, Id uint32) error
+	DeleteAccountHandler(w http.ResponseWriter, r *http.Request)
 	GetAccount(ctx context.Context, Id uint32) (*core_auth_sdk.Account, error)
+	GetAccountHandler(w http.ResponseWriter, r *http.Request)
 	LockAccount(ctx context.Context, Id uint32) error
+	LockAccountHandler(w http.ResponseWriter, r *http.Request)
 	UnLockAccount(ctx context.Context, Id uint32) error
+	UnLockAccountHandler(w http.ResponseWriter, r *http.Request)
 	UpdateAccount(ctx context.Context, Id uint32, email string) error
+	UpdateEmailHandler(w http.ResponseWriter, r *http.Request)
 	LogoutAccount(ctx context.Context, Id uint32) error
+	LogoutAccountHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // AuthenticationParams encompases the required entries necessary to configure a client connection to the authn service
@@ -43,12 +53,14 @@ type AuthenticationComponent struct {
 	Logger *zap.Logger
 	// Metric specific to this module
 	Metric *ServiceMetrics
+	// Duration of any expected http call
+	HttpTimeout time.Duration
 }
 
 var _ AuthenticationServiceInterface = (*AuthenticationComponent)(nil)
 
 // NewAuthenticationComponent returns an authentication component to the caller
-func NewAuthenticationComponent(params *AuthenticationParams, serviceName string) *AuthenticationComponent {
+func NewAuthenticationComponent(params *AuthenticationParams, serviceName string, httpRequestTimeout time.Duration) *AuthenticationComponent {
 	if params == nil {
 		log.Fatal(ErrInvalidInputArguments.Error())
 	}
@@ -64,7 +76,7 @@ func NewAuthenticationComponent(params *AuthenticationParams, serviceName string
 	}
 
 	var response = make(chan interface{}, 1)
-	if err = ConnectToDownstreamService(logger, authnClient, response); err != nil {
+	if err = ConnectToAuthService(logger, authnClient, response); err != nil {
 		logger.Fatal(fmt.Sprintf("failed to actually connect to authn client. error - %s", err.Error()))
 	}
 
@@ -72,11 +84,11 @@ func NewAuthenticationComponent(params *AuthenticationParams, serviceName string
 
 	serviceMetrics := NewServiceMetrics(serviceName)
 
-	return &AuthenticationComponent{Client: authnClient, Logger: params.Logger, Metric: serviceMetrics}
+	return &AuthenticationComponent{Client: authnClient, Logger: params.Logger, Metric: serviceMetrics, HttpTimeout: httpRequestTimeout}
 }
 
-// ConnectToDownstreamService attempts to connect to a downstream service
-func ConnectToDownstreamService(logger *zap.Logger, client *core_auth_sdk.Client, response chan interface{}) error {
+// ConnectToAuthService attempts to connect to a downstream service
+func ConnectToAuthService(logger *zap.Logger, client *core_auth_sdk.Client, response chan interface{}) error {
 	return retry.Do(
 		func(conn chan<- interface{}) func() error {
 			return func() error {
