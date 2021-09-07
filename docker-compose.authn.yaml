@@ -60,7 +60,16 @@ services:
       retries: 5
     networks:
       - monitor-net
-    command: sleep 10 && sh -c "./authn migrate && ./authn server"
+    command: > #sleep 10s && sh -c "./authn migrate && ./authn server"
+      bin/bash -c "
+              while ! nc -z auth_service_db 5432;
+              do
+                echo sleeping;
+                sleep 1;
+              done;
+              echo Connected!;
+              sh -c "./authn migrate && ./authn server";
+            "
 
 networks:
   monitor-net:
