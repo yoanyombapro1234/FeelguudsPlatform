@@ -50,7 +50,11 @@ func TestAuthenticateAccountHandler(t *testing.T) {
 		if data.shouldCreateUserAccountFirst {
 			resp, err, _ := CreateAccountInAuthSvc(data.email, data.password, authCmp ,t)
 			if (err != nil || resp.ErrorMessage != EMPTY) && !data.shouldErrorOccur {
-				t.Errorf("obtained error but not expected - %s", err.Error())
+				var errMsg = EMPTY
+				if err != nil {
+					errMsg = err.Error()
+				}
+				t.Errorf("obtained error but not expected - %s", errMsg)
 			}
 		}
 

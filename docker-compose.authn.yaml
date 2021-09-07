@@ -8,9 +8,9 @@ services:
       POSTGRES_DB: ${AUTHN_POSTGRES_DB_NAME:-authentication_service}
       POSTGRES_USER: ${AUTHN_POSTGRES_USER:-authentication_service}
       POSTGRES_PASSWORD: ${AUTHN_POSTGRES_PASSWORD:-authentication_service}
-      PGDATA: /data/postgres
+      PGDATA: /data/auth_service_db
     volumes:
-      - postgres:/data/postgres
+      - auth_service_db:/data/auth_service_db
     ports:
       - ${AUTHN_POSTGRES_EXTERNAL_PORT:-5432}:${AUTHN_POSTGRES_INTERNAL_PORT:-5432}
     restart: always
@@ -51,8 +51,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis
-      - postgres
+      - auth_service_redis
+      - auth_service_db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
       interval: 30s
@@ -67,4 +67,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres:
+  auth_service_db:
