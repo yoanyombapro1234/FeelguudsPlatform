@@ -165,7 +165,7 @@ go-mod:
 
 .PHONY: test
 test: start-containers
-	sleep 3s
+	sleep 30s
 	echo "starting unit tests and integration tests"
 	docker ps -a
 	docker logs authentication_service
