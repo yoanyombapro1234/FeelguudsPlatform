@@ -43,7 +43,7 @@ helm upgrade --install auth-service-redis -f ./kubernetes/auth-service/redis/val
 helm upgrade --install auth-service ./charts/authentication_service
 
 # install feelguuds_platform with tls enabled
-helm upgrade --install feelguuds_platform ./charts/feelguuds_platform \
+helm upgrade --install feelguuds-platform ./charts/feelguuds_platform \
     --set image.repository=test/feelguuds_platform \
     --set image.tag=latest \
     --set tls.enabled=true \
