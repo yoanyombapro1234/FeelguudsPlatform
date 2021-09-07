@@ -61,14 +61,14 @@ services:
     networks:
       - monitor-net
     command: > #sleep 10s && sh -c "./authn migrate && ./authn server"
-      bin/bash -c "
+      sh -c "
               while ! nc -z auth_service_db 5432;
               do
                 echo sleeping;
                 sleep 1;
               done;
               echo Connected!;
-              sh -c "./authn migrate && ./authn server";
+              ./authn migrate && ./authn server;
             "
 
 networks:
