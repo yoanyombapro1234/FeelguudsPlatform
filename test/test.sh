@@ -3,7 +3,7 @@
 set -e
 
 # wait for podinfo
-kubectl rollout status deployment/podinfo --timeout=3m
+kubectl rollout status deployment/feelguuds_platform --timeout=3m
 
 # test podinfo
-helm test podinfo
+helm test feelguuds_platform

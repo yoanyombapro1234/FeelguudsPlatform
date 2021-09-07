@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - 'master'
+      - '*'
 
 jobs:
   kind-helm:
@@ -23,7 +23,7 @@ jobs:
       - name: Build container image
         run: |
           ./test/build.sh
-          kind load docker-image test/podinfo:latest
+          kind load docker-image test/feelguuds_platform:latest
       - name: Setup Helm
         uses: ./.github/actions/helm
         with:
