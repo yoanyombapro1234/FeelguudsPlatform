@@ -68,8 +68,6 @@ services:
                 sleep 1;
               done;
               echo Connected!;
-              echo Performing Database Migrations;
-              ./authn migrate;
               echo Starting Authentication Server;
               ./authn server;
             "
