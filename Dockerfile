@@ -16,7 +16,7 @@ RUN CGO_ENABLED=0 go build -ldflags "-s -w \
 
 RUN CGO_ENABLED=0 go build -ldflags "-s -w \
     -X github.com/yoanyombapro1234/FeelguudsPlatform/pkg/version.REVISION=${REVISION}" \
-    -a -o bin/feelguuds_platform cmd/feelguuds_platform_cli/*
+    -a -o bin/feelguuds_platform_cli cmd/feelguuds_platform_cli/*
 
 FROM alpine:3.14
 
