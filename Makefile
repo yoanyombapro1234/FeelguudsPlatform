@@ -167,6 +167,8 @@ go-mod:
 test: start-containers
 	sleep 3s
 	echo "starting unit tests and integration tests"
+	docker ps -a
+	docker logs authentication_service
 	go get github.com/mfridman/tparse
 	go test -v -race ./... -json -cover  -coverprofile cover.out | tparse -all -top
 	go tool cover -html=cover.out
