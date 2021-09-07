@@ -57,6 +57,13 @@ jobs:
           go-version: ^1.15
       - run: go version
       - run: go mod download
+      - name: Setup Docker Containers
+        run: |
+          docker-compose -f docker-compose.yaml -f \
+          			  	  docker-compose.authn.yaml -f \
+          			   	  docker-compose.jaeger.yaml -f \
+          			   	  docker-compose.merchant.dep.yaml -f \
+          			   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
       - name: Run tests
         run: |
           go test \
