@@ -83,6 +83,22 @@ data:
   UI_LOGO: ""
   UI_MESSAGE: AUTHENTICATION_HANDLER_SERVICE
   UI_PATH: ./ui
+  APP_DOMAINS: localhost
+  ACCESS_TOKEN_TTL: "86400"
+  AUTHN_URL: http://localhost:8000
+  DATABASE_URL: postgres://authentication_service:authentication_service@auth-service-db-postgresql:5432/authentication_service?sslmode=disable
+  DB_ENCRYPTION_KEY_SALT: feelguuds
+  ENABLE_SIGNUP: "false"
+  HTTP_AUTH_PASSWORD: feelguuds
+  HTTP_AUTH_USERNAME: feelguuds
+  PASSWORD_CHANGE_LOGOUT: "true"
+  PASSWORD_POLICY_SCORE: "2"
+  PASSWORD_RESET_TOKEN_TTL: "1800"
+  REDIS_URL: redis://auth-service-redis-master:6379/11
+  REFRESH_TOKEN_TTL: "2592000"
+  SECRET_KEY_BASE: secret
+  SESSION_KEY_SALT: felguuds
+  USERNAME_IS_EMAIL: "true"
 kind: ConfigMap
 metadata:
   creationTimestamp: null

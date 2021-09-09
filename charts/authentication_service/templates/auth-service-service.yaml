@@ -6,14 +6,14 @@ metadata:
     kompose.version: 1.19.0 (f63a961c)
   creationTimestamp: null
   labels:
-    io.kompose.service: auth-service
-  name: auth-service
+    io.kompose.service: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}
 spec:
   ports:
-  - name: "8000"
-    port: 8000
-    targetPort: 3000
+  - name: "{{ .Values.service.externalPort }}"
+    port: {{ .Values.service.externalPort }}
+    targetPort: {{ .Values.service.internalPort }}
   selector:
-    io.kompose.service: auth-service
+    io.kompose.service: {{ .Chart.Name }}
 status:
   loadBalancer: {}

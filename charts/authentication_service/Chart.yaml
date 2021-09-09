@@ -1,7 +1,7 @@
 apiVersion: v1
 version: 0.0.1
 appVersion: 0.0.1
-name: authentication_service
+name: authentication-service
 description: Authentication Service Helm chart for Kubernetes
 home: https://github.com/yoanyombapro1234/FeelGuuds
 maintainers:

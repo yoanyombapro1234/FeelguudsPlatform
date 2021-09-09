@@ -6,20 +6,23 @@ metadata:
     kompose.version: 1.19.0 (f63a961c)
   creationTimestamp: null
   labels:
-    io.kompose.service: auth-service
-  name: auth-service
+	{{- include "auth-service.labels" . | nindent 4 }}
+  	io.kompose.service: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}
 spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 2
+  progressDeadlineSeconds: {{ .Values.progressDeadlineInSeconds }}
+  {{- if not .Values.hpa.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
-      io.kompose.service: auth-service
+      io.kompose.service: {{ .Chart.Name }}
   strategy:
     rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      maxSurge: {{ .Values.deploymentStrategy.maxSurge }}
+      maxUnavailable: {{ .Values.deploymentStrategy.maxUnavailable }}
+    type: {{ .Values.deploymentStrategy.type }}
   template:
     metadata:
       annotations:
@@ -27,7 +30,7 @@ spec:
         kompose.version: 1.19.0 (f63a961c)
       creationTimestamp: null
       labels:
-        io.kompose.service: auth-service
+        io.kompose.service: {{ .Chart.Name }}
     spec:
       containers:
       - args:
@@ -482,28 +485,28 @@ spec:
               name: auth-service-env
         - name: USERNAME_IS_EMAIL
           value: "true"
-        image: keratin/authn-server:latest
-        imagePullPolicy: Always
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         livenessProbe:
           exec:
             command:
             - curl
             - -f
             - http://localhost:8000
-          failureThreshold: 5
-          periodSeconds: 30
-          successThreshold: 1
-          timeoutSeconds: 10
-        name: authentication-service
+          failureThreshold: {{ .Values.failures.failurethreshold }}
+          periodSeconds: {{ .Values.failures.periodSeconds }}
+          successThreshold: {{ .Values.failures.successThresholds }}
+          timeoutSeconds: {{ .Values.failures.timeoutSeconds }}
+        name: {{ .Chart.Name }}
         ports:
-        - containerPort: 3000
+        - containerPort: {{ .Values.service.externalPort}}
           protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
+      dnsPolicy: {{ .Values.dnsPolicy }}
+      restartPolicy: {{ .Values.restartPolicy }}
+      schedulerName: {{ .Values.schedulerName }}
+      securityContext: {{ .Values.securityContext }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
 status: {}
