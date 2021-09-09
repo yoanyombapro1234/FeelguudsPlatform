@@ -113,9 +113,11 @@ kill-containers:
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml down
 
+.PHONY: setup-authn-deps
 setup-authn-deps:
 	./scripts/run_authn.sh
 
+.PHONY: start-deps
 start-deps: setup-authn-deps
 	docker-compose -f docker-compose.yaml -f \
 				   	  docker-compose.jaeger.yaml -f \
@@ -172,6 +174,7 @@ cover:
 go-mod:
 	go list -m -u all
 
+.PHONY: ci-test
 ci-test: start-deps
 	docker ps -a
 	docker logs authentication_service
