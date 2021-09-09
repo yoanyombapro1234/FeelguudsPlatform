@@ -32,11 +32,11 @@ services:
     ports:
       - "8000:3000"
     environment:
-      - DATABASE_URL=sqlite3://:memory:?mode=memory\&cache=shared #postgres://authentication_service:authentication_service@postgres:5432/authentication_service?sslmode=disable
+      - DATABASE_URL=postgres://authentication_service:authentication_service@postgres:5432/authentication_service?sslmode=disable
       - AUTHN_URL=http://localhost:8000
       - APP_DOMAINS=localhost
       - SECRET_KEY_BASE=secret
-      #- REDIS_URL=redis://redis:6379/11
+      - REDIS_URL=redis://redis:6379/11
       - HTTP_AUTH_USERNAME=feelguuds
       - HTTP_AUTH_PASSWORD=feelguuds
       - ENABLE_SIGNUP=false

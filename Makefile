@@ -122,7 +122,6 @@ start-containers:
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml config
 	docker-compose -f docker-compose.yaml -f \
-				  	  docker-compose.authn.yaml -f \
 				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
@@ -165,7 +164,7 @@ go-mod:
 
 .PHONY: test
 test: start-containers
-	sleep 30s
+	./scripts/run_authn.sh
 	echo "starting unit tests and integration tests"
 	docker ps -a
 	docker logs authentication_service
