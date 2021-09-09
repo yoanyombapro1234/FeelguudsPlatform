@@ -113,6 +113,15 @@ kill-containers:
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml down
 
+setup-authn-deps:
+	./scripts/run_authn.sh
+
+start-deps: setup-authn-deps
+	docker-compose -f docker-compose.yaml -f \
+				   	  docker-compose.jaeger.yaml -f \
+				   	  docker-compose.merchant.dep.yaml -f \
+				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
+
 # start docker containers in the backgound
 .PHONY: start-containers
 start-containers:
@@ -122,6 +131,7 @@ start-containers:
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml config
 	docker-compose -f docker-compose.yaml -f \
+					  docker-compose.authn.yaml -f \
 				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
@@ -161,6 +171,13 @@ cover:
 .PHONY: go-mod
 go-mod:
 	go list -m -u all
+
+ci-test: start-deps
+	docker ps -a
+	docker logs authentication_service
+	go get github.com/mfridman/tparse
+	go test -v -race ./... -json -cover  -coverprofile cover.out | tparse -all -top
+	go tool cover -html=cover.out
 
 .PHONY: test
 test: start-containers
