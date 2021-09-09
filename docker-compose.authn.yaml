@@ -36,7 +36,7 @@ services:
       - AUTHN_URL=http://localhost:8000
       - APP_DOMAINS=localhost
       - SECRET_KEY_BASE=secret
-      - REDIS_URL=redis://redis:6379/11
+      #- REDIS_URL=redis://redis:6379/11
       - HTTP_AUTH_USERNAME=feelguuds
       - HTTP_AUTH_PASSWORD=feelguuds
       - ENABLE_SIGNUP=false
