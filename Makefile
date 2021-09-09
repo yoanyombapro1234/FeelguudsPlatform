@@ -3,7 +3,7 @@
 # The release version is controlled from pkg/version
 
 TAG?=latest
-NAME:=feelguuds_platform
+NAME:=feelguuds-platform
 DOCKER_REPOSITORY:=feelguuds
 DOCKER_IMAGE_NAME:=$(DOCKER_REPOSITORY)/$(NAME)
 GIT_COMMIT:=$(shell git describe --dirty --always)

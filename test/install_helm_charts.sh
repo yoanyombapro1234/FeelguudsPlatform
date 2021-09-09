@@ -1,22 +1,52 @@
 #!/usr/bin/env bash
 
 # installing postgres helm chart under a given release name
+kubectl apply -f https://raw.githubusercontent.com/pixie-labs/pixie/main/k8s/operator/crd/base/px.dev_viziers.yaml
+kubectl apply -f https://raw.githubusercontent.com/pixie-labs/pixie/main/k8s/operator/helm/crds/olm_crd.yaml
+helm repo add newrelic https://helm-charts.newrelic.com
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
 helm repo update
 
+kubectl create namespace feelguuds-platform
+kubectl create namespace newrelic
+
 # install jaeger dependency
-helm upgrade --install telemetry ./charts/telemetry
-helm upgrade --install  prometheus prometheus-community/prometheus
+helm upgrade  --namespace feelguuds-platform --install telemetry ./charts/telemetry
+helm upgrade  --namespace feelguuds-platform --install prometheus prometheus-community/prometheus
 
 # install database helm charts for service
-helm upgrade --install merchant-component-db -f ./kubernetes/merchant-component-db/values.yaml bitnami/postgresql
-helm upgrade --install shopper-component-db -f ./kubernetes/shopper-component-db/values.yaml bitnami/postgresql
-helm upgrade --install auth-service-db -f ./kubernetes/auth-service/postgresql/values.yaml bitnami/postgresql
-
-# install redis helm charts for auth service
-helm upgrade --install auth-service-redis -f ./kubernetes/auth-service/redis/values.yaml bitnami/redis
+helm upgrade --namespace feelguuds-platform --install merchant-component-db -f ./kubernetes/merchant-component-db/values.yaml bitnami/postgresql
+helm upgrade  --namespace feelguuds-platform --install shopper-component-db -f ./kubernetes/shopper-component-db/values.yaml bitnami/postgresql
 
 # install authentication service helm chart
-helm upgrade --install auth-service ./charts/authentication_service
+helm upgrade --namespace feelguuds-platform --install  auth-service ./charts/authentication_service
+
+# create a namespace for new relic bundle and deploy app
+helm upgrade --install newrelic-bundle newrelic/nri-bundle \
+ --set global.licenseKey="$NEW_RELIC_LICENSE" \
+ --set global.cluster=development \
+ --namespace=newrelic \
+ --set newrelic-infrastructure.privileged=true \
+ --set ksm.enabled=true \
+ --set prometheus.enabled=true \
+ --set kubeEvents.enabled=true \
+ --set logging.enabled=true \
+ --set newrelic-pixie.enabled=true \
+ --set newrelic-pixie.apiKey="$NEW_RELIC_PIXIE_DEPLOY" \
+ --set pixie-chart.enabled=true \
+ --set pixie-chart.deployKey="$NEW_RELIC_PIXIE_APIKEY" \
+ --set pixie-chart.clusterName=development
+
+# we build the feelguuds docker image and send it to minikube registry which will be pulled by the by helm
+# during deployment
+# link: https://medium.com/swlh/how-to-run-locally-built-docker-images-in-kubernetes-b28fbc32cc1d
+make docker-build
+
+kubectl apply -f ./k8s/feelguuds-platform/feelguuds-platform-claim0-persistentvolumeclaim.yaml \
+				-f ./k8s/feelguuds-platform/feelguuds-platform-deployment.yaml \
+				-f ./k8s/feelguuds-platform/feelguuds-platform-env-configmap.yaml \
+				-f ./k8s/feelguuds-platform/feelguuds-platform-service.yaml
+
+# helm upgrade --namespace feelguuds-platform --install feelguuds-platform ./k8s/feelguuds-platform/

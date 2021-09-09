@@ -103,7 +103,7 @@ serviceAccount:
   name:
 
 # set container security context
-securityContext: {}
+securityContext:
 
 ingress:
   enabled: false
