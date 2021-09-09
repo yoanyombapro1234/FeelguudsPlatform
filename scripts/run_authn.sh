@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker run -it --rm \
+docker run --rm \
   --publish 8000:3000 \
   -e AUTHN_URL=localhost:8000 \
   -e APP_DOMAINS=localhost \
