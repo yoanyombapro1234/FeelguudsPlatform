@@ -448,7 +448,7 @@ spec:
                   key: UI_PATH
                   name: feelguuds-platform-env
           image: feelguuds/feelguuds-platform:6.0.0
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           name: feelguuds-platform
           ports:
             - containerPort: 9898
