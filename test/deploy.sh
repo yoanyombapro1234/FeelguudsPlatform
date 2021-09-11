@@ -18,8 +18,7 @@ kubectl create namespace newrelic
 # install cert-manager
 helm upgrade --install cert-manager jetstack/cert-manager \
     --set installCRDs=true \
-    --namespace default \
-  	--set prometheus.enabled=false --set webhook.timeoutSeconds=4s   # Example: changing the wehbook timeout using a Helm parameter
+    --namespace default
 
 # wait for cert manager
 kubectl cert-manager check api --wait=5m
