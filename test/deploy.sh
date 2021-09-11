@@ -36,8 +36,6 @@ spec:
   selfSigned: {}
 EOF
 
-./install_charts
-
 # install feelguuds_platform with tls enabled
 helm upgrade --install feelguuds-platform ./charts/feelguuds_platform \
     --set image.repository=test/feelguuds_platform \
