@@ -2,8 +2,8 @@
 
 set -e
 
-# wait for podinfo
+# wait for feelguuds platform
 kubectl rollout status deployment/feelguuds_platform --timeout=3m
 
-# test podinfo
+# test feelguuds platform
 helm test feelguuds_platform

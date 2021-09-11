@@ -7,17 +7,20 @@ metadata:
     kompose.version: 1.19.0 (f63a961c)
   creationTimestamp: null
   labels:
-    io.kompose.service: feelguuds-platform
-  name: feelguuds-platform
+	{{- include "feelguuds-platform.labels" . | nindent 4 }}
+    io.kompose.service: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}
 spec:
-  progressDeadlineSeconds: 2147483647
-  replicas: 1
-  revisionHistoryLimit: 2147483647
+  progressDeadlineSeconds: {{ .Values.progressDeadlineInSeconds }}
+  {{- if not .Values.hpa.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
-      io.kompose.service: feelguuds-platform
+      io.kompose.service: {{ .Chart.Name }}
   strategy:
-    type: Recreate
+    type: {{ .Values.deploymentStrategy.type }}
   template:
     metadata:
       annotations:
@@ -26,7 +29,7 @@ spec:
         kompose.version: 1.19.0 (f63a961c)
       creationTimestamp: null
       labels:
-        io.kompose.service: feelguuds-platform
+        io.kompose.service: {{ .Chart.Name }}
     spec:
       containers:
         - env:
@@ -447,9 +450,9 @@ spec:
                 configMapKeyRef:
                   key: UI_PATH
                   name: feelguuds-platform-env
-          image: feelguuds/feelguuds-platform:6.0.0
-          imagePullPolicy: Always
-          name: feelguuds-platform
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ .Chart.Name }}
           ports:
             - containerPort: 9898
               protocol: TCP
@@ -461,11 +464,11 @@ spec:
           volumeMounts:
             - mountPath: /go/src/github.com/yoanyombapro1234/FeelguudsPlatform
               name: feelguuds-platform-claim0
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
+      dnsPolicy: {{ .Values.dnsPolicy }}
+      restartPolicy: {{ .Values.restartPolicy }}
+      schedulerName: {{ .Values.schedulerName }}
+      securityContext: {{ .Values.securityContext }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
         - name: feelguuds-platform-claim0
           persistentVolumeClaim:

@@ -1,11 +1,19 @@
 #! /usr/bin/env sh
 
 # add jetstack repository
+kubectl apply -f https://raw.githubusercontent.com/pixie-labs/pixie/main/k8s/operator/crd/base/px.dev_viziers.yaml
+kubectl apply -f https://raw.githubusercontent.com/pixie-labs/pixie/main/k8s/operator/helm/crds/olm_crd.yaml
+helm repo add newrelic https://helm-charts.newrelic.com
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add jetstack https://charts.jetstack.io || true
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
 helm repo update
+
+kubectl create namespace feelguuds-platform
+kubectl create namespace newrelic
 
 # install cert-manager
 helm upgrade --install cert-manager jetstack/cert-manager \
@@ -27,7 +35,7 @@ spec:
   selfSigned: {}
 EOF
 
-./install_helm_charts
+./install_charts
 
 # install feelguuds_platform with tls enabled
 helm upgrade --install feelguuds-platform ./charts/feelguuds_platform \

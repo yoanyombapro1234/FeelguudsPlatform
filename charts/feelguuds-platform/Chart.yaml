@@ -1,0 +1,14 @@
+apiVersion: v1
+version: 0.0.1
+appVersion: 0.0.1
+name: feelguuds-platform
+description: Feelguuds Platforn Helm chart for Kubernetes
+home: https://github.com/yoanyombapro1234/FeelGuuds
+maintainers:
+  - email: yaonyombapro@gmail.com
+    name: yoanyomba
+sources:
+  - https://github.com/yoanyombapro1234/FeelGuuds
+kubeVersion: ">=1.19.0-0"
+keywords:
+  - docker-compose.feelguuds_platform

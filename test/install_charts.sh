@@ -17,8 +17,8 @@ helm upgrade  --namespace feelguuds-platform --install telemetry ./charts/teleme
 helm upgrade  --namespace feelguuds-platform --install prometheus prometheus-community/prometheus
 
 # install database helm charts for service
-helm upgrade --namespace feelguuds-platform --install merchant-component-db -f ./kubernetes/merchant-component-db/values.yaml bitnami/postgresql
-helm upgrade  --namespace feelguuds-platform --install shopper-component-db -f ./kubernetes/shopper-component-db/values.yaml bitnami/postgresql
+helm upgrade --namespace feelguuds-platform --install merchant-component-db -f ./k8s/merchant-component-db/values.yaml bitnami/postgresql
+helm upgrade  --namespace feelguuds-platform --install shopper-component-db -f ./k8s/shopper-component-db/values.yaml bitnami/postgresql
 
 # install authentication service helm chart
 helm upgrade --namespace feelguuds-platform --install  auth-service ./charts/authentication_service
@@ -42,12 +42,11 @@ helm upgrade --install newrelic-bundle newrelic/nri-bundle \
 # we build the feelguuds docker image and send it to minikube registry which will be pulled by the by helm
 # during deployment
 # link: https://medium.com/swlh/how-to-run-locally-built-docker-images-in-kubernetes-b28fbc32cc1d
-eval $(minikube -p minikube docker-env)
-make container-build
+# make mkd_push_image
 
-kubectl apply -f ./k8s/feelguuds-platform/feelguuds-platform-claim0-persistentvolumeclaim.yaml \
-				-f ./k8s/feelguuds-platform/feelguuds-platform-deployment.yaml \
-				-f ./k8s/feelguuds-platform/feelguuds-platform-env-configmap.yaml \
-				-f ./k8s/feelguuds-platform/feelguuds-platform-service.yaml
-
-# helm upgrade --namespace feelguuds-platform --install feelguuds-platform ./k8s/feelguuds-platform/
+helm upgrade  --namespace feelguuds-platform --install feelguuds-platform ./charts/feelguuds-platform \
+ 							--set image.repository=feelguuds/feelguuds_platform \
+							--set image.tag=6.0.0 \
+							--set tls.enabled=true \
+							--set certificate.create=true \
+							--namespace=feelguuds-platform

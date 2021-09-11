@@ -40,6 +40,21 @@ build-charts:
 	helm lint charts/*
 	helm package charts/*
 
+.PHONY: minikube_start
+mk_start:
+	minikube start
+
+.PHONY: setup-minikube-docker-daemon
+mkd_push_image:
+	eval $(minikube docker-env)
+	make build-container
+
+.PHONY: push-image-to-minikube
+mk_push_image:
+	minikube addons enable registry
+	docker build --tag $(minikube ip):5000/$(NAME) .
+	docker push $(minikube ip):5000/$(NAME)
+
 # builds a docker container in which the service's executable will run
 .PHONY: build-container
 build-container:
@@ -113,20 +128,20 @@ kill-containers:
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml down
 
-.PHONY: setup-authn-deps
-setup-authn-deps:
+.PHONY: ci-setup-authn-deps
+ci-setup-authn-deps:
 	./scripts/run_authn.sh
 
-.PHONY: start-deps
-start-deps: setup-authn-deps
+.PHONY: ci-start-deps
+ci-setup-deps: ci-setup-authn-deps
 	docker-compose -f docker-compose.yaml -f \
 				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
 # start docker containers in the backgound
-.PHONY: start-containers
-start-containers:
+.PHONY: start-local-deps
+start-local-deps:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
 					  docker-compose.jaeger.yaml -f \
@@ -139,8 +154,8 @@ start-containers:
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
 # start docker containers with logs running in the foreground
-.PHONY: start-containers-live
-start-containers-live:
+.PHONY: start-local-deps-live
+start-local-deps-live:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
 					  docker-compose.jaeger.yaml -f \
@@ -175,7 +190,7 @@ go-mod:
 	go list -m -u all
 
 .PHONY: ci-test
-ci-test: start-deps
+ci-test: ci-setup-deps
 	docker ps -a
 	docker logs authentication_service
 	go get github.com/mfridman/tparse
@@ -183,8 +198,7 @@ ci-test: start-deps
 	go tool cover -html=cover.out
 
 .PHONY: test
-test: start-containers
-	./scripts/run_authn.sh
+test: start-local-deps
 	echo "starting unit tests and integration tests"
 	docker ps -a
 	docker logs authentication_service
@@ -194,7 +208,7 @@ test: start-containers
 
 # runs service load tests
 .PHONY: load-test
-load-test: start-containers
+load-test: start-local-deps
 	cd ./load_test && ./load.sh
 	cd ../
 
@@ -206,17 +220,17 @@ install-pprof:
 ## Profiling (https://blog.golang.org/pprof)
 # profiles cpu usage
 .PHONY: profile-cpu
-profile-cpu: install-pprof start-containers
+profile-cpu: install-pprof start-local-deps
 	go tool pprof http://localhost:9898/debug/pprof/profile\?seconds\=20
 
 # profile heap allocations
 .PHONY: profile-heap
-profile-heap: install-pprof start-containers
+profile-heap: install-pprof start-local-deps
 	go tool pprof http://localhost:9898/debug/pprof/heap
 
 # profile block go routines
 .PHONY: install-pprof profile-goroutines
-profile-goroutines: start-containers
+profile-goroutines: start-local-deps
 	go tool pprof http://localhost:9898/debug/pprof/block
 
 # start minikube cluster
@@ -226,23 +240,7 @@ start-minikube:
 
 # deploy artifacts to minikube cluster
 kube-deploy: start-minikube
-	kubectl apply -f ./kubernetes/auth-service/auth-service-db-deployment.yaml \
-				  -f ./kubernetes/auth-service/auth-service-db-service.yaml \
-				  -f ./kubernetes/auth-service/auth-service-deployment.yaml \
-				  -f ./kubernetes/auth-service/auth-service-env-configmap.yaml \
-				  -f ./kubernetes/auth-service/auth-service-redis-deployment.yaml \
-				  -f ./kubernetes/auth-service/auth-service-redis-service.yaml \
-				  -f ./kubernetes/auth-service/auth-service-service.yaml
-	kubectl apply -f ./kubernetes/feelguuds-platform/feelguuds-platform-claim0-persistentvolumeclaim.yaml \
-				  -f ./kubernetes/feelguuds-platform/feelguuds-platform-deployment.yaml \
-				  -f ./kubernetes/feelguuds-platform/feelguuds-platform-env-configmap.yaml \
-				  -f ./kubernetes/feelguuds-platform/feelguuds-platform-service.yaml
-	kubectl apply -f ./kubernetes/merchant-component-db/merchant-component-db-deployment.yaml \
-				  -f ./kubernetes/merchant-component-db/merchant-component-db-service.yaml \
-				  -f ./kubernetes/merchant-component-db/merchant-component-db-persistentvolumeclaim.yaml
-	kubectl apply -f ./kubernetes/shopper-component-db/shopper-component-db-deployment.yaml \
-				  -f ./kubernetes/shopper-component-db/shopper-component-db-service.yaml \
-				  -f ./kubernetes/shopper-component-db/shopper-component-db-persistentvolumeclaim.yaml
+	./test/install_charts.sh
 	minikube dashboard
 
 # kubectl convert -f ./my-deployment.yaml --output-version apps/v1

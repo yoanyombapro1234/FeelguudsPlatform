@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ template "feelguuds-platform.fullname" . }}-service-test-{{ randAlphaNum 5 | lower }}
+  labels:
+    {{- include "feelguuds-platform.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    sidecar.istio.io/inject: "false"
+    linkerd.io/inject: disabled
+    appmesh.k8s.aws/sidecarInjectorWebhook: disabled
+spec:
+  containers:
+    - name: curl
+      image: curlimages/curl:7.69.0
+      command:
+        - sh
+        - -c
+        - |
+           curl --header "Content-Type: application/json" --request POST --data '{"email":"jo@gmail.com", "password": "jojo"}' ${SVC}/v1/auth/account/create | ID=$(grep id | jq -r .id) && curl --header "Content-Type: appliaction/json" --request POST --data '{"email":"jo@gmail.com", "password": "jojo"}' ${SVC}/v1/auth/account/login | TOKEN=$(grep token | jq -r .token) && curl -sH "Authorization: Bearer ${TOKEN}" --request GET ${SVC}/v1/auth/account/${ID}
+      env:
+        - name: SVC
+          value: "{{ template "feelguuds-platform.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.externalPort }}"
+  restartPolicy: Never

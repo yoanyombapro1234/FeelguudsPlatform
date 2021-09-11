@@ -27,7 +27,7 @@ services:
 
   # docker run -it --rm  --publish 8080:3000   -e AUTHN_URL=http://localhost:8080   -e APP_DOMAINS=localhost   -e DATABASE_URL=sqlite3://:memory:?mode=memory\&cache=shared   -e SECRET_KEY_BASE=changeme   -e HTTP_AUTH_USERNAME=hello   -e HTTP_AUTH_PASSWORD=world   --name authn_app   keratin/authn-server:latest   sh -c "./authn migrate && ./authn server"
   auth_service:
-    container_name: authentication_service
+    container_name: ${AUTHN_SERVICE_NAME:-authentication-service}
     image: keratin/authn-server:latest
     ports:
       - "8000:3000"
@@ -68,6 +68,8 @@ services:
                 sleep 1;
               done;
               echo Connected!;
+              echo Migrating Database Schema
+              ./authn migrate
               echo Starting Authentication Server;
               ./authn server;
             "

@@ -36,7 +36,7 @@ func main() {
 	fs.Int("HTTP_PORT", 9897, "HTTP port")
 	fs.Int("HTTPS_PORT", 9898, "HTTPS port")
 	fs.Int("METRICS_PORT", 9899, "metrics port")
-	fs.String("GRPC_SERVICE_NAME", "feelguuds_platform", "service name")
+	fs.String("GRPC_SERVICE_NAME", "FEELGUUDS_PLATFORM", "service name")
 	fs.Int("GRPC_PORT", 9896, "gRPC port")
 	fs.Int("GRPC_RPC_DEADLINE_IN_MS", 5, "gRPC deadline in milliseconds")
 	fs.Int("GRPC_RPC_RETRIES", 2, "gRPC max operation retries in the face of errors")
@@ -75,7 +75,7 @@ func main() {
 	fs.String("AUTHN_ISSUER_BASE_URL", "http://localhost", "authentication service issuer")
 	fs.String("AUTHN_ORIGIN", "http://localhost", "origin of auth requests")
 	fs.String("AUTHN_DOMAINS", "localhost", "authentication service domains")
-	fs.String("PRIVATE_BASE_URL", "http://authentication_service",
+	fs.String("PRIVATE_BASE_URL", "http://authentication-service",
 		"authentication service private url. should be local host if these are not running on docker containers. "+
 			"However if running in docker container with a configured docker network, the url should be equal to the service name")
 	fs.String("AUTHN_PUBLIC_BASE_URL", "http://localhost", "authentication service public endpoint")
@@ -88,7 +88,7 @@ func main() {
 	fs.Duration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS", 15*time.Millisecond, "maximum time to wait between failed calls for retry")
 	fs.Duration("HTTP_REQUEST_TIMEOUT_IN_MS", 300*time.Millisecond, "time until a request is seen as timing out")
 	// logging specific configurations
-	fs.String("SERVICE_NAME", "feelguuds_platform", "service name")
+	fs.String("SERVICE_NAME", "FEELGUUDS_PLATFORM", "service name")
 	fs.String("JAEGER_ENDPOINT", "http://jaeger-collector:14268/api/traces", "jaeger collector endpoint")
 	fs.Int("DOWNSTREAM_SERVICE_CONNECTION_LIMIT", 8, "max retries to perform while attempting to connect to downstream services")
 
