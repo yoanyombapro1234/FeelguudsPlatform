@@ -10,6 +10,7 @@ metadata:
     io.kompose.service: feelguuds-platform
   name: feelguuds-platform
 spec:
+  type: {{ .Values.service.type }}
   ports:
   - name: "9898"
     port: 9898

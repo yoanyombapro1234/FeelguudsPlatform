@@ -67,11 +67,6 @@ helm upgrade --install newrelic-bundle newrelic/nri-bundle \
 # we build the feelguuds docker image and send it to minikube registry which will be pulled by the by helm
 # during deployment
 # link: https://medium.com/swlh/how-to-run-locally-built-docker-images-in-kubernetes-b28fbc32cc1d
-# make mkd_push_image
+make mkd_push_image
 
-helm upgrade  --namespace feelguuds-platform --install feelguuds-platform ./charts/feelguuds-platform \
- 							--set image.repository=feelguuds/feelguuds_platform \
-							--set image.tag=6.0.0 \
-							--set tls.enabled=true \
-							--set certificate.create=true \
-							--namespace=feelguuds-platform
+helm upgrade  --namespace feelguuds-platform --install feelguuds-platform ./charts/feelguuds-platform
