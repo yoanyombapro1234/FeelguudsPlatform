@@ -22,10 +22,10 @@ helm upgrade --install cert-manager jetstack/cert-manager \
     --namespace default
 
 # wait for cert manager
-kubectl cert-manager check api --wait=5m
-kubectl rollout status deployment/cert-manager --timeout=5m
-kubectl rollout status deployment/cert-manager-webhook --timeout=5m
-kubectl rollout status deployment/cert-manager-cainjector --timeout=5m
+kubectl cert-manager check api --wait=8m
+#kubectl rollout status deployment/cert-manager --timeout=5m
+#kubectl rollout status deployment/cert-manager-webhook --timeout=5m
+#kubectl rollout status deployment/cert-manager-cainjector --timeout=5m
 
 # install self-signed certificate
 cat << 'EOF' | kubectl apply -f -
