@@ -3,14 +3,15 @@ package merchant
 import (
 	"context"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/database"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"go.uber.org/zap"
 )
 
 type MerchantServiceInterface interface {
-	// CreateMerchantAccount(ctx context.Context, merchantAccount *MerchantAccount)
-	// UpdateMerchantAccount(ctx context.Context, merchantAccount *MerchantAccount)
+	CreateMerchantAccount(ctx context.Context, merchantAccount *models.MerchantAccount)
+	UpdateMerchantAccount(ctx context.Context, merchantAccount *models.MerchantAccount)
 	DeleteMerchantAccount(ctx context.Context, merchantAccountID uint32)
 	GetMerchantAccount(ctx context.Context, merchantAccountID uint32)
 	GetMerchantAccounts(ctx context.Context, merchantAccountIDs []uint32)
@@ -21,7 +22,7 @@ type MerchantServiceInterface interface {
 
 type MerchantAccountComponent struct {
 	Logger *zap.Logger
-	Conn   *core_database.DatabaseConn
+	Db   *database.Db
 }
 
 func NewMerchantAccountComponent(params *helper.DatabaseConnectionParams, log *zap.Logger) *MerchantAccountComponent {
@@ -29,39 +30,23 @@ func NewMerchantAccountComponent(params *helper.DatabaseConnectionParams, log *z
 		log.Fatal("failed to initialize merchant account component due to invalid input arguments")
 	}
 
-	conn := helper.ConnectToDatabase(params, log)
-	if conn == nil {
-		log.Fatal("failed to connect to database")
+	dbInstance, err := database.New(context.Background(), database.ConnectionInitializationParams{
+		ConnectionParams:       params,
+		Logger:                 log,
+		MaxConnectionAttempts:  2,
+		MaxRetriesPerOperation: 3,
+		RetryTimeOut:           100,
+		RetrySleepInterval:     10,
+	})
+
+	if err == nil {
+		log.Fatal(err.Error())
 	}
 
 	return &MerchantAccountComponent{
 		Logger: log,
-		Conn:   conn,
+		Db:   dbInstance,
 	}
-}
-
-func (m MerchantAccountComponent) DeleteMerchantAccount(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) GetMerchantAccount(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) GetMerchantAccounts(ctx context.Context, merchantAccountIDs []uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) StartMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) StopMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) FinalizeMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
 }
 
 var _ MerchantServiceInterface = (*MerchantAccountComponent)(nil)
