@@ -111,6 +111,7 @@ func (s *Server) registerHandlers() {
 			EnableOpenMetrics: true,
 		},
 	))
+
 	s.router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	s.router.HandleFunc("/", s.indexHandler).HeadersRegexp("User-Agent", "^Mozilla.*").Methods("GET")
 	s.router.HandleFunc("/", s.infoHandler).Methods("GET")

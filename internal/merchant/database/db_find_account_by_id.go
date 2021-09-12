@@ -12,9 +12,7 @@ import (
 // FindMerchantAccountById finds a merchant account by id
 func (db *Db) FindMerchantAccountById(ctx context.Context, id uint64) (bool, error) {
 	const operation = "merchant_account_exists_by_id_op"
-	db.Logger.For(ctx).Info(fmt.Sprintf("get business account by id database operation."))
-	ctx, span := db.startRootSpan(ctx, operation)
-	defer span.Finish()
+	db.Logger.Info(fmt.Sprintf("get business account by id database operation."))
 
 	tx := db.findMerchantAccountByIdTxFunc(id)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
@@ -34,9 +32,7 @@ func (db *Db) FindMerchantAccountById(ctx context.Context, id uint64) (bool, err
 func (db *Db) findMerchantAccountByIdTxFunc(id uint64) func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 	return func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operation = "merchant_account_exists_by_id_tx"
-		db.Logger.For(ctx).Info(fmt.Sprintf("get business account by id database tx."))
-		ctx, span := db.startRootSpan(ctx, operation)
-		defer span.Finish()
+		db.Logger.Info(fmt.Sprintf("get business account by id database tx."))
 
 		if id == 0 {
 			return false, service_errors.ErrInvalidInputArguments

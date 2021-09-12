@@ -47,8 +47,6 @@ message MerchantAccount {
 	MerchantAccountState account_onboarding_state = 20;
 	// type of merchant account
 	MerchantAccountType account_type = 21;
-	// merchant account password
-	string password = 22;
 	bool isActive = 23;
 }
 

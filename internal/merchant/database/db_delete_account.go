@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-database"
+	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
 )
@@ -15,9 +15,7 @@ import (
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
 func (db *Db) DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, error) {
 	const operation = "delete_business_account_db_op"
-	db.Logger.For(ctx).Info(fmt.Sprintf("delete business account database operation. id : %d", id))
-	ctx, span := db.startRootSpan(ctx, operation)
-	defer span.Finish()
+	db.Logger.Info(fmt.Sprintf("delete business account database operation. id : %d", id))
 
 	tx := db.deactivateMerchantAccountTxFunc(id)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
@@ -37,9 +35,7 @@ func (db *Db) DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, e
 func (db *Db) deactivateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operation = "delete_business_account_db_tx"
-		db.Logger.For(ctx).Info("starting transaction")
-		span := db.TracingEngine.CreateChildSpan(ctx, operation)
-		defer span.Finish()
+		db.Logger.Info("starting transaction")
 
 		if id == 0 {
 			return false, service_errors.ErrInvalidInputArguments
@@ -52,7 +48,7 @@ func (db *Db) deactivateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 
 		account.IsActive = false
 		if err := db.SaveAccountRecord(tx, account); err != nil {
-			db.Logger.For(ctx).Error(service_errors.ErrFailedToUpdateAccountActiveStatus, err.Error())
+			db.Logger.Error(err.Error())
 			return false, err
 		}
 

@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,13 +12,11 @@ import (
 	"time"
 
 	"github.com/labstack/gommon/log"
-	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	_ "github.com/wailsapp/wails/lib/logger"
 	core_auth_sdk "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-auth-sdk"
 	core_logging "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging"
-	tracer "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-tracing/jaeger"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/authentication_handler"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant"
@@ -89,7 +86,6 @@ func main() {
 	fs.Duration("HTTP_REQUEST_TIMEOUT_IN_MS", 300*time.Millisecond, "time until a request is seen as timing out")
 	// logging specific configurations
 	fs.String("SERVICE_NAME", "FEELGUUDS_PLATFORM", "service name")
-	fs.String("JAEGER_ENDPOINT", "http://jaeger-collector:14268/api/traces", "jaeger collector endpoint")
 	fs.Int("DOWNSTREAM_SERVICE_CONNECTION_LIMIT", 8, "max retries to perform while attempting to connect to downstream services")
 
 	// merchant component database connection configurations
@@ -115,26 +111,11 @@ func main() {
 	LoadServiceConfigsFromFile()
 
 	serviceName := viper.GetString("SERVICE_NAME")
-	collectorEndpoint := viper.GetString("JAEGER_ENDPOINT")
 	logLevel := viper.GetString("LOG_LEVEL")
 
 	logInstance := core_logging.New(logLevel)
 	defer logInstance.ConfigureLogger()
 	log := logInstance.Logger
-
-	// initialize a tracing object globally
-	tracerEngine, closer := tracer.New(serviceName, collectorEndpoint)
-	defer func(closer io.Closer) {
-		err := closer.Close()
-		if err != nil {
-			log.Error("Failed to close handle to tracing instance connection")
-		}
-	}(closer)
-
-	if tracerEngine == nil {
-		log.Fatal("cannot initialize tracer engine")
-	}
-	opentracing.SetGlobalTracer(tracerEngine.Tracer)
 
 	// initialize authentication's account component's dependencies
 	var authenticationComponent *authentication_handler.AuthenticationComponent

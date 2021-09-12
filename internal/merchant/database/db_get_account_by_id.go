@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-database"
+	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
@@ -14,9 +14,7 @@ import (
 // GetMerchantAccountById finds a merchant account by id
 func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccount, error) {
 	const operation = "get_business_account_by_id_db_op"
-	db.Logger.For(ctx).Info(fmt.Sprintf("get business account by id database operation. id : %d", id))
-	ctx, span := db.startRootSpan(ctx, operation)
-	defer span.Finish()
+	db.Logger.Info(fmt.Sprintf("get business account by id database operation. id : %d", id))
 
 	tx := db.getMerchantAccountByIdTxFunc(id)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
@@ -36,8 +34,6 @@ func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64) (*models.Me
 func (db *Db) getMerchantAccountByIdTxFunc(id uint64) core_database.CmplxTx {
 	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operation = "get_business_account_by_id_db_tx"
-		span := db.TracingEngine.CreateChildSpan(ctx, operation)
-		defer span.Finish()
 
 		if id == 0 {
 			return nil, service_errors.ErrInvalidInputArguments

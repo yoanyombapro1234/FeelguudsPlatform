@@ -119,7 +119,6 @@ swagger:
 kill-containers:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-					  docker-compose.jaeger.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml down
 
@@ -130,7 +129,6 @@ ci-setup-authn-deps:
 .PHONY: ci-start-deps
 ci-setup-deps: ci-setup-authn-deps
 	docker-compose -f docker-compose.yaml -f \
-				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
@@ -139,12 +137,10 @@ ci-setup-deps: ci-setup-authn-deps
 start-local-deps:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-					  docker-compose.jaeger.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml config
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
@@ -153,12 +149,10 @@ start-local-deps:
 start-local-deps-live:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-					  docker-compose.jaeger.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml config
 	docker-compose -f docker-compose.yaml -f \
 				  	  docker-compose.authn.yaml -f \
-				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans
 

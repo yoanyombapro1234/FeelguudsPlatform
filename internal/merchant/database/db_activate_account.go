@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-database"
+	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
 )
@@ -15,9 +15,7 @@ import (
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
 func (db *Db) ActivateAccount(ctx context.Context, id uint64) (bool, error) {
 	const operationType = "active_business_account_db_op"
-	db.Logger.For(ctx).Info(fmt.Sprintf("active business account database operation. id: %d", id))
-	ctx, span := db.startRootSpan(ctx, operationType)
-	defer span.Finish()
+	db.Logger.Info(fmt.Sprintf("active business account database operation. id: %d", id))
 
 	tx := db.activateMerchantAccountTxFunc(id)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
@@ -37,9 +35,7 @@ func (db *Db) ActivateAccount(ctx context.Context, id uint64) (bool, error) {
 func (db *Db) activateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operationType = "update_business_account_db_tx"
-		db.Logger.For(ctx).Info("starting transaction")
-		span := db.TracingEngine.CreateChildSpan(ctx, operationType)
-		defer span.Finish()
+		db.Logger.Info("starting transaction")
 
 		if id == 0 {
 			return nil, service_errors.ErrInvalidInputArguments

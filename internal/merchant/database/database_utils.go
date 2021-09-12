@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 
-	"github.com/yoanyombapro1234/FeelGuuds/src/services/merchant_service/pkg/utils"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 
-	"github.com/opentracing/opentracing-go"
-	"github.com/yoanyombapro1234/FeelGuuds/src/services/merchant_service/pkg/constants"
 	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	EMPTY = ""
 )
 
 // ValidateAndHashPassword validates, hashes and salts a password
@@ -62,19 +63,19 @@ func (db *Db) ComparePasswords(hashedPwd string, plainPwd []byte) bool {
 func (db *Db) ValidateAccount(ctx context.Context, account *models.MerchantAccount) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
-		db.Logger.Error(err, err.Error())
+		db.Logger.Error(err.Error())
 		return err
 	}
 
 	err = db.ValidateAccountIds(ctx, account)
 	if err != nil {
-		db.Logger.Error(err, err.Error())
+		db.Logger.Error(err.Error())
 		return err
 	}
 
 	err = db.ValidateAccountParameters(ctx, account)
 	if err != nil {
-		db.Logger.Error(err, err.Error())
+		db.Logger.Error(err.Error())
 		return err
 	}
 
@@ -85,11 +86,11 @@ func (db *Db) ValidateAccount(ctx context.Context, account *models.MerchantAccou
 func (db *Db) ValidateAccountParameters(ctx context.Context, account *models.MerchantAccount) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
-		db.Logger.Error(err, err.Error())
+		db.Logger.Error(err.Error())
 		return err
 	}
 
-	if account.BusinessEmail == constants.EMPTY || account.PhoneNumber == constants.EMPTY || account.BusinessName == constants.EMPTY {
+	if account.BusinessEmail == EMPTY || account.PhoneNumber == EMPTY || account.BusinessName == EMPTY {
 		return service_errors.ErrMisconfiguredAccountParameters
 	}
 
@@ -109,11 +110,11 @@ func (db *Db) ValidateAccountNotNil(ctx context.Context, account *models.Merchan
 func (db *Db) ValidateAccountIds(ctx context.Context, account *models.MerchantAccount) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
-		db.Logger.Error(err, err.Error())
+		db.Logger.Error(err.Error())
 		return err
 	}
 
-	if account.AuthnAccountId == 0 || account.StripeAccountId == 0 || account.StripeConnectedAccountId == constants.EMPTY || account.EmployerId == 0 {
+	if account.AuthnAccountId == 0 || account.StripeAccountId == 0 || account.StripeConnectedAccountId == EMPTY || account.EmployerId == 0 {
 		return service_errors.ErrMisconfiguredIds
 	}
 
@@ -132,7 +133,7 @@ func (db *Db) AccountActive(account *models.MerchantAccount) bool {
 func (db *Db) UpdateAccountOnboardStatus(ctx context.Context, account *models.MerchantAccount) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
-		db.Logger.Error(err, err.Error())
+		db.Logger.Error(err.Error())
 		return err
 	}
 
@@ -159,9 +160,4 @@ func (db *Db) UpdateAccountOnboardStatus(ctx context.Context, account *models.Me
 	}
 
 	return nil
-}
-
-// startRootSpan starts a root span object
-func (db *Db) startRootSpan(ctx context.Context, dbOpType OperationType) (context.Context, opentracing.Span) {
-	return utils.StartRootOperationSpan(ctx, string(dbOpType), db.Logger)
 }

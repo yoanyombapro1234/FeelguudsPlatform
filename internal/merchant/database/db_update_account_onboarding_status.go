@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-database"
+	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"gorm.io/gorm"
 )
@@ -16,10 +16,7 @@ import (
 func (db *Db) UpdateAccountOnboardingStatus(ctx context.Context, id uint64, state models.MerchantAccountState) (
 	*models.MerchantAccount, error) {
 	const operationType = "update_business_account_onboarding_status_db_op"
-	db.Logger.For(ctx).Info(fmt.Sprintf("update business account onboarding status database operation. id: %d", id))
-
-	ctx, span := db.startRootSpan(ctx, operationType)
-	defer span.Finish()
+	db.Logger.Info(fmt.Sprintf("update business account onboarding status database operation. id: %d", id))
 
 	tx := db.updateMerchantAccountOnboardingStatusTxFunc(id, state)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
@@ -35,9 +32,7 @@ func (db *Db) UpdateAccountOnboardingStatus(ctx context.Context, id uint64, stat
 func (db *Db) updateMerchantAccountOnboardingStatusTxFunc(id uint64, status models.MerchantAccountState) core_database.CmplxTx {
 	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operationType = "update_business_account_onboarding_status_db_tx"
-		db.Logger.For(ctx).Info("starting transaction")
-		span := db.TracingEngine.CreateChildSpan(ctx, operationType)
-		defer span.Finish()
+		db.Logger.Info("starting transaction")
 
 		acct, err := db.GetMerchantAccountById(ctx, id)
 		if err != nil {

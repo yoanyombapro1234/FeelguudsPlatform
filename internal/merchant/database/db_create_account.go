@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-database"
+	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
@@ -15,9 +15,7 @@ import (
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
 func (db *Db) CreateMerchantAccount(ctx context.Context, account *models.MerchantAccount) (*models.MerchantAccount, error) {
 	const operation = "create_business_account_db_op"
-	db.Logger.For(ctx).Info(fmt.Sprintf("create business account database operation."))
-	ctx, span := db.startRootSpan(ctx, operation)
-	defer span.Finish()
+	db.Logger.Info(fmt.Sprintf("create business account database operation."))
 
 	tx := db.createAccountTxFunc(account)
 
@@ -34,9 +32,7 @@ func (db *Db) CreateMerchantAccount(ctx context.Context, account *models.Merchan
 func (db *Db) createAccountTxFunc(account *models.MerchantAccount) core_database.CmplxTx {
 	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operation = "create_business_account_db_tx"
-		db.Logger.For(ctx).Info("starting transaction")
-		span := db.TracingEngine.CreateChildSpan(ctx, operation)
-		defer span.Finish()
+		db.Logger.Info("starting transaction")
 
 		if err := db.ValidateAccount(ctx, account); err != nil {
 			return nil, err
