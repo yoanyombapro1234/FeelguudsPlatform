@@ -14,6 +14,7 @@ EXTRA_RUN_ARGS?=
 TMP_BASE := .tmp
 # TMP_COVERAGE is where we store code coverage files.
 TMP_COVERAGE := $(TMP_BASE)/coverage
+IP := $(minikube ip)
 
 # runs an instance of the service locally
 .PHONY: run
@@ -48,12 +49,6 @@ mk_start:
 mkd_push_image:
 	eval $(minikube docker-env)
 	make build-container
-
-.PHONY: push-image-to-minikube
-mk_push_image:
-	minikube addons enable registry
-	docker build --tag $(minikube ip):5000/$(NAME) .
-	docker push $(minikube ip):5000/$(NAME)
 
 # builds a docker container in which the service's executable will run
 .PHONY: build-container

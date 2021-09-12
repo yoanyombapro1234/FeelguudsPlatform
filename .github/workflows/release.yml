@@ -42,9 +42,9 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           tags: |
-            docker.io/yoanyombapro1234/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
-            docker.io/yoanyombapro1234/feelguuds_platform:latest
-            ghcr.io/yoanyombapro1234/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
+            docker.io/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
+            docker.io/feelguuds_platform:latest
+            ghcr.io/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
@@ -61,7 +61,7 @@ jobs:
           context: .
           platforms: linux/amd64
           file: ./Dockerfile.base
-          tags: docker.io/yoanyombapro1234/feelguuds_platform-base:latest
+          tags: docker.io/feelguuds_platform-base:latest
       - name: Publish helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
