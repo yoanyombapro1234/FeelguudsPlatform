@@ -61,7 +61,7 @@ jobs:
           context: .
           platforms: linux/amd64
           file: ./Dockerfile.base
-          tags: docker.io/feelguuds_platform-base:latest
+          tags: docker.io/feelguuds/feelguuds_platform-base:latest
       - name: Publish helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
