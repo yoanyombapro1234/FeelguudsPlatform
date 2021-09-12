@@ -13,7 +13,6 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics
 helm repo update
 
-kubectl create namespace feelguuds-platform
 kubectl create namespace newrelic
 
 # install cert-manager
@@ -22,10 +21,9 @@ helm upgrade --install cert-manager jetstack/cert-manager \
     --namespace default
 
 # wait for cert manager
-kubectl cert-manager check api --wait=8m
-#kubectl rollout status deployment/cert-manager --timeout=5m
-#kubectl rollout status deployment/cert-manager-webhook --timeout=5m
-#kubectl rollout status deployment/cert-manager-cainjector --timeout=5m
+kubectl rollout status deployment/cert-manager --timeout=3m
+kubectl rollout status deployment/cert-manager-webhook --timeout=3m
+kubectl rollout status deployment/cert-manager-cainjector --timeout=3m
 
 # install self-signed certificate
 cat << 'EOF' | kubectl apply -f -
@@ -38,15 +36,15 @@ spec:
 EOF
 
 # install jaeger dependency
-helm upgrade  --namespace feelguuds-platform --install telemetry ./charts/telemetry
-helm upgrade  --namespace feelguuds-platform --install prometheus prometheus-community/prometheus
+helm upgrade --install telemetry ./charts/telemetry
+helm upgrade --install prometheus prometheus-community/prometheus
 
 # install database helm charts for service
-helm upgrade --namespace feelguuds-platform --install merchant-component-db -f ./k8s/merchant-component-db/values.yaml bitnami/postgresql
-helm upgrade  --namespace feelguuds-platform --install shopper-component-db -f ./k8s/shopper-component-db/values.yaml bitnami/postgresql
+helm upgrade --install merchant-component-db -f ./k8s/merchant-component-db/values.yaml bitnami/postgresql
+helm upgrade --install shopper-component-db -f ./k8s/shopper-component-db/values.yaml bitnami/postgresql
 
 # install authentication service helm chart
-helm upgrade --namespace feelguuds-platform --install  auth-service ./charts/authentication_service
+helm upgrade --install  auth-service ./charts/authentication_service
 
 # create a namespace for new relic bundle and deploy app
 helm upgrade --install newrelic-bundle newrelic/nri-bundle \
@@ -69,4 +67,4 @@ helm upgrade --install newrelic-bundle newrelic/nri-bundle \
 # link: https://medium.com/swlh/how-to-run-locally-built-docker-images-in-kubernetes-b28fbc32cc1d
 make mkd_push_image
 
-helm upgrade  --namespace feelguuds-platform --install feelguuds-platform ./charts/feelguuds-platform
+helm upgrade --install feelguuds-platform ./charts/feelguuds-platform
