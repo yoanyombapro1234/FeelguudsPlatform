@@ -5,7 +5,6 @@ metadata:
     kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.merchant.dep.yaml
       -f docker-compose.shopper.dep.yaml convert
     kompose.version: 1.19.0 (f63a961c)
-  creationTimestamp: null
   labels:
 	{{- include "feelguuds-platform.labels" . | nindent 4 }}
     io.kompose.service: {{ .Chart.Name }}
@@ -19,17 +18,25 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: {{ .Chart.Name }}
+      {{- include "feelguuds-platform.selectorLabels" . | nindent 6 }}
   strategy:
     type: {{ .Values.deploymentStrategy.type }}
+	rollingUpdate:
+	  maxUnavailable: 1
   template:
     metadata:
       annotations:
         kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f
           docker-compose.merchant.dep.yaml -f docker-compose.shopper.dep.yaml convert
         kompose.version: 1.19.0 (f63a961c)
-      creationTimestamp: null
+	    prometheus.io/scrape: "true"
+	    prometheus.io/port: "{{ .Values.service.httpPort }}"
+	    {{- range $key, $value := .Values.podAnnotations }}}
+	    {{ $key }}: {{ $value | quote }}
       labels:
         io.kompose.service: {{ .Chart.Name }}
+	    {{- include "feelguuds-platform.selectorLabels" . | nindent 8 }}
+	    {{- end }}
     spec:
       containers:
         - env:
@@ -453,17 +460,114 @@ spec:
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: {{ .Chart.Name }}
+		  {{- if .Values.securityContext }}
+		  securityContext:
+		  {{- toYaml .Values.securityContext | nindent 12 }}
+		  {{- else if (or .Values.service.hostPort .Values.tls.hostPort) }}
+		  securityContext:
+			allowPrivilegeEscalation: true
+			capabilities:
+			  drop:
+				- ALL
+			  add:
+				- NET_BIND_SERVICE
+		  {{- end }}
+		  livenessProbe:
+			exec:
+			  command:
+				- podcli
+				- check
+				- http
+				- localhost:{{ .Values.service.httpPort | default 9897 }}/healthz
+			initialDelaySeconds: 1
+			timeoutSeconds: 5
+		  readinessProbe:
+			exec:
+			  command:
+				- podcli
+				- check
+				- http
+				- localhost:{{ .Values.service.httpPort | default 9897 }}/readyz
+			initialDelaySeconds: 1
+			timeoutSeconds: 5
+		  command:
+			- ./podinfo
+			- --port={{ .Values.service.httpPort | default 9897 }}
+			{{- if .Values.host }}
+			- --host={{ .Values.host }}
+			{{- end }}
+			{{- if .Values.tls.enabled }}
+			- --secure-port={{ .Values.tls.port }}
+			{{- end }}
+			{{- if .Values.tls.certPath }}
+			- --cert-path={{ .Values.tls.certPath }}
+			{{- end }}
+			{{- if .Values.service.metricsPort }}
+			- --port-metrics={{ .Values.service.metricsPort }}
+			{{- end }}
+			{{- if .Values.service.grpcPort }}
+			- --grpc-port={{ .Values.service.grpcPort }}
+			{{- end }}
+			{{- if .Values.service.grpcService }}
+			- --grpc-service-name={{ .Values.service.grpcService }}
+			{{- end }}
+			{{- range .Values.backends }}
+			- --backend-url={{ . }}
+			{{- end }}
+			{{- if .Values.cache }}
+			- --cache-server={{ .Values.cache }}
+			{{- else if .Values.redis.enabled }}
+			- --cache-server={{ template "feelguuds-platform.fullname" . }}-redis:6379
+			{{- end }}
+			- --level={{ .Values.logLevel }}
+			- --random-delay={{ .Values.faults.delay }}
+			- --random-error={{ .Values.faults.error }}
+			{{- if .Values.faults.unhealthy }}
+			- --unhealthy
+			{{- end }}
+			{{- if .Values.faults.unready }}
+			- --unready
+			{{- end }}
+			{{- if .Values.h2c.enabled }}
+			- --h2c
+			{{- end }}
           ports:
-            - containerPort: 9898
+            - containerPort: {{ .Values.service.httpPort | default 9897 }}
               protocol: TCP
-            - containerPort: 9897
-              protocol: TCP
+			  {{- if .Values.service.hostPort }}
+			  hostPort: {{ .Values.service.hostPort }}
+			  {{- end }}
+			{{- if .Values.tls.enabled }}
+			- name: https
+			  containerPort: {{ .Values.tls.port | default 9899 }}
+			  protocol: TCP
+			  {{- if .Values.tls.hostPort }}
+			  hostPort: {{ .Values.tls.hostPort }}
+			{{- end }}
+			{{- end }}
+			{{- if .Values.service.metricsPort }}
+			- name: http-metrics
+			  containerPort: {{ .Values.service.metricsPort }}
+			  protocol: TCP
+			{{- end }}
+			{{- if .Values.service.grpcPort }}
+			- name: grpc
+			  containerPort: {{ .Values.service.grpcPort }}
+			  protocol: TCP
+			{{- end }}
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
             - mountPath: /go/src/github.com/yoanyombapro1234/FeelguudsPlatform
               name: feelguuds-platform-claim0
+			- name: data
+			  mountPath: /data
+			{{- if .Values.tls.enabled }}
+			- name: tls
+			  mountPath: {{ .Values.tls.certPath | default "/data/cert" }}
+			  readOnly: true
+		   {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy }}
       restartPolicy: {{ .Values.restartPolicy }}
       schedulerName: {{ .Values.schedulerName }}
@@ -473,4 +577,10 @@ spec:
         - name: feelguuds-platform-claim0
           persistentVolumeClaim:
             claimName: feelguuds-platform-claim0
-status: {}
+		- name: data
+		  emptyDir: {}
+		  {{- if .Values.tls.enabled }}
+		- name: tls
+		  secret:
+			secretName: {{ template "feelguuds-platform.tlsSecretName" . }}
+		{{- end }}

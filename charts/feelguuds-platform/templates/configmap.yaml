@@ -85,7 +85,6 @@ data:
   UI_PATH: ./ui
 kind: ConfigMap
 metadata:
-  creationTimestamp: null
   labels:
     io.kompose.service: feelguuds-platform-env
   name: feelguuds-platform-env

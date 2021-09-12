@@ -42,9 +42,10 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           tags: |
-            docker.io/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
-            docker.io/feelguuds_platform:latest
-            ghcr.io/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
+            feelguuds/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
+            feelguuds/feelguuds_platform:latest
+            feelguuds/feelguuds_platform:${{ steps.prep.outputs.VERSION }}
+            feelguuds/feelguuds_platform:${{ github.event.pull_request.base.ref }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}

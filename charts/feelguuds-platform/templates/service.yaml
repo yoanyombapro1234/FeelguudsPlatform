@@ -5,7 +5,6 @@ metadata:
     kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.merchant.dep.yaml
       -f docker-compose.shopper.dep.yaml convert
     kompose.version: 1.19.0 (f63a961c)
-  creationTimestamp: null
   labels:
     io.kompose.service: feelguuds-platform
   name: feelguuds-platform

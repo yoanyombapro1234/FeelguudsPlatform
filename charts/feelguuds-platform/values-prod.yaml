@@ -42,6 +42,7 @@ service:
   grpcPort: 9896
   metricsPort: 9899
   httpPort: 9897
+  grpcService: feelguuds-platform
   externalPort: 9897
   nodePort: 31198
   # the port used to bind the http port to the host
@@ -53,7 +54,7 @@ service:
 h2c:
   enabled: false
 
-# enable tls on the podinfo service
+# enable tls on the feelguuds service
 tls:
   enabled: false
   # the name of the secret used to mount the certificate key pair
