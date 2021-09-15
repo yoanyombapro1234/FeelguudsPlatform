@@ -2,18 +2,15 @@ package database
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"math/rand"
 	"testing"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/assert"
-	"github.com/uber/jaeger-lib/metrics/prometheus"
-	core_database "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-database"
-	core_logging "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-logging/json"
-	core_tracing "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-tracing"
+	core_logging "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
+	"go.uber.org/zap"
+
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
@@ -50,29 +47,28 @@ var (
 		AccountOnboardingDetails: 0,
 		AccountOnboardingState:   0,
 		AccountType:              0,
-		Password:                 "",
 		IsActive:                 false,
 	}
 )
 
 func TestMain(m *testing.M) {
 	const serviceName string = "test"
-	// initiate tracing engine
-	tracingEngine, closer := InitializeTracingEngine(serviceName)
-	defer closer.Close()
 	ctx := context.Background()
 
 	// initiate logging client
 	logger := InitializeLoggingEngine(ctx)
 
-	connectionString := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+	params := &helper.DatabaseConnectionParams{
+		Host:        host,
+		User:        user,
+		Password:    password,
+		DatabaseName: dbname,
+		Port:         port,
+	}
 
 	// connect to db
 	db, _ = New(ctx, ConnectionInitializationParams{
-		ConnectionString:       connectionString,
-		TracingEngine:          tracingEngine,
+		ConnectionParams:       params,
 		Logger:                 logger,
 		MaxConnectionAttempts:  4,
 		MaxRetriesPerOperation: 4,
@@ -85,19 +81,10 @@ func TestMain(m *testing.M) {
 }
 
 // InitializeLoggingEngine initializes a logging object
-func InitializeLoggingEngine(ctx context.Context) core_logging.ILog {
-	// initiate authn client
-	rootSpan := opentracing.SpanFromContext(ctx)
-
+func InitializeLoggingEngine(ctx context.Context) *zap.Logger {
 	// create logging object
-	logger := core_logging.NewJSONLogger(nil, rootSpan)
-	return logger
-}
-
-// InitializeTracingEngine initializes a tracing object
-func InitializeTracingEngine(serviceName string) (*core_tracing.TracingEngine, io.Closer) {
-	const collectorEndpoint string = "http://localhost:14268/api/traces"
-	return core_tracing.NewTracer(serviceName, collectorEndpoint, prometheus.New())
+	logger := core_logging.New("info")
+	return logger.Logger
 }
 
 // GenerateRandomId generates a random id over a range
@@ -118,7 +105,6 @@ func ExpectValidAccountObtained(t *testing.T, err error, obtainedAccount *models
 	assert.True(t, obtainedAccount != nil)
 	assert.Equal(t, obtainedAccount.BusinessEmail, result.BusinessName)
 	assert.Equal(t, obtainedAccount.BusinessName, result.BusinessName)
-	assert.Equal(t, obtainedAccount.Password, result.Password)
 }
 
 // ExpectInvalidArgumentsError ensure the invalid error is present
@@ -151,7 +137,7 @@ func ExpectCannotUpdatePasswordError(t *testing.T, err error, account *models.Me
 
 // GenerateRandomizedAccount generates a random account
 func GenerateRandomizedAccount() *models.MerchantAccount {
-	randStr := core_database.GenerateRandomString(150)
+	randStr := helper.GenerateRandomString(150)
 	account := testBusinessAccount
 	account.BusinessName = account.BusinessEmail + randStr
 	account.BusinessName = account.BusinessName + randStr

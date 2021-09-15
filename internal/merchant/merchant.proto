@@ -1,14 +1,20 @@
 syntax = "proto3";
 
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+import "github.com/protobuf/src/google/protobuf/timestamp.proto";
+
 package merchant_service_proto_v1;
 
 option go_package = "/models";
 
 // MerchantAccount represents a business account in the context of feelguuds
 message MerchantAccount {
-	uint64 id = 1;
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint32 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 	// set of owners who are responsible for this merchant account
-	repeated Owner owners = 2;
+	repeated Owner owners = 2 [(gorm.field).has_many.preload = true];
 	// business name of the merchant account
 	string business_name = 3;
 	// business email of the merchant account
@@ -18,15 +24,15 @@ message MerchantAccount {
 	// estimated annual revenue pre-tax of the merchant account
 	string estimate_annual_revenue = 6;
 	// merchant account address
-	Address address = 7;
+	Address address = 7 [(gorm.field).has_one.preload = true];
 	// types of item this merchant is selling
-	repeated ItemSold items_or_services_sold = 8;
+	repeated ItemSold items_or_services_sold = 8 [(gorm.field).has_many.preload = true];
 	// ways in which the merchant aims to fulfill purchases
-	repeated FulfillmentOptions fulfillment_options = 9;
+	repeated FulfillmentOptions fulfillment_options = 9 [(gorm.field).has_many.preload = true];
 	// shop settings
-	Settings ShopSettings = 10;
+	Settings ShopSettings = 10 [(gorm.field).has_one.preload = true];
 	// set of supported causes the merchant adheres to
-	repeated Causes supported_causes = 11;
+	repeated Causes supported_causes = 11 [(gorm.field).has_many.preload = true];
 	// merchant account bio
 	string bio = 12;
 	// merchant account headline
@@ -34,7 +40,7 @@ message MerchantAccount {
 	// merchant account phone number
 	string phone_number = 14;
 	// set of tags associated with a merchant
-	repeated Tags tags = 15;
+	repeated Tags tags = 15 [(gorm.field).has_many.preload = true];
 	// stripe connect account id
 	string stripe_connected_account_id = 16;
 	// id of the associated stripe account this merchant account is tied to
@@ -42,11 +48,11 @@ message MerchantAccount {
 	// id of the merchant account from the context of the auth service
 	uint64 authn_account_id = 18;
 	// merchant account onboarding step
-	OnboardingStatus account_onboarding_details = 19;
+	OnboardingStatus account_onboarding_details = 19 [(gorm.field).has_one.preload = true];
 	// merchant account state
-	MerchantAccountState account_onboarding_state = 20;
+	MerchantAccountState account_onboarding_state = 20 [(gorm.field).has_one.preload = true];
 	// type of merchant account
-	MerchantAccountType account_type = 21;
+	MerchantAccountType account_type = 21 [(gorm.field).has_one.preload = true];
 	bool isActive = 23;
 }
 
@@ -102,11 +108,17 @@ enum Causes {
 
 // Represents all configurable settings for a given merchant account
 message Settings {
-	uint64 id = 1;
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint32 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	// Represents the various details associated with a payment type
 	message PaymentDetails {
-		uint64 id = 1;
+		option (gorm.opts) = {
+			ormable: true,
+		};
+		uint32 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 		// Credit card type
 		enum CreditCardBrand {
@@ -143,21 +155,24 @@ message Settings {
 	}
 
 	// merchant account payment details
-	PaymentDetails payment_details = 2;
+	PaymentDetails payment_details = 2 [(gorm.field).has_one.preload = true];
 
 	// set of policies a merchant account can define on it's shop profile
-	repeated Policy ShopPolicy = 3;
+	repeated Policy ShopPolicy = 3 [(gorm.field).has_many.preload = true];
 	// set of policies a merchant account can define with respect to privacy on it's shop profile
-	repeated Policy PrivacyPolicy = 4;
+	repeated Policy PrivacyPolicy = 4 [(gorm.field).has_many.preload = true];
 	// set of return policies a merchant account can define with respect to issuing refunds on its shop profile
-	ReturnPolicy ReturnPolicy = 5;
+	ReturnPolicy ReturnPolicy = 5 [(gorm.field).has_one.preload = true];
 	// set of shipping policies a merchant account can define on to its shop profile
-	ShippingPolicy ShippingPolicy = 6;
+	ShippingPolicy ShippingPolicy = 6 [(gorm.field).has_one.preload = true];
 }
 
 // Represents the types of items a merchant account sells
 message ItemSold {
-	uint64 id = 1;
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	// Represents the types of services/items the merchant account will sell to customers
 	enum ItemsType {
@@ -174,7 +189,10 @@ message ItemSold {
 
 // business address
 message Address {
-	uint64 id = 1;
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	// the address field
 	string Address = 2;
@@ -194,7 +212,10 @@ message Address {
 
 // Represents the merchant account owner
 message Owner {
-	uint64 id = 1;
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	string FirstName=2;
 	string LastName=3;
@@ -204,7 +225,10 @@ message Owner {
 
 // represents a sample tag
 message Tags {
-	uint64 id = 1;
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	string tag_name = 2;
 	string tag_description = 3;
@@ -213,7 +237,7 @@ message Tags {
 
 // Represents various policies a merchant account can declare for various use cases
 message Policy {
-	uint64 id = 1 ;
+	uint64 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	enum PolicyType {
 		SHIPPING_POLICY = 0;
@@ -228,7 +252,7 @@ message Policy {
 
 // ReturnPolicy represent a sample shop return policy
 message ReturnPolicy {
-	uint64 id = 1;
+	uint64 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	Policy policy_meta = 2;
 	uint32 contact_within_days_of_delivery = 3;
@@ -241,7 +265,7 @@ message ReturnPolicy {
 
 // ShippingPolicy represents a sample shop shipping policy
 message ShippingPolicy {
-	uint64 id = 1;
+	uint64 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 
 	Policy policy_meta = 2;
 	enum PostalService {

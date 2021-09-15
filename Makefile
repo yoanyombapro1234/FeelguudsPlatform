@@ -190,7 +190,7 @@ ci-test: ci-setup-deps
 test: start-local-deps
 	echo "starting unit tests and integration tests"
 	docker ps -a
-	docker logs authentication_service
+	docker logs authentication-service
 	go get github.com/mfridman/tparse
 	go test -v -race ./... -json -cover  -coverprofile cover.out | tparse -all -top
 	go tool cover -html=cover.out

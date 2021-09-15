@@ -146,7 +146,8 @@ tolerations: []
 
 affinity: {}
 
-podAnnotations: {}
+podAnnotations:
+  service: feelguuds/feelguuds-commerce-platform
 
 deploymentStrategy:
   maxSurge: 25%
