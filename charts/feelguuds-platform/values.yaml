@@ -158,3 +158,5 @@ failures:
   periodSeconds: 30
   successThresholds: 1
   timeoutSeconds: 10
+  initialDelaySeconds: 30
+

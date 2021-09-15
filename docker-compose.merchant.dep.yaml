@@ -13,4 +13,4 @@ services:
     volumes:
       - merchant_component_db:/data/merchant_component_db
     networks:
-      - web
+      - monitor-net

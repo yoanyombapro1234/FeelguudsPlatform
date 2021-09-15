@@ -13,4 +13,4 @@ services:
     volumes:
       - shopper_component_db:/data/shopper_component_db
     networks:
-      - web
+      - monitor-net
