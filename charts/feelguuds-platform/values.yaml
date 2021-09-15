@@ -16,7 +16,7 @@ backend: #http://backend-podinfo:9898/echo
 backends: []
 
 image:
-  repository: docker.io/feelguuds/feelguuds-platform
+  repository: feelguuds/feelguuds-platform
   tag: 6.0.0
   pullPolicy: IfNotPresent
 

@@ -16,6 +16,9 @@ TMP_BASE := .tmp
 TMP_COVERAGE := $(TMP_BASE)/coverage
 IP := $(minikube ip)
 
+PROTO_VER = 3.7.0
+PROTO_ROOT_DIR = $(shell brew --prefix)/Cellar/protobuf/$(PROTO_VER)/include
+
 # runs an instance of the service locally
 .PHONY: run
 run:
@@ -233,3 +236,40 @@ kube-deploy: start-minikube
 	minikube dashboard
 
 # kubectl convert -f ./my-deployment.yaml --output-version apps/v1
+golang:
+	protoc -I. \
+		-I${GOPATH}/src \
+		-I${GOPATH}/src/github.com \
+		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway \
+		-I${GOPATH}/src/github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto \
+		-I${GOPATH}/src/github.com/infobloxopen/atlas-app-toolkit/query/collection_operators.proto \
+		-I${GOPATH}/src/github.com/lyft/protoc-gen-validate \
+		--gorm_out=:. \
+		internal/merchant/merchant.proto
+	protoc -I/usr/local/include -I. \
+		-I${GOPATH}/src \
+		-I${GOPATH}/src/github.com \
+		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway \
+		-I${GOPATH}/src/github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto \
+		-I${GOPATH}/src/github.com/infobloxopen/atlas-app-toolkit/query/collection_operators.proto \
+		-I${GOPATH}/src/github.com/lyft/protoc-gen-validate \
+		--go_out=plugins=grpc:./internal/merchant \
+		internal/merchant/merchant.proto
+	protoc -I/usr/local/include -I. \
+		-I${GOPATH}/src \
+		-I${GOPATH}/src/github.com \
+		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway \
+		-I${GOPATH}/src/github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto \
+		-I${GOPATH}/src/github.com/infobloxopen/atlas-app-toolkit/query/collection_operators.proto \
+		-I${GOPATH}/src/github.com/lyft/protoc-gen-validate \
+		--swagger_out=logtostderr=true:./internal/merchant \
+		internal/merchant/merchant.proto
+	protoc -I/usr/local/include -I. \
+		-I${GOPATH}/src \
+		-I${GOPATH}/src/github.com \
+		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway \
+		-I${GOPATH}/src/github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto \
+		-I${GOPATH}/src/github.com/infobloxopen/atlas-app-toolkit/query/collection_operators.proto \
+		-I${GOPATH}/src/github.com/lyft/protoc-gen-validate \
+		--validate_out="lang=go:." \
+		internal/merchant/merchant.proto

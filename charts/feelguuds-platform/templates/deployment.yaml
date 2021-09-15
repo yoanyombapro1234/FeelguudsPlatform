@@ -7,8 +7,8 @@ metadata:
     kompose.version: 1.19.0 (f63a961c)
   labels:
 	{{- include "feelguuds-platform.labels" . | nindent 4 }}
-    io.kompose.service: {{ .Chart.Name }}
-  name: {{ .Chart.Name }}
+    io.kompose.service: {{ template "feelguuds-platform.fullname" . }}
+  name: {{ template "feelguuds-platform.fullname" . }}
 spec:
   progressDeadlineSeconds: {{ .Values.progressDeadlineInSeconds }}
   {{- if not .Values.hpa.enabled }}
@@ -17,7 +17,7 @@ spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
-      io.kompose.service: {{ .Chart.Name }}
+      io.kompose.service: {{ template "feelguuds-platform.fullname" . }}
       {{- include "feelguuds-platform.selectorLabels" . | nindent 6 }}
   strategy:
     type: {{ .Values.deploymentStrategy.type }}
@@ -32,7 +32,7 @@ spec:
 	    {{- range $key, $value := .Values.podAnnotations }}}
 	    {{ $key }}: {{ $value | quote }}
       labels:
-	    io.kompose.service: {{ .Chart.Name }}
+	    io.kompose.service: {{ template "feelguuds-platform.fullname" . }}
     spec:
       containers:
         - env:
@@ -455,7 +455,7 @@ spec:
                   name: feelguuds-platform-env
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          name: {{ .Chart.Name }}
+          name: {{ template "feelguuds-platform.fullname" . }}
 		  {{- if .Values.securityContext }}
 		  securityContext:
 		  {{- toYaml .Values.securityContext | nindent 12 }}

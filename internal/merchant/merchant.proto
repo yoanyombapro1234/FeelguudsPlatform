@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
-import "github.com/protobuf/src/google/protobuf/timestamp.proto";
-
 package merchant_service_proto_v1;
 
 option go_package = "/models";
+
+import "google/protobuf/descriptor.proto";
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
 // MerchantAccount represents a business account in the context of feelguuds
 message MerchantAccount {
@@ -247,7 +247,7 @@ message Policy {
 	string Body = 2;
 	string Handle = 3;
 	string Title = 4;
-	repeated Tags tags = 5;
+	repeated Tags tags = 5 [(gorm.field).has_many.preload = true];
 }
 
 // ReturnPolicy represent a sample shop return policy
@@ -275,7 +275,7 @@ message ShippingPolicy {
 		UPS = 3;
 		BLUE_DART = 4;
 	}
-	PostalService postal_service = 3;
+	PostalService postal_service = 3 [(gorm.field).has_one.preload = true];
 	uint32 days_order_ships_in = 4;
 	string details = 5;
 }
