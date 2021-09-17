@@ -1,0 +1,16 @@
+{{- if .Values.certificate.create -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ template "platform.fullname" . }}
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+  {{- range .Values.certificate.dnsNames }}
+    - {{ . | quote }}
+  {{- end }}
+  secretName: {{ template "platform.tlsSecretName" . }}
+  issuerRef:
+  {{- .Values.certificate.issuerRef | toYaml | trimSuffix "\n" | nindent 4 }}
+{{- end }}

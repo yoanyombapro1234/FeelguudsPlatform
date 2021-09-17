@@ -20,8 +20,8 @@ services:
       - '.:/go/src/github.com/yoanyombapro1234/FeelguudsPlatform'
     env_file:
       - .env
-    #depends_on:
-    #  - auth_service
+    depends_on:
+      - auth_service
 
 networks:
   monitor-net:

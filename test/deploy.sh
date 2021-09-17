@@ -37,8 +37,8 @@ spec:
 EOF
 
 # install feelguuds_platform with tls enabled
-helm upgrade --install feelguuds-platform ./charts/feelguuds_platform \
-    --set image.repository=test/feelguuds_platform \
+helm upgrade --install feelguuds-platform ./charts/feelguuds-platform \
+    --set image.repository=test/feelguuds-platform \
     --set image.tag=latest \
     --set tls.enabled=true \
     --set certificate.create=true \

@@ -35,16 +35,7 @@ spec:
   selfSigned: {}
 EOF
 
-# install jaeger dependency
-helm upgrade --install telemetry ./charts/telemetry
 helm upgrade --install prometheus prometheus-community/prometheus
-
-# install database helm charts for service
-helm upgrade --install merchant-component-db -f ./k8s/merchant-component-db/values.yaml bitnami/postgresql
-helm upgrade --install shopper-component-db -f ./k8s/shopper-component-db/values.yaml bitnami/postgresql
-
-# install authentication service helm chart
-helm upgrade --install  auth-service ./charts/authentication_service
 
 # create a namespace for new relic bundle and deploy app
 helm upgrade --install newrelic-bundle newrelic/nri-bundle \
@@ -67,4 +58,5 @@ helm upgrade --install newrelic-bundle newrelic/nri-bundle \
 # link: https://medium.com/swlh/how-to-run-locally-built-docker-images-in-kubernetes-b28fbc32cc1d
 make mkd_push_image
 
-helm upgrade --install feelguuds-platform ./charts/feelguuds-platform
+# install feelguuds platform and all dependent services
+helm upgrade --install feelguuds-platform ./charts/feelguuds-platform-dev

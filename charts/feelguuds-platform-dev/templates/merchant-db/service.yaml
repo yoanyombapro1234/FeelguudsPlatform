@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --file docker-compose.merchant.dep.yaml convert
+    kompose.version: 1.19.0 (f63a961c)
+  labels:
+    io.kompose.service: merchant-component-db
+  name: merchant-component-db
+spec:
+  ports:
+  - name: "6000"
+    port: 6000
+    targetPort: 5432
+  selector:
+    io.kompose.service: merchant-component-db
+status:
+  loadBalancer: {}

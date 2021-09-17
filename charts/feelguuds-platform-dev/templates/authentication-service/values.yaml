@@ -1,0 +1,157 @@
+# Default values for the authentication service.
+nameOverride: authentication-service
+fullnameOverride:
+replicaCount: 2
+progressDeadlineInSeconds: 600
+revisionHistoryLimit: 3
+
+dnsPolicy: ClusterFirst
+restartPolicy: Always
+schedulerName: default-scheduler
+terminationGracePeriodSeconds: 30
+
+logLevel: info
+host: #0.0.0.0
+backend: #http://backend-podinfo:9898/echo
+backends: []
+
+image:
+  repository: keratin/authn-server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+ui:
+  color: "#34577c"
+  message: ""
+  logo: ""
+
+# failure conditions
+faults:
+  delay: false
+  error: false
+  unhealthy: false
+  unready: false
+  testFail: false
+  testTimeout: false
+
+# Kubernetes Service settings
+service:
+  enabled: true
+  annotations: {}
+  type: ClusterIP
+  internalPort: 3000
+  externalPort: 8000
+  nodePort: 31198
+  # the port used to bind the external port to the host
+  # NOTE: requires privileged container with NET_BIND_SERVICE capability -- this is useful for testing
+  # in local clusters such as kind without port forwarding
+  hostPort:
+
+# enable h2c protocol (non-TLS version of HTTP/2)
+h2c:
+  enabled: false
+
+# enable tls on the podinfo service
+tls:
+  enabled: false
+  # the name of the secret used to mount the certificate key pair
+  secretName:
+  # the path where the certificate key pair will be mounted
+  certPath: /data/cert
+  # the port used to host the tls endpoint on the service
+  port:
+  # the port used to bind the tls port to the host
+  # NOTE: requires privileged container with NET_BIND_SERVICE capability -- this is useful for testing
+  # in local clusters such as kind without port forwarding
+  hostPort:
+
+# create a certificate manager certificate (cert-manager required)
+certificate:
+  create: false
+  # the issuer used to issue the certificate
+  issuerRef:
+    kind: ClusterIssuer
+    name: self-signed
+  # the hostname / subject alternative names for the certificate
+  dnsNames:
+    - authentication-service
+
+# metrics-server add-on required
+hpa:
+  enabled: false
+  maxReplicas: 5
+  # average total CPU usage per pod (1-100)
+  cpu: 80
+  # average memory usage per pod (100Mi-1Gi)
+  memory: 80
+  # average http requests per second per pod (k8s-prometheus-adapter)
+  requests:
+
+# Redis address in the format <host>:<port>
+cache: ""
+# Redis deployment
+redis:
+  enabled: false
+  repository: redis
+  tag: 6.0.8
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  enabled: false
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+# set container security context
+securityContext:
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: authentication-service.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+linkerd:
+  profile:
+    enabled: false
+
+# create Prometheus Operator monitor
+serviceMonitor:
+  enabled: false
+  interval: 15s
+  additionalLabels: {}
+
+resources:
+  limits:
+  requests:
+    cpu: 1m
+    memory: 16Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podAnnotations: {}
+
+deploymentStrategy:
+  maxSurge: 25%
+  maxUnavailable: 25%
+  type: RollingUpdate
+
+failures:
+  failurethreshold: 5
+  periodSeconds: 30
+  successThresholds: 1
+  timeoutSeconds: 10
