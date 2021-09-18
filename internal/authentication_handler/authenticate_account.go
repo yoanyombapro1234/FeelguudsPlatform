@@ -13,8 +13,8 @@ type AuthenticateAccountRequest struct {
 }
 
 type AuthenticateAccountResponse struct {
-	Token string `json:"token"`
-	Code  int    `json:"code"`
+	Token        string `json:"token"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 

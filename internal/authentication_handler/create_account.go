@@ -15,8 +15,8 @@ type CreateAccountRequest struct {
 }
 
 type CreateAccountResponse struct {
-	Id    uint32 `json:"id"`
-	Code  int    `json:"code"`
+	Id           uint32 `json:"id"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 

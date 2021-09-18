@@ -139,24 +139,24 @@ func (db *Db) UpdateAccountOnboardStatus(ctx context.Context, account *models.Me
 
 	switch account.AccountOnboardingDetails {
 	// not started onboarding
-	case models.OnboardingStatus_OnboardingNotStarted:
-		account.AccountOnboardingDetails = models.OnboardingStatus_FeelGuudOnboarding
-		account.AccountOnboardingState = models.MerchantAccountState_PendingOnboardingCompletion
+	case models.OnboardingStatusOnboardingNotStarted:
+		account.AccountOnboardingDetails = models.OnboardingStatusFeelGuudOnboarding
+		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
 		// completed onboarding with feelguud
-	case models.OnboardingStatus_FeelGuudOnboarding:
-		account.AccountOnboardingDetails = models.OnboardingStatus_StripeOnboarding
-		account.AccountOnboardingState = models.MerchantAccountState_PendingOnboardingCompletion
+	case models.OnboardingStatusFeelGuudOnboarding:
+		account.AccountOnboardingDetails = models.OnboardingStatusStripeOnboarding
+		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
 		// completed onboarding with stripe
-	case models.OnboardingStatus_StripeOnboarding:
-		account.AccountOnboardingDetails = models.OnboardingStatus_CatalogueOnboarding
-		account.AccountOnboardingState = models.MerchantAccountState_PendingOnboardingCompletion
+	case models.OnboardingStatusStripeOnboarding:
+		account.AccountOnboardingDetails = models.OnboardingStatusCatalogueOnboarding
+		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
 		// completed onboarding catalogue
-	case models.OnboardingStatus_CatalogueOnboarding:
-		account.AccountOnboardingDetails = models.OnboardingStatus_BCorpOnboarding
-		account.AccountOnboardingState = models.MerchantAccountState_ActiveAndOnboarded
+	case models.OnboardingStatusCatalogueOnboarding:
+		account.AccountOnboardingDetails = models.OnboardingStatusBCorpOnboarding
+		account.AccountOnboardingState = models.MerchantAccountStateActiveAndOnboarded
 	default:
-		account.AccountOnboardingDetails = models.OnboardingStatus_OnboardingNotStarted
-		account.AccountOnboardingState = models.MerchantAccountState_PendingOnboardingCompletion
+		account.AccountOnboardingDetails = models.OnboardingStatusOnboardingNotStarted
+		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
 	}
 
 	return nil

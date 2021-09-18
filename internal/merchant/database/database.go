@@ -63,7 +63,7 @@ func New(ctx context.Context, params ConnectionInitializationParams) (*Db,
 
 	logger := params.Logger
 
-	conn := helper.ConnectToDatabase(params.ConnectionParams, params.Logger, models.MerchantAccount{})
+	conn := helper.ConnectToDatabase(params.ConnectionParams, params.Logger, models.DatabaseModels()...)
 	if conn == nil {
 		logger.Fatal(service_errors.ErrFailedToConnectToDatabase.Error())
 	}

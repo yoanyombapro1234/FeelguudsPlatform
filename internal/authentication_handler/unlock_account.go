@@ -10,7 +10,7 @@ import (
 )
 
 type UnLockAccountResponse struct {
-	Code  int    `json:"code"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 
@@ -61,4 +61,3 @@ func (c *AuthenticationComponent) UnLockAccount(ctx context.Context, Id uint32) 
 	c.Logger.Info("Successfully unlocked user account", zap.Int("Id", int(Id)))
 	return nil
 }
-

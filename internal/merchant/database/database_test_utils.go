@@ -26,7 +26,7 @@ var (
 
 var (
 	testBusinessAccount = &models.MerchantAccount{
-		Id:                       0,
+		Id: 0,
 		Owners:                   nil,
 		BusinessName:             "",
 		BusinessEmail:            "",

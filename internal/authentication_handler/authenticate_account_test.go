@@ -12,9 +12,9 @@ import (
 
 var authCmp = InitializeMockAuthenticationComponent()
 
-func TestAuthenticateAccount(t *testing.T){
+func TestAuthenticateAccount(t *testing.T) {
 	randomstringLength := 15
-	var scenarios  = getAuthenticationTestScenarios(randomstringLength)
+	var scenarios = getAuthenticationTestScenarios(randomstringLength)
 
 	for _, data := range scenarios {
 		ctx := context.Background()
@@ -44,11 +44,11 @@ func TestAuthenticateAccount(t *testing.T){
 
 func TestAuthenticateAccountHandler(t *testing.T) {
 	randomstringLength := 15
-	var scenarios  = getAuthenticationTestScenarios(randomstringLength)
+	var scenarios = getAuthenticationTestScenarios(randomstringLength)
 
 	for _, data := range scenarios {
 		if data.shouldCreateUserAccountFirst {
-			resp, err, _ := CreateAccountInAuthSvc(data.email, data.password, authCmp ,t)
+			resp, err, _ := CreateAccountInAuthSvc(data.email, data.password, authCmp, t)
 			if (err != nil || resp.ErrorMessage != EMPTY) && !data.shouldErrorOccur {
 				var errMsg = EMPTY
 				if err != nil {

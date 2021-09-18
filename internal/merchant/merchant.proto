@@ -1,10 +1,7 @@
 syntax = "proto3";
 
-package merchant_service_proto_v1;
-
 option go_package = "/models";
 
-import "google/protobuf/descriptor.proto";
 import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
 // MerchantAccount represents a business account in the context of feelguuds
@@ -48,12 +45,12 @@ message MerchantAccount {
 	// id of the merchant account from the context of the auth service
 	uint64 authn_account_id = 18;
 	// merchant account onboarding step
-	OnboardingStatus account_onboarding_details = 19 [(gorm.field).has_one.preload = true];
+	OnboardingStatus account_onboarding_details = 19;
 	// merchant account state
-	MerchantAccountState account_onboarding_state = 20 [(gorm.field).has_one.preload = true];
+	MerchantAccountState account_onboarding_state = 20;
 	// type of merchant account
-	MerchantAccountType account_type = 21 [(gorm.field).has_one.preload = true];
-	bool isActive = 23;
+	MerchantAccountType account_type = 21;
+	bool isActive = 22;
 }
 
 // represents the type of merchant account

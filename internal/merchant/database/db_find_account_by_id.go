@@ -42,7 +42,6 @@ func (db *Db) findMerchantAccountByIdTxFunc(id uint64) func(ctx context.Context,
 		if err := tx.Where(&models.MerchantAccount{Id: id}).First(&account).Error; err != nil {
 			return false, service_errors.ErrAccountDoesNotExist
 		}
-
 		if ok := db.AccountActive(&account); !ok {
 			return false, service_errors.ErrAccountDoesNotExist
 		}

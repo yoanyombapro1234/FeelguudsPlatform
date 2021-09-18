@@ -18,8 +18,10 @@ require (
 	github.com/go-openapi/runtime v0.19.31
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gomodule/redigo v1.8.5
+	github.com/googleapis/googleapis v0.0.0-20210917223719-7c4eb0bdb785 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
@@ -31,7 +33,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/infobloxopen/go-trees v0.0.0-20180608122459-a1e500cde93c // indirect
-	github.com/infobloxopen/protoc-gen-gorm v1.0.0 // indirect
+	github.com/infobloxopen/protoc-gen-gorm v1.0.1 // indirect
 	github.com/infobloxopen/themis v0.0.0-20180709114455-d62bb103665c // indirect
 	github.com/itimofeev/go-saga v0.1.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect

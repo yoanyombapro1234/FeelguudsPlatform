@@ -7,7 +7,6 @@ import (
 	"github.com/itimofeev/go-saga"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"go.uber.org/zap"
-
 )
 
 type SagaCoordinator struct {

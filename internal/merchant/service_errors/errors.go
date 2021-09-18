@@ -34,8 +34,8 @@ type ServiceError struct {
 	HTTPStatusCode int       `json:"status,omitempty"`
 	Msg            string    `json:"message"`
 	Param          string    `json:"param,omitempty"`
-	RequestID string    `json:"request_id,omitempty"`
-	Type      ErrorType `json:"type"`
+	RequestID      string    `json:"request_id,omitempty"`
+	Type           ErrorType `json:"type"`
 }
 
 // NewServiceError creates a new instance of the service error

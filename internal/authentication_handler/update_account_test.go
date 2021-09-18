@@ -12,7 +12,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 )
 
-func TestUpdateAccount(t *testing.T){
+func TestUpdateAccount(t *testing.T) {
 	randomstringLength := 15
 	var scenarios = getUpdateAccountTestScenarios(randomstringLength)
 	ctx := context.Background()
@@ -74,27 +74,27 @@ func TestUpdateAccountHandler(t *testing.T) {
 }
 
 type UpdateAccountHandlerTestMetadata struct {
-	email                        string
-	updatedEmail string
-	responseCode                 int
-	shouldErrorOccur             bool
+	email               string
+	updatedEmail        string
+	responseCode        int
+	shouldErrorOccur    bool
 	shouldCreateAccount bool
 }
 
 // getUpdateAccountTestScenarios returns a set of test scenarios for the update account test case
 func getUpdateAccountTestScenarios(randomstringLength int) []UpdateAccountHandlerTestMetadata {
-	return []UpdateAccountHandlerTestMetadata {
+	return []UpdateAccountHandlerTestMetadata{
 		// test success scenario. update an existing account
 		{
-			helper.GenerateRandomString(randomstringLength)+"@gmail.com",
-			helper.GenerateRandomString(randomstringLength)+"@gmail.com",
+			helper.GenerateRandomString(randomstringLength) + "@gmail.com",
+			helper.GenerateRandomString(randomstringLength) + "@gmail.com",
 			http.StatusOK,
 			false,
 			true,
 		},
 		// test failure scenario. empty input parameters
 		{
-			helper.GenerateRandomString(randomstringLength)+"@gmail.com",
+			helper.GenerateRandomString(randomstringLength) + "@gmail.com",
 			EMPTY,
 			http.StatusBadRequest,
 			true,
@@ -109,7 +109,7 @@ func UpdateEmailInAuthSvc(accountId uint32, email string, cmp *AuthenticationCom
 	var result UpdateEmailResponse
 
 	reqBody := UpdateEmailRequest{
-		Email:    email,
+		Email: email,
 	}
 
 	body, err := helper.CreateRequestBody(reqBody)

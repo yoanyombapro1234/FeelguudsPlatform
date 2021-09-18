@@ -12,7 +12,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 )
 
-func TestUnLockAccount(t *testing.T){
+func TestUnLockAccount(t *testing.T) {
 	randomstringLength := 15
 	var scenarios = getLockAccountTestScenarios(randomstringLength)
 	ctx := context.Background()
@@ -100,12 +100,12 @@ func TestUnLockAccountHandler(t *testing.T) {
 }
 
 type UnLockAccountHandlerTestMetadata struct {
-	email                        string
-	password                     string
-	responseCode                 int
-	shouldErrorOccur             bool
-	shouldCreateAccountFirst     bool
-	doubleUnLockScenario          bool
+	email                    string
+	password                 string
+	responseCode             int
+	shouldErrorOccur         bool
+	shouldCreateAccountFirst bool
+	doubleUnLockScenario     bool
 }
 
 // getUnLockAccountTestScenarios returns a set of test scenarios for the unlock account test case
@@ -113,7 +113,7 @@ func getUnLockAccountTestScenarios(randomstringLength int) []UnLockAccountHandle
 	email := helper.GenerateRandomString(randomstringLength)
 	password := helper.GenerateRandomString(randomstringLength)
 
-	return []UnLockAccountHandlerTestMetadata {
+	return []UnLockAccountHandlerTestMetadata{
 		// test success scenario. create an account first then successfully get it
 		{
 			email,
@@ -150,12 +150,11 @@ func UnLockAccountInAuthSvc(accountId uint32, cmp *AuthenticationComponent,
 	var result UnLockAccountResponse
 
 	id := fmt.Sprint(accountId)
-	req, err := http.NewRequest("POST", "//v1/auth/account/unlock/" + id, nil)
+	req, err := http.NewRequest("POST", "//v1/auth/account/unlock/"+id, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	req = mux.SetURLVars(req, map[string]string{"id": id})
-
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(cmp.UnLockAccountHandler)

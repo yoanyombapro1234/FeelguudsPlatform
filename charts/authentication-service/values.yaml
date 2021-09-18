@@ -1,14 +1,23 @@
-# Production values for podinfo.
-# Includes Redis deployment and memory limits.
+# Default values for the authentication service.
+nameOverride: authentication-service
+fullnameOverride:
+replicaCount: 2
+progressDeadlineInSeconds: 600
+revisionHistoryLimit: 3
 
-replicaCount: 1
+dnsPolicy: ClusterFirst
+restartPolicy: Always
+schedulerName: default-scheduler
+terminationGracePeriodSeconds: 30
+
 logLevel: info
+host: #0.0.0.0
 backend: #http://backend-podinfo:9898/echo
 backends: []
 
 image:
-  repository: ghcr.io/stefanprodan/podinfo
-  tag: 6.0.0
+  repository: keratin/authn-server
+  tag: latest
   pullPolicy: IfNotPresent
 
 ui:
@@ -30,12 +39,13 @@ service:
   enabled: true
   annotations: {}
   type: ClusterIP
-  metricsPort: 9797
-  httpPort: 9898
-  externalPort: 9898
-  grpcPort: 9999
-  grpcService: podinfo
+  internalPort: 8000
+  externalPort: 3000
   nodePort: 31198
+  # the port used to bind the external port to the host
+  # NOTE: requires privileged container with NET_BIND_SERVICE capability -- this is useful for testing
+  # in local clusters such as kind without port forwarding
+  hostPort:
 
 # enable h2c protocol (non-TLS version of HTTP/2)
 h2c:
@@ -49,7 +59,7 @@ tls:
   # the path where the certificate key pair will be mounted
   certPath: /data/cert
   # the port used to host the tls endpoint on the service
-  port: 9899
+  port:
   # the port used to bind the tls port to the host
   # NOTE: requires privileged container with NET_BIND_SERVICE capability -- this is useful for testing
   # in local clusters such as kind without port forwarding
@@ -64,16 +74,16 @@ certificate:
     name: self-signed
   # the hostname / subject alternative names for the certificate
   dnsNames:
-    - podinfo
+    - authentication-service
 
 # metrics-server add-on required
 hpa:
-  enabled: true
+  enabled: false
   maxReplicas: 5
   # average total CPU usage per pod (1-100)
-  cpu: 99
+  cpu: 80
   # average memory usage per pod (100Mi-1Gi)
-  memory:
+  memory: 80
   # average http requests per second per pod (k8s-prometheus-adapter)
   requests:
 
@@ -81,7 +91,7 @@ hpa:
 cache: ""
 # Redis deployment
 redis:
-  enabled: true
+  enabled: false
   repository: redis
   tag: 6.0.8
 
@@ -93,16 +103,16 @@ serviceAccount:
   name:
 
 # set container security context
-securityContext: {}
+securityContext:
 
 ingress:
   enabled: false
   className: ""
   annotations: {}
     # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: podinfo.local
+    - host: authentication-service.local
       paths:
         - path: /
           pathType: ImplementationSpecific
@@ -123,10 +133,9 @@ serviceMonitor:
 
 resources:
   limits:
-    memory: 256Mi
   requests:
-    cpu: 100m
-    memory: 64Mi
+    cpu: 1m
+    memory: 16Mi
 
 nodeSelector: {}
 
@@ -135,3 +144,14 @@ tolerations: []
 affinity: {}
 
 podAnnotations: {}
+
+deploymentStrategy:
+  maxSurge: 25%
+  maxUnavailable: 25%
+  type: RollingUpdate
+
+failures:
+  failurethreshold: 5
+  periodSeconds: 30
+  successThresholds: 1
+  timeoutSeconds: 10

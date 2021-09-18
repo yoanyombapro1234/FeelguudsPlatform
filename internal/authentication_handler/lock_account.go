@@ -10,7 +10,7 @@ import (
 )
 
 type LockAccountResponse struct {
-	Code  int    `json:"code"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 

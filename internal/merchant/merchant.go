@@ -22,7 +22,7 @@ type MerchantServiceInterface interface {
 
 type MerchantAccountComponent struct {
 	Logger *zap.Logger
-	Db   *database.Db
+	Db     *database.Db
 }
 
 func NewMerchantAccountComponent(params *helper.DatabaseConnectionParams, log *zap.Logger) *MerchantAccountComponent {
@@ -45,7 +45,7 @@ func NewMerchantAccountComponent(params *helper.DatabaseConnectionParams, log *z
 
 	return &MerchantAccountComponent{
 		Logger: log,
-		Db:   dbInstance,
+		Db:     dbInstance,
 	}
 }
 

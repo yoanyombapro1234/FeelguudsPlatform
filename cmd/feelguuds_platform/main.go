@@ -107,7 +107,8 @@ func main() {
 	versionFlag := fs.BoolP("ENABLE_VERSION_FROM_FILE", "v", false, "get version number")
 	// parse flags
 	ParseFlags(fs, versionFlag)
-	BindFlagsToEnvironmentVariables(fs)
+	// BindFlagsToEnvironmentVariables(fs)
+	LoadEnvVariables(fs)
 	LoadServiceConfigsFromFile()
 
 	serviceName := viper.GetString("SERVICE_NAME")
@@ -116,12 +117,6 @@ func main() {
 	logInstance := core_logging.New(logLevel)
 	defer logInstance.ConfigureLogger()
 	log := logInstance.Logger
-
-	// initialize authentication's account component's dependencies
-	var authenticationComponent *authentication_handler.AuthenticationComponent
-	{
-		authenticationComponent = InitializeAuthenticationComponent(log, serviceName)
-	}
 
 	var merchantAccountComponent *merchant.MerchantAccountComponent
 	// initialize merchant account component's dependencies
@@ -140,6 +135,12 @@ func main() {
 		}, log)
 
 		log.Info("successfully initialized merchant account component")
+	}
+
+	// initialize authentication's account component's dependencies
+	var authenticationComponent *authentication_handler.AuthenticationComponent
+	{
+		authenticationComponent = InitializeAuthenticationComponent(log, serviceName)
 	}
 
 	// start stress tests if any
@@ -191,6 +192,7 @@ func InitializeAuthenticationComponent(log *zap.Logger, serviceName string) *aut
 	authPassword := viper.GetString("AUTHN_PASSWORD")
 	audience := viper.GetString("AUTHN_DOMAINS")
 	privateURL := viper.GetString("PRIVATE_BASE_URL") + ":" + viper.GetString("AUTHN_INTERNAL_PORT")
+
 	origin := viper.GetString("AUTHN_ORIGIN")
 	issuer := viper.GetString("AUTHN_ISSUER_BASE_URL") + ":" + viper.GetString("AUTHN_EXTERNAL_PORT")
 	httpTimeout := 300 * time.Millisecond
@@ -249,19 +251,27 @@ func ValidatePorts(fs *pflag.FlagSet) {
 	}
 }
 
-// BindFlagsToEnvironmentVariables binds a set of flags to environment variables
-func BindFlagsToEnvironmentVariables(fs *pflag.FlagSet) {
+// LoadEnvVariables binds a set of flags to and loads environment variables
+func LoadEnvVariables(fs *pflag.FlagSet) {
+	viper.AddConfigPath("/Users/yoanyomba/go/src/github.com/yoanyombapro1234/FeelguudsPlatform")
 	viper.BindPFlags(fs)
 	viper.RegisterAlias("BACKEND_SERVICE_URLS", "backend-url")
+	viper.SetConfigName("service")
+	viper.SetConfigType("env")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	hostname, _ := os.Hostname()
 	viper.SetDefault("JWT_SECRET", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
 	viper.SetDefault("UI_LOGO", "https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif")
 	viper.Set("HOSTNAME", hostname)
 	viper.Set("VERSION", version.VERSION)
 	viper.Set("REVISION", version.REVISION)
-	viper.SetEnvPrefix("SERVICE")
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
 }
 
 // ParseFlags parses a set of defined flags

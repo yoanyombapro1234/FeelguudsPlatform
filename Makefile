@@ -149,7 +149,7 @@ start-local-deps:
 
 # start docker containers with logs running in the foreground
 .PHONY: start-local-deps-live
-start-local-deps-live:
+start-local-live:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \
@@ -236,3 +236,15 @@ kube-deploy: start-minikube
 	minikube dashboard
 
 # kubectl convert -f ./my-deployment.yaml --output-version apps/v1
+gen:
+	@echo "setting up grpc service schema definition via protobuf"
+	protoc -I/usr/local/include \
+		   -I. \
+		   -I$(GOPATH)/src \
+		   -I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm \
+		   -I=$(GOPATH)/src/github.com/infobloxopen/atlas-app-toolkit \
+		   -I=$(GOPATH)/src/github.com/lyft/protoc-gen-validate/validate/validate.proto \
+		   -I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm/options \
+		   --proto_path=${GOPATH}/src/github.com/gogo/protobuf/protobuf \
+		   --govalidators_out=./internal/merchant/ \
+		   --go_out="plugins=grpc:./internal/merchant" --gorm_out="engine=postgres:./internal/merchant/" ./internal/merchant/merchant.proto

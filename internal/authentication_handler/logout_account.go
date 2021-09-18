@@ -8,7 +8,7 @@ import (
 )
 
 type LogoutAccountResponse struct {
-	Code  int    `json:"code"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 

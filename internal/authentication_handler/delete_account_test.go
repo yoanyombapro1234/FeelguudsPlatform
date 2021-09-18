@@ -12,7 +12,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 )
 
-func TestDeleteAccount(t *testing.T){
+func TestDeleteAccount(t *testing.T) {
 	randomstringLength := 15
 	var scenarios = getDeleteAccountTestScenarios(randomstringLength)
 	ctx := context.Background()
@@ -74,10 +74,10 @@ func TestDeleteAccountHandler(t *testing.T) {
 }
 
 type DeleteAccountHandlerTestMetadata struct {
-	email                        string
-	password                     string
-	responseCode                 int
-	shouldErrorOccur             bool
+	email                    string
+	password                 string
+	responseCode             int
+	shouldErrorOccur         bool
 	shouldCreateAccountFirst bool
 }
 
@@ -86,7 +86,7 @@ func getDeleteAccountTestScenarios(randomstringLength int) []DeleteAccountHandle
 	email := helper.GenerateRandomString(randomstringLength)
 	password := helper.GenerateRandomString(randomstringLength)
 
-	return []DeleteAccountHandlerTestMetadata {
+	return []DeleteAccountHandlerTestMetadata{
 		// test success scenario. create an account first then successfully delete it
 		{
 			email,
@@ -112,12 +112,11 @@ func DeleteAccountInAuthSvc(accountId uint32, cmp *AuthenticationComponent,
 	var result DeleteAccountResponse
 
 	id := fmt.Sprint(accountId)
-	req, err := http.NewRequest("DELETE", "//v1/auth/account/login/" + id, nil)
+	req, err := http.NewRequest("DELETE", "//v1/auth/account/login/"+id, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	req = mux.SetURLVars(req, map[string]string{"id": id})
-
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(cmp.DeleteAccountHandler)

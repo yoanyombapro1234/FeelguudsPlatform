@@ -10,7 +10,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 )
 
-func TestCreateAccount(t *testing.T){
+func TestCreateAccount(t *testing.T) {
 	randomstringLength := 15
 	var scenarios = getCreateAccountTestScenarios(randomstringLength)
 	ctx := context.Background()
@@ -62,10 +62,10 @@ func TestCreateAccountHandler(t *testing.T) {
 }
 
 type CreateAccountHandlerTestMetadata struct {
-	email                        string
-	password                     string
-	responseCode                 int
-	shouldErrorOccur             bool
+	email            string
+	password         string
+	responseCode     int
+	shouldErrorOccur bool
 }
 
 // getCreateAccountTestScenarios returns a set of test scenarios for the create account test case
@@ -73,7 +73,7 @@ func getCreateAccountTestScenarios(randomstringLength int) []CreateAccountHandle
 	email := helper.GenerateRandomString(randomstringLength)
 	password := helper.GenerateRandomString(randomstringLength)
 
-	return []CreateAccountHandlerTestMetadata {
+	return []CreateAccountHandlerTestMetadata{
 		// test success scenario. create an account from scratch
 		{
 			email,

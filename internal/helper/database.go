@@ -8,11 +8,11 @@ import (
 )
 
 type DatabaseConnectionParams struct {
-	Host string
-	User string
-	Password string
+	Host         string
+	User         string
+	Password     string
 	DatabaseName string
-	Port int
+	Port         int
 }
 
 // ConnectToDatabase establish and connects to a database instance
