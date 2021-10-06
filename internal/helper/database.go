@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -19,24 +20,42 @@ type DatabaseConnectionParams struct {
 }
 
 // ConnectToDatabase establish and connects to a database instance
-func ConnectToDatabase(params *DatabaseConnectionParams, log *zap.Logger, models ...interface{}) *core_database.DatabaseConn {
-	connectionString := configureConnectionString(params.Host, params.User, params.Password, params.DatabaseName, params.Port)
+func ConnectToDatabase(ctx context.Context, params *DatabaseConnectionParams, log *zap.Logger, models ...interface{}) (*core_database.DatabaseConn, error) {
+	var dbConn *core_database.DatabaseConn
+	connectionString := configureConnectionString(ctx, params.Host, params.User, params.Password, params.DatabaseName, params.Port)
 
-	databaseConnectionObject := core_database.NewDatabaseConn(connectionString, "postgres")
-	if databaseConnectionObject == nil {
-		log.Fatal("failed to connect to merchant component database")
+	if dbConn = core_database.NewDatabaseConn(connectionString, "postgres"); dbConn == nil {
+		return nil, errors.New("failed to connect to merchant component database")
 	}
 
-	configureDatabaseConnection(databaseConnectionObject)
-	if err := migrateSchemas(databaseConnectionObject, log, models...); err != nil {
-		log.Fatal("failed to perform database migration")
+	if err := pingDatabase(ctx, dbConn); err != nil {
+		return nil, err
 	}
 
-	return databaseConnectionObject
+	if err := migrateSchemas(ctx, dbConn, log, models...); err != nil {
+		return nil, err
+	}
+
+	return dbConn, nil
+}
+
+// pingDatabase pings a database node via a connection object
+func pingDatabase(ctx context.Context, dbConn *core_database.DatabaseConn) error {
+	db, err := dbConn.Engine.DB()
+	if err != nil {
+		return err
+	}
+
+	if err := db.Ping(); err != nil {
+		return err
+	}
+
+	setConnectionConfigs(ctx, dbConn)
+	return nil
 }
 
 // configureConnectionString constructs database connection string from a set of params
-func configureConnectionString(host, user, password, dbname string, port int) string {
+func configureConnectionString(ctx context.Context, host, user, password, dbname string, port int) string {
 	connectionString := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -44,7 +63,7 @@ func configureConnectionString(host, user, password, dbname string, port int) st
 }
 
 // configureDatabaseConnection configures a database connection
-func configureDatabaseConnection(dbConn *core_database.DatabaseConn) {
+func setConnectionConfigs(ctx context.Context, dbConn *core_database.DatabaseConn) {
 	dbConn.Engine.FullSaveAssociations = true
 	dbConn.Engine.SkipDefaultTransaction = false
 	dbConn.Engine.PrepareStmt = true
@@ -54,7 +73,7 @@ func configureDatabaseConnection(dbConn *core_database.DatabaseConn) {
 
 // migrateSchemas creates or updates a given set of model based on a schema
 // if it does not exist or migrates the model schemas to the latest version
-func migrateSchemas(db *core_database.DatabaseConn, log *zap.Logger, models ...interface{}) error {
+func migrateSchemas(ctx context.Context, db *core_database.DatabaseConn, log *zap.Logger, models ...interface{}) error {
 	var engine *gorm.DB
 	if db == nil {
 		return service_errors.ErrInvalidInputArguments

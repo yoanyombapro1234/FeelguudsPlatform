@@ -18,13 +18,13 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/infobloxopen/atlas-app-toolkit v0.24.1-0.20210416193901-4c7518b07e08
+	github.com/infobloxopen/atlas-app-toolkit v1.1.1
 	github.com/infobloxopen/protoc-gen-gorm v1.0.1
 	github.com/itimofeev/go-saga v0.1.0
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/jinzhu/gorm v1.9.16
 	github.com/labstack/gommon v0.3.0
-	github.com/lib/pq v1.10.2
+	github.com/lib/pq v1.10.3
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mwitkow/go-proto-validators v0.3.2
@@ -43,17 +43,19 @@ require (
 	github.com/swaggo/swag v1.7.1
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/wailsapp/wails v1.16.7
+	github.com/yoanyombapro1234/FeelGuuds_Core/core v0.0.0-20210825234059-68dcdef2198a // indirect
 	github.com/yoanyombapro1234/FeelGuuds_Core/core/core-auth-sdk v0.0.0-20210825234059-68dcdef2198a
 	github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database v0.0.0-20210825234059-68dcdef2198a
 	github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging v0.0.0-20210825234059-68dcdef2198a
-	go.uber.org/zap v1.19.0
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
-	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
-	golang.org/x/sys v0.0.0-20210906170528-6f6e22806c34 // indirect
+	go.uber.org/zap v1.19.1
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/net v0.0.0-20211005215030-d2e5035098b3
+	golang.org/x/sys v0.0.0-20211004093028-2c5d950f24ef // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
-	google.golang.org/grpc v1.40.0
+	google.golang.org/genproto v0.0.0-20211005153810-c76a74d43a8e
+	google.golang.org/grpc v1.41.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/ini.v1 v1.62.1 // indirect
-	gorm.io/gorm v1.21.14
+	gorm.io/driver/postgres v1.1.2 // indirect
+	gorm.io/gorm v1.21.15
 )

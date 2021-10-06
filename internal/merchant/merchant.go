@@ -39,7 +39,7 @@ func NewMerchantAccountComponent(params *helper.DatabaseConnectionParams, log *z
 		RetrySleepInterval:     10,
 	})
 
-	if err == nil {
+	if err != nil {
 		log.Fatal(err.Error())
 	}
 

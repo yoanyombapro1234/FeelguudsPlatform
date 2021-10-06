@@ -2,7 +2,8 @@ package database
 
 import (
 	"context"
-	"log"
+	"errors"
+	"fmt"
 	"time"
 
 	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
@@ -57,16 +58,17 @@ func New(ctx context.Context, params ConnectionInitializationParams) (*Db,
 	error) {
 	// TODO: generate a span for the database connection attempt
 	if params.ConnectionParams == nil || params.Logger == nil {
-		log.Fatal(service_errors.ErrInvalidInputArguments)
+		return nil, errors.New(fmt.Sprintf("%s - invalid connection params objects or logger", service_errors.ErrInvalidInputArguments))
 	}
 
 	logger := params.Logger
-
 	databaseModels := models.DatabaseModels()
-	conn := helper.ConnectToDatabase(params.ConnectionParams, params.Logger, databaseModels...)
-	if conn == nil {
-		logger.Fatal(service_errors.ErrFailedToConnectToDatabase.Error())
+
+	conn, err := helper.ConnectToDatabase(ctx, params.ConnectionParams, params.Logger, databaseModels...)
+	if err != nil {
+		return nil, err
 	}
+
 	logger.Info("Successfully connected to the database")
 
 	return &Db{

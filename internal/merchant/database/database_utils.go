@@ -138,25 +138,25 @@ func (db *Db) UpdateAccountOnboardStatus(ctx context.Context, account *models.Me
 	}
 
 	switch account.AccountOnboardingDetails {
-		// not started onboarding
-		case int32(models.OnboardingStatus_OnboardingNotStarted):
-			account.AccountOnboardingDetails = int32(models.OnboardingStatus_FeelGuudOnboarding)
-			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
-			// completed onboarding with feelguud
-		case int32(models.OnboardingStatus_FeelGuudOnboarding):
-			account.AccountOnboardingDetails = int32(models.OnboardingStatus_StripeOnboarding)
-			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
-			// completed onboarding with stripe
-		case int32(models.OnboardingStatus_StripeOnboarding):
-			account.AccountOnboardingDetails = int32(models.OnboardingStatus_CatalogueOnboarding)
-			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
-			// completed onboarding catalogue
-		case int32(models.OnboardingStatus_CatalogueOnboarding):
-			account.AccountOnboardingDetails = int32(models.OnboardingStatus_BCorpOnboarding)
-			account.AccountOnboardingState = int32(models.MerchantAccountState_ActiveAndOnboarded)
-		default:
-			account.AccountOnboardingDetails = int32(models.OnboardingStatus_OnboardingNotStarted)
-			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
+	// not started onboarding
+	case int32(models.OnboardingStatus_OnboardingNotStarted):
+		account.AccountOnboardingDetails = int32(models.OnboardingStatus_FeelGuudOnboarding)
+		account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
+		// completed onboarding with feelguud
+	case int32(models.OnboardingStatus_FeelGuudOnboarding):
+		account.AccountOnboardingDetails = int32(models.OnboardingStatus_StripeOnboarding)
+		account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
+		// completed onboarding with stripe
+	case int32(models.OnboardingStatus_StripeOnboarding):
+		account.AccountOnboardingDetails = int32(models.OnboardingStatus_CatalogueOnboarding)
+		account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
+		// completed onboarding catalogue
+	case int32(models.OnboardingStatus_CatalogueOnboarding):
+		account.AccountOnboardingDetails = int32(models.OnboardingStatus_BCorpOnboarding)
+		account.AccountOnboardingState = int32(models.MerchantAccountState_ActiveAndOnboarded)
+	default:
+		account.AccountOnboardingDetails = int32(models.OnboardingStatus_OnboardingNotStarted)
+		account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
 	}
 
 	return nil

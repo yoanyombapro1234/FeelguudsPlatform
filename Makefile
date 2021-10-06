@@ -136,8 +136,8 @@ ci-setup-deps: ci-setup-authn-deps
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
 # start docker containers in the backgound
-.PHONY: start-local-deps
-start-local-deps:
+.PHONY: start-local
+start-local:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \

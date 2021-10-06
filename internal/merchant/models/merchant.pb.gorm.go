@@ -3,13 +3,12 @@ package models
 import (
 	context "context"
 	fmt "fmt"
-	strings "strings"
-
 	gorm1 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 	errors "github.com/infobloxopen/protoc-gen-gorm/errors"
 	gorm "github.com/jinzhu/gorm"
 	pq "github.com/lib/pq"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
+	strings "strings"
 )
 
 type MerchantAccountORM struct {
@@ -24,7 +23,7 @@ type MerchantAccountORM struct {
 	EmployerId               uint64
 	EstimateAnnualRevenue    string
 	Headline                 string
-	Id                       uint64 `gorm:"type:serial;primary_key;auto_increment"`
+	Id                       uint64 `gorm:"type:integer;primary_key;auto_increment"`
 	IsActive                 bool
 	ItemsOrServicesSold      []*ItemSoldORM `gorm:"foreignkey:MerchantAccountId;association_foreignkey:Id;preload:true"`
 	Owners                   []*OwnerORM    `gorm:"foreignkey:MerchantAccountId;association_foreignkey:Id;preload:true"`
@@ -224,7 +223,7 @@ type MerchantAccountWithAfterToPB interface {
 }
 
 type SettingsORM struct {
-	Id                uint32 `gorm:"type:serial;primary_key;auto_increment"`
+	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
 	MerchantAccountId *uint64
 }
 
@@ -295,7 +294,7 @@ type SettingsWithAfterToPB interface {
 }
 
 type ItemSoldORM struct {
-	Id                uint64 `gorm:"type:serial;primary_key;auto_increment"`
+	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
 	MerchantAccountId *uint64
 	Type              int32
 }
@@ -367,7 +366,7 @@ type ItemSoldWithAfterToPB interface {
 type AddressORM struct {
 	Address           string
 	City              string
-	Id                uint64 `gorm:"type:serial;primary_key;auto_increment"`
+	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
 	Lattitude         string
 	Longitude         string
 	MerchantAccountId *uint64
@@ -456,7 +455,7 @@ type OwnerORM struct {
 	Country           string
 	Email             string
 	FirstName         string
-	Id                uint64 `gorm:"type:serial;primary_key;auto_increment"`
+	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
 	LastName          string
 	MerchantAccountId *uint64
 }
@@ -532,7 +531,7 @@ type OwnerWithAfterToPB interface {
 }
 
 type TagsORM struct {
-	Id                uint64 `gorm:"type:serial;primary_key;auto_increment"`
+	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
 	MerchantAccountId *uint64
 	Metadata          pq.StringArray `gorm:"type:text[]"`
 	TagDescription    string
@@ -1240,7 +1239,7 @@ func DefaultDeleteSettingsSet(ctx context.Context, in []*Settings, db *gorm.DB) 
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []uint32{}
+	keys := []uint64{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
