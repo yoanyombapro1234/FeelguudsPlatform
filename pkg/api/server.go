@@ -67,8 +67,8 @@ type Config struct {
 	H2C                       bool          `mapstructure:"H2C"`
 	RandomDelay               bool          `mapstructure:"ENABLE_RANDOM_DELAY"`
 	RandomDelayUnit           string        `mapstructure:"RANDOM_DELAY_UNIT"`
-	RandomDelayMin            int           `mapstructure:"RANDOM_DELAY_MIN_IN_MS"`
-	RandomDelayMax            int           `mapstructure:"RANDOM_DELAY_MAX_IN_MS"`
+	RandomDelayMin            int           `mapstructure:"RANDOM_DELAY_MIN"`
+	RandomDelayMax            int           `mapstructure:"RANDOM_DELAY_MAX"`
 	RandomError               bool          `mapstructure:"ENABLE_RANDOM_ERROR"`
 	Unhealthy                 bool          `mapstructure:"SET_SERVICE_UNHEALTHY"`
 	Unready                   bool          `mapstructure:"SET_SERVICE_UNREADY"`

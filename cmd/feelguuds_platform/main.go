@@ -56,8 +56,8 @@ func main() {
 	fs.Bool("ENABLE_H2C", false, "allow upgrading to H2C")
 	fs.Bool("ENABLE_RANDOM_DELAY", false, "between 0 and 5 seconds random delay by default")
 	fs.String("RANDOM_DELAY_UNIT", "s", "either s(seconds) or ms(milliseconds")
-	fs.Int("RANDOM_DELAY_MIN_IN_MS", 0, "min for random delay: 0 by default")
-	fs.Int("RANDOM_DELAY_MAX_IN_MS", 5, "max for random delay: 5 by default")
+	fs.Int("RANDOM_DELAY_MIN", 0, "min for random delay: 0 by default")
+	fs.Int("RANDOM_DELAY_MAX", 5, "max for random delay: 5 by default")
 	fs.Bool("ENABLE_RANDOM_RANDOM_ERROR", false, "1/3 chances of a random response error")
 	fs.Bool("SET_SERVICE_UNHEALTHY", false, "when set, healthy state is never reached")
 	fs.Bool("SET_SERVICE_UNREADY", false, "when set, ready state is never reached")
@@ -81,8 +81,8 @@ func main() {
 	fs.Bool("ENABLE_AUTHN_PRIVATE_INTEGRATION", true, "enables communication with authentication service")
 	// retry specific configurations
 	fs.Int("HTTP_MAX_RETRIES", 5, "max retries to perform on failed http calls")
-	fs.Duration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS", 5*time.Millisecond, "minimum time to wait between failed calls for retry")
-	fs.Duration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS", 15*time.Millisecond, "maximum time to wait between failed calls for retry")
+	fs.Duration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS", 50*time.Millisecond, "minimum time to wait between failed calls for retry")
+	fs.Duration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS", 100*time.Millisecond, "maximum time to wait between failed calls for retry")
 	fs.Duration("HTTP_REQUEST_TIMEOUT_IN_MS", 300*time.Millisecond, "time until a request is seen as timing out")
 	// logging specific configurations
 	fs.String("SERVICE_NAME", "FEELGUUDS_PLATFORM", "service name")
@@ -208,9 +208,9 @@ func InitializeAuthenticationComponent(log *zap.Logger, serviceName string) *aut
 		},
 		AuthConnectionConfig: &core_auth_sdk.RetryConfig{
 			MaxRetries:       viper.GetInt("HTTP_MAX_RETRIES"),
-			MinRetryWaitTime: viper.GetDuration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS"),
-			MaxRetryWaitTime: viper.GetDuration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS"),
-			RequestTimeout:   viper.GetDuration("HTTP_REQUEST_TIMEOUT_IN_MS"),
+			MinRetryWaitTime: 150 * time.Millisecond, // viper.GetDuration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS"),
+			MaxRetryWaitTime: 300 * time.Millisecond, //viper.GetDuration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS"),
+			RequestTimeout:   500 * time.Millisecond, // viper.GetDuration("HTTP_REQUEST_TIMEOUT_IN_MS"),
 		},
 		Logger: log,
 		Origin: origin,
@@ -220,7 +220,7 @@ func InitializeAuthenticationComponent(log *zap.Logger, serviceName string) *aut
 // ValidateDelayOptions validates random delay options
 func ValidateDelayOptions(log *zap.Logger) {
 	// validate random delay options
-	if viper.GetInt("RANDOM_DELAY_MAX_IN_MS") < viper.GetInt("RANDOM_DELAY_MIN_IN_MS") {
+	if viper.GetInt("RANDOM_DELAY_MAX") < viper.GetInt("RANDOM_DELAY_MIN") {
 		err := errors.New("`--random-delay-max` should be greater than `--random-delay-min`")
 		log.Fatal("please fix configurations", zap.Error(err))
 	}
