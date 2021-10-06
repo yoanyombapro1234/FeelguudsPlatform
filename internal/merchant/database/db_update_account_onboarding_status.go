@@ -14,7 +14,7 @@ import (
 // the assumption from the context of the database is that all account should have the proper set of parameters in order prior
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
 func (db *Db) UpdateAccountOnboardingStatus(ctx context.Context, id uint64, state models.MerchantAccountState) (
-	*models.MerchantAccount, error) {
+	*models.MerchantAccountORM, error) {
 	const operationType = "update_business_account_onboarding_status_db_op"
 	db.Logger.Info(fmt.Sprintf("update business account onboarding status database operation. id: %d", id))
 
@@ -24,7 +24,7 @@ func (db *Db) UpdateAccountOnboardingStatus(ctx context.Context, id uint64, stat
 		return nil, err
 	}
 
-	createdAccount := result.(*models.MerchantAccount)
+	createdAccount := result.(*models.MerchantAccountORM)
 	return createdAccount, nil
 }
 
@@ -39,7 +39,7 @@ func (db *Db) updateMerchantAccountOnboardingStatusTxFunc(id uint64, status mode
 			return nil, err
 		}
 
-		acct.AccountOnboardingState = status
+		acct.AccountOnboardingState = int32(status)
 		if err := db.SaveAccountRecord(tx, acct); err != nil {
 			return nil, err
 		}

@@ -1,10 +1,13 @@
 package helper
 
 import (
+	"errors"
 	"fmt"
 
 	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type DatabaseConnectionParams struct {
@@ -52,10 +55,21 @@ func configureDatabaseConnection(dbConn *core_database.DatabaseConn) {
 // migrateSchemas creates or updates a given set of model based on a schema
 // if it does not exist or migrates the model schemas to the latest version
 func migrateSchemas(db *core_database.DatabaseConn, log *zap.Logger, models ...interface{}) error {
-	if err := db.Engine.AutoMigrate(models...); err != nil {
-		// TODO: emit metric
-		log.Error("failed to perform database migrations")
-		return err
+	var engine *gorm.DB
+	if db == nil {
+		return service_errors.ErrInvalidInputArguments
+	}
+
+	if engine = db.Engine; engine == nil {
+		return errors.New("invalid gorm database engine object")
+	}
+
+	if len(models) > 0 {
+		if err := engine.AutoMigrate(models...); err != nil {
+			// TODO: emit metric
+			log.Error(err.Error())
+			return err
+		}
 	}
 
 	return nil

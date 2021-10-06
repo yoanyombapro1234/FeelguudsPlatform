@@ -13,7 +13,7 @@ import (
 //
 // the assumption from the context of the database is that all account should have the proper set of parameters in order prior
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
-func (db *Db) GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccount, error) {
+func (db *Db) GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccountORM, error) {
 	const operation = "get_business_accounts_db_op"
 	db.Logger.Info(fmt.Sprintf("get business account sdatabase operation."))
 
@@ -23,7 +23,7 @@ func (db *Db) GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*mod
 		return nil, err
 	}
 
-	accounts := result.([]*models.MerchantAccount)
+	accounts := result.([]*models.MerchantAccountORM)
 	return accounts, nil
 }
 
@@ -33,8 +33,8 @@ func (db *Db) getMerchantAccountsTxFunc(ids []uint64) core_database.CmplxTx {
 		const operationType = "get_business_accounts_db_tx"
 		db.Logger.Info("starting database transaction")
 
-		var accounts = make([]*models.MerchantAccount, len(ids)+1)
-		if err := tx.Where(ids).Where(models.MerchantAccount{IsActive: true}).Find(&accounts).Error; err != nil {
+		var accounts = make([]*models.MerchantAccountORM, len(ids)+1)
+		if err := tx.Where(ids).Where(models.MerchantAccountORM{IsActive: true}).Find(&accounts).Error; err != nil {
 			return nil, err
 		}
 

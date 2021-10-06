@@ -26,7 +26,7 @@ var (
 
 var (
 	testBusinessAccount = &models.MerchantAccount{
-		Id: 0,
+		Id:                       0,
 		Owners:                   nil,
 		BusinessName:             "",
 		BusinessEmail:            "",
@@ -42,7 +42,7 @@ var (
 		PhoneNumber:              "",
 		Tags:                     nil,
 		StripeConnectedAccountId: "",
-		StripeAccountId:        0,
+		StripeAccountId:          0,
 		AuthnAccountId:           0,
 		AccountOnboardingDetails: 0,
 		AccountOnboardingState:   0,
@@ -59,9 +59,9 @@ func TestMain(m *testing.M) {
 	logger := InitializeLoggingEngine(ctx)
 
 	params := &helper.DatabaseConnectionParams{
-		Host:        host,
-		User:        user,
-		Password:    password,
+		Host:         host,
+		User:         user,
+		Password:     password,
 		DatabaseName: dbname,
 		Port:         port,
 	}
@@ -93,8 +93,8 @@ func GenerateRandomId(min, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
-//  ExpectNoErrorOccured ensures no errors occured during the operation
-func ExpectNoErrorOccured(t *testing.T, err error, result *models.MerchantAccount) {
+// ExpectNoErrorOccurred ensures no errors occured during the operation
+func ExpectNoErrorOccurred(t *testing.T, err error, result *models.MerchantAccount) {
 	assert.Empty(t, err)
 	assert.NotNil(t, result)
 }

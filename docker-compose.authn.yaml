@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   auth_service_db:
-    container_name: ${AUTHN_POSTGRES_CONTAINER:-postgres}
+    container_name: ${AUTHN_POSTGRES_CONTAINER:-auth_service_db}
     image: postgres
     environment:
       POSTGRES_DB: ${AUTHN_POSTGRES_DB_NAME:-authentication_service}
@@ -32,7 +32,7 @@ services:
     ports:
       - "8000:3000"
     environment:
-      - DATABASE_URL=postgres://authentication_service:authentication_service@postgres:5432/authentication_service?sslmode=disable
+      - DATABASE_URL=postgres://authentication_service:authentication_service@auth_service_db:5432/authentication_service?sslmode=disable
       - AUTHN_URL=http://localhost:8000
       - APP_DOMAINS=localhost
       - SECRET_KEY_BASE=secret

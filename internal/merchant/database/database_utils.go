@@ -60,7 +60,7 @@ func (db *Db) ComparePasswords(hashedPwd string, plainPwd []byte) bool {
 }
 
 // ValidateAccount performs various account level validations
-func (db *Db) ValidateAccount(ctx context.Context, account *models.MerchantAccount) error {
+func (db *Db) ValidateAccount(ctx context.Context, account *models.MerchantAccountORM) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
 		db.Logger.Error(err.Error())
@@ -83,7 +83,7 @@ func (db *Db) ValidateAccount(ctx context.Context, account *models.MerchantAccou
 }
 
 // ValidateAccountParameters validates account params.
-func (db *Db) ValidateAccountParameters(ctx context.Context, account *models.MerchantAccount) error {
+func (db *Db) ValidateAccountParameters(ctx context.Context, account *models.MerchantAccountORM) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
 		db.Logger.Error(err.Error())
@@ -98,7 +98,7 @@ func (db *Db) ValidateAccountParameters(ctx context.Context, account *models.Mer
 }
 
 // ValidateAccountNotNil ensures the account object is not nil
-func (db *Db) ValidateAccountNotNil(ctx context.Context, account *models.MerchantAccount) error {
+func (db *Db) ValidateAccountNotNil(ctx context.Context, account *models.MerchantAccountORM) error {
 	if account != nil {
 		return service_errors.ErrInvalidAccount
 	}
@@ -107,7 +107,7 @@ func (db *Db) ValidateAccountNotNil(ctx context.Context, account *models.Merchan
 }
 
 // ValidateAccountIds validates the existence of various ids associated with the account
-func (db *Db) ValidateAccountIds(ctx context.Context, account *models.MerchantAccount) error {
+func (db *Db) ValidateAccountIds(ctx context.Context, account *models.MerchantAccountORM) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
 		db.Logger.Error(err.Error())
@@ -121,7 +121,7 @@ func (db *Db) ValidateAccountIds(ctx context.Context, account *models.MerchantAc
 	return nil
 }
 
-func (db *Db) AccountActive(account *models.MerchantAccount) bool {
+func (db *Db) AccountActive(account *models.MerchantAccountORM) bool {
 	if account == nil || !account.IsActive {
 		return false
 	}
@@ -130,7 +130,7 @@ func (db *Db) AccountActive(account *models.MerchantAccount) bool {
 }
 
 // UpdateAccountOnboardStatus updates the onboarding status of a merchant account
-func (db *Db) UpdateAccountOnboardStatus(ctx context.Context, account *models.MerchantAccount) error {
+func (db *Db) UpdateAccountOnboardStatus(ctx context.Context, account *models.MerchantAccountORM) error {
 	err := db.ValidateAccountNotNil(ctx, account)
 	if err != nil {
 		db.Logger.Error(err.Error())
@@ -138,25 +138,25 @@ func (db *Db) UpdateAccountOnboardStatus(ctx context.Context, account *models.Me
 	}
 
 	switch account.AccountOnboardingDetails {
-	// not started onboarding
-	case models.OnboardingStatusOnboardingNotStarted:
-		account.AccountOnboardingDetails = models.OnboardingStatusFeelGuudOnboarding
-		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
-		// completed onboarding with feelguud
-	case models.OnboardingStatusFeelGuudOnboarding:
-		account.AccountOnboardingDetails = models.OnboardingStatusStripeOnboarding
-		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
-		// completed onboarding with stripe
-	case models.OnboardingStatusStripeOnboarding:
-		account.AccountOnboardingDetails = models.OnboardingStatusCatalogueOnboarding
-		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
-		// completed onboarding catalogue
-	case models.OnboardingStatusCatalogueOnboarding:
-		account.AccountOnboardingDetails = models.OnboardingStatusBCorpOnboarding
-		account.AccountOnboardingState = models.MerchantAccountStateActiveAndOnboarded
-	default:
-		account.AccountOnboardingDetails = models.OnboardingStatusOnboardingNotStarted
-		account.AccountOnboardingState = models.MerchantAccountStatePendingOnboardingCompletion
+		// not started onboarding
+		case int32(models.OnboardingStatus_OnboardingNotStarted):
+			account.AccountOnboardingDetails = int32(models.OnboardingStatus_FeelGuudOnboarding)
+			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
+			// completed onboarding with feelguud
+		case int32(models.OnboardingStatus_FeelGuudOnboarding):
+			account.AccountOnboardingDetails = int32(models.OnboardingStatus_StripeOnboarding)
+			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
+			// completed onboarding with stripe
+		case int32(models.OnboardingStatus_StripeOnboarding):
+			account.AccountOnboardingDetails = int32(models.OnboardingStatus_CatalogueOnboarding)
+			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
+			// completed onboarding catalogue
+		case int32(models.OnboardingStatus_CatalogueOnboarding):
+			account.AccountOnboardingDetails = int32(models.OnboardingStatus_BCorpOnboarding)
+			account.AccountOnboardingState = int32(models.MerchantAccountState_ActiveAndOnboarded)
+		default:
+			account.AccountOnboardingDetails = int32(models.OnboardingStatus_OnboardingNotStarted)
+			account.AccountOnboardingState = int32(models.MerchantAccountState_PendingOnboardingCompletion)
 	}
 
 	return nil

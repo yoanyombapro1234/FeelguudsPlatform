@@ -12,7 +12,7 @@ import (
 )
 
 // GetMerchantAccountById finds a merchant account by id
-func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccount, error) {
+func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccountORM, error) {
 	const operation = "get_business_account_by_id_db_op"
 	db.Logger.Info(fmt.Sprintf("get business account by id database operation. id : %d", id))
 
@@ -22,7 +22,7 @@ func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64) (*models.Me
 		return nil, err
 	}
 
-	acc, ok := result.(*models.MerchantAccount)
+	acc, ok := result.(*models.MerchantAccountORM)
 	if !ok {
 		return nil, service_errors.ErrFailedToCastToType
 	}
@@ -39,8 +39,8 @@ func (db *Db) getMerchantAccountByIdTxFunc(id uint64) core_database.CmplxTx {
 			return nil, service_errors.ErrInvalidInputArguments
 		}
 
-		var account models.MerchantAccount
-		if err := tx.Preload(clause.Associations).Where(&models.MerchantAccount{Id: id}).First(&account).Error; err != nil {
+		var account models.MerchantAccountORM
+		if err := tx.Preload(clause.Associations).Where(&models.MerchantAccountORM{Id: id}).First(&account).Error; err != nil {
 			return nil, service_errors.ErrAccountDoesNotExist
 		}
 

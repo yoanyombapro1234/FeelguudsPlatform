@@ -6,7 +6,7 @@ import (
 )
 
 // SaveAccountRecord saves a record in the database
-func (db *Db) SaveAccountRecord(tx *gorm.DB, account *models.MerchantAccount) error {
+func (db *Db) SaveAccountRecord(tx *gorm.DB, account *models.MerchantAccountORM) error {
 	if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Save(&account).Error; err != nil {
 		return err
 	}

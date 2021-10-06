@@ -12,7 +12,6 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-
 )
 
 type TxFunc func(ctx context.Context, tx *gorm.DB) (interface{}, error)
@@ -21,14 +20,14 @@ type OperationType string
 
 // DbOperations provides an interface which any database tied to this service should implement
 type DbOperations interface {
-	CreateMerchantAccount(ctx context.Context, account *models.MerchantAccount) (*models.MerchantAccount, error)
-	UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccount) (*models.MerchantAccount, error)
+	CreateMerchantAccount(ctx context.Context, account *models.MerchantAccountORM) (*models.MerchantAccountORM, error)
+	UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccountORM) (*models.MerchantAccountORM, error)
 	DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, error)
-	GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccount, error)
-	GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccount, error)
+	GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccountORM, error)
+	GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccountORM, error)
 	CheckAccountExistenceStatus(ctx context.Context, id uint64) (bool, error)
 	ActivateAccount(ctx context.Context, id uint64) (bool, error)
-	UpdateAccountOnboardingStatus(ctx context.Context, id uint64, status models.MerchantAccountState) (*models.MerchantAccount, error)
+	UpdateAccountOnboardingStatus(ctx context.Context, id uint64, status models.MerchantAccountState) (*models.MerchantAccountORM, error)
 }
 
 // Db withholds connection to a postgres database as well as a logging handler
@@ -45,7 +44,7 @@ type Db struct {
 var _ DbOperations = (*Db)(nil)
 
 type ConnectionInitializationParams struct {
-	ConnectionParams      *helper.DatabaseConnectionParams
+	ConnectionParams       *helper.DatabaseConnectionParams
 	Logger                 *zap.Logger
 	MaxConnectionAttempts  int
 	MaxRetriesPerOperation int
@@ -63,7 +62,8 @@ func New(ctx context.Context, params ConnectionInitializationParams) (*Db,
 
 	logger := params.Logger
 
-	conn := helper.ConnectToDatabase(params.ConnectionParams, params.Logger, models.DatabaseModels()...)
+	databaseModels := models.DatabaseModels()
+	conn := helper.ConnectToDatabase(params.ConnectionParams, params.Logger, databaseModels...)
 	if conn == nil {
 		logger.Fatal(service_errors.ErrFailedToConnectToDatabase.Error())
 	}

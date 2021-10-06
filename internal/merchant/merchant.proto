@@ -9,7 +9,7 @@ message MerchantAccount {
 	option (gorm.opts) = {
 		ormable: true,
 	};
-	uint32 id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
+	uint64  id = 1 [(gorm.field).tag = {type: "serial" primary_key: true, auto_increment: true}];
 	// set of owners who are responsible for this merchant account
 	repeated Owner owners = 2 [(gorm.field).has_many.preload = true];
 	// business name of the merchant account
@@ -25,7 +25,7 @@ message MerchantAccount {
 	// types of item this merchant is selling
 	repeated ItemSold items_or_services_sold = 8 [(gorm.field).has_many.preload = true];
 	// ways in which the merchant aims to fulfill purchases
-	repeated FulfillmentOptions fulfillment_options = 9 [(gorm.field).has_many.preload = true];
+	repeated FulfillmentOptions fulfillment_options = 9;
 	// shop settings
 	Settings ShopSettings = 10 [(gorm.field).has_one.preload = true];
 	// set of supported causes the merchant adheres to

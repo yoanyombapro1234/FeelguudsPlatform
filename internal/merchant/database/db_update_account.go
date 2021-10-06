@@ -14,8 +14,8 @@ import (
 //
 // the assumption from the context of the database is that all account should have the proper set of parameters in order prior
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
-func (db *Db) UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccount) (
-	*models.MerchantAccount, error) {
+func (db *Db) UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccountORM) (
+	*models.MerchantAccountORM, error) {
 	const operationType = "update_business_account_db_op"
 	db.Logger.Info(fmt.Sprintf("update business account database operation. id: %d", id))
 
@@ -25,12 +25,12 @@ func (db *Db) UpdateMerchantAccount(ctx context.Context, id uint64, account *mod
 		return nil, err
 	}
 
-	createdAccount := result.(*models.MerchantAccount)
+	createdAccount := result.(*models.MerchantAccountORM)
 	return createdAccount, nil
 }
 
 // updateMerchantAccountTxFunc wraps the update operation in a database tx.
-func (db *Db) updateMerchantAccountTxFunc(account *models.MerchantAccount, id uint64) core_database.CmplxTx {
+func (db *Db) updateMerchantAccountTxFunc(account *models.MerchantAccountORM, id uint64) core_database.CmplxTx {
 	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operationType = "update_business_account_db_tx"
 		db.Logger.Info("starting transaction")
