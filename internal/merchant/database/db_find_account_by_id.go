@@ -20,12 +20,12 @@ func (db *Db) FindMerchantAccountById(ctx context.Context, id uint64) (bool, err
 		return false, err
 	}
 
-	status, ok := result.(*bool)
+	status, ok := result.(bool)
 	if !ok {
 		return true, service_errors.ErrFailedToCastToType
 	}
 
-	return *status, nil
+	return status, nil
 }
 
 // findMerchantAccountByIdTxFunc finds the merchant account by id and wraps it in a db tx.
@@ -44,7 +44,7 @@ func (db *Db) findMerchantAccountByIdTxFunc(id uint64) func(ctx context.Context,
 		}
 
 		if ok := db.AccountActive(&account); !ok {
-			return false, service_errors.ErrAccountDoesNotExist
+			return false, service_errors.ErrAccountExistButInactive
 		}
 
 		return true, nil
