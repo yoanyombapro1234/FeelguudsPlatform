@@ -24,7 +24,7 @@ type MerchantAccountORM struct {
 	EmployerId               uint64
 	EstimateAnnualRevenue    string
 	Headline                 string
-	Id                       uint64 `gorm:"type:integer;primary_key;auto_increment"`
+	Id                       uint64
 	IsActive                 bool
 	ItemsOrServicesSold      []*ItemSoldORM `gorm:"foreignkey:MerchantAccountId;association_foreignkey:Id;preload:true"`
 	Owners                   []*OwnerORM    `gorm:"foreignkey:MerchantAccountId;association_foreignkey:Id;preload:true"`
@@ -224,7 +224,7 @@ type MerchantAccountWithAfterToPB interface {
 }
 
 type SettingsORM struct {
-	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
+	Id                uint64
 	MerchantAccountId *uint64
 }
 
@@ -295,7 +295,7 @@ type SettingsWithAfterToPB interface {
 }
 
 type ItemSoldORM struct {
-	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
+	Id                uint64
 	MerchantAccountId *uint64
 	Type              int32
 }
@@ -367,7 +367,7 @@ type ItemSoldWithAfterToPB interface {
 type AddressORM struct {
 	Address           string
 	City              string
-	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
+	Id                uint64
 	Lattitude         string
 	Longitude         string
 	MerchantAccountId *uint64
@@ -456,7 +456,7 @@ type OwnerORM struct {
 	Country           string
 	Email             string
 	FirstName         string
-	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
+	Id                uint64
 	LastName          string
 	MerchantAccountId *uint64
 }
@@ -532,7 +532,7 @@ type OwnerWithAfterToPB interface {
 }
 
 type TagsORM struct {
-	Id                uint64 `gorm:"type:integer;primary_key;auto_increment"`
+	Id                uint64
 	MerchantAccountId *uint64
 	Metadata          pq.StringArray `gorm:"type:text[]"`
 	TagDescription    string

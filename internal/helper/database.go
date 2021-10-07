@@ -89,6 +89,8 @@ func migrateSchemas(ctx context.Context, db *core_database.DatabaseConn, log *za
 			log.Error(err.Error())
 			return err
 		}
+
+		log.Info("successfully migrated database schemas")
 	}
 
 	return nil

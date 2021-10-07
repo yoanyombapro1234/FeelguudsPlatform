@@ -23,12 +23,12 @@ func (db *Db) DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, e
 		return false, err
 	}
 
-	status, ok := result.(*bool)
+	status, ok := result.(bool)
 	if !ok {
 		return false, service_errors.ErrFailedToCastToType
 	}
 
-	return *status, nil
+	return status, nil
 }
 
 // deactivateMerchantAccountTxFunc wraps the delete operation of a merchant account in a database transaction

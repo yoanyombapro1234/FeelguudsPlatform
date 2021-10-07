@@ -9,7 +9,7 @@ message MerchantAccount {
 	option (gorm.opts) = {
 		ormable: true,
 	};
-	uint64  id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64  id = 1;
 	// set of owners who are responsible for this merchant account
 	repeated Owner owners = 2 [(gorm.field).has_many.preload = true];
 	// business name of the merchant account
@@ -108,14 +108,14 @@ message Settings {
 	option (gorm.opts) = {
 		ormable: true,
 	};
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	// Represents the various details associated with a payment type
 	message PaymentDetails {
 		option (gorm.opts) = {
 			ormable: true,
 		};
-		uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+		uint64 id = 1;
 
 		// Credit card type
 		enum CreditCardBrand {
@@ -169,7 +169,7 @@ message ItemSold {
 	option (gorm.opts) = {
 		ormable: true,
 	};
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	// Represents the types of services/items the merchant account will sell to customers
 	enum ItemsType {
@@ -189,7 +189,7 @@ message Address {
 	option (gorm.opts) = {
 		ormable: true,
 	};
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	// the address field
 	string Address = 2;
@@ -212,7 +212,7 @@ message Owner {
 	option (gorm.opts) = {
 		ormable: true,
 	};
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	string FirstName=2;
 	string LastName=3;
@@ -225,7 +225,7 @@ message Tags {
 	option (gorm.opts) = {
 		ormable: true,
 	};
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	string tag_name = 2;
 	string tag_description = 3;
@@ -234,7 +234,7 @@ message Tags {
 
 // Represents various policies a merchant account can declare for various use cases
 message Policy {
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	enum PolicyType {
 		SHIPPING_POLICY = 0;
@@ -249,7 +249,7 @@ message Policy {
 
 // ReturnPolicy represent a sample shop return policy
 message ReturnPolicy {
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	Policy policy_meta = 2;
 	uint32 contact_within_days_of_delivery = 3;
@@ -262,7 +262,7 @@ message ReturnPolicy {
 
 // ShippingPolicy represents a sample shop shipping policy
 message ShippingPolicy {
-	uint64 id = 1 [(gorm.field).tag = {type: "integer" primary_key: true, auto_increment: true}];
+	uint64 id = 1;
 
 	Policy policy_meta = 2;
 	enum PostalService {

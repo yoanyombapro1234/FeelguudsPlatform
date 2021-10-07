@@ -37,6 +37,7 @@ var (
 	ErrDistributedTransactionError              = errors.New("distributed transaction error. failed to successfully perform a distributed operations")
 	ErrFailedToUpdateAccountActiveStatus        = errors.New("failed to updated account active status")
 	ErrAccountDoesNotExist                      = errors.New("account does not exist")
+	ErrAccountExistButInactive                  = errors.New("account exists but is inactive")
 	ErrAccountAlreadyExist                      = errors.New("account already exists")
 	ErrFailedToConvertFromOrmType               = errors.New("failed to perform conversion from Orm type")
 	ErrFailedToConvertToOrmType                 = errors.New("failed to perform conversion to Orm type")

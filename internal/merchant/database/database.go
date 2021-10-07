@@ -21,8 +21,8 @@ type OperationType string
 
 // DbOperations provides an interface which any database tied to this service should implement
 type DbOperations interface {
-	CreateMerchantAccount(ctx context.Context, account *models.MerchantAccountORM) (*models.MerchantAccountORM, error)
-	UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccountORM) (*models.MerchantAccountORM, error)
+	CreateMerchantAccount(ctx context.Context, account *models.MerchantAccount) (*models.MerchantAccount, error)
+	UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccount) (*models.MerchantAccount, error)
 	DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, error)
 	GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccountORM, error)
 	GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccountORM, error)
@@ -54,9 +54,13 @@ type ConnectionInitializationParams struct {
 }
 
 // New creates a database connection and returns the connection object
-func New(ctx context.Context, params ConnectionInitializationParams) (*Db,
+func New(ctx context.Context, params *ConnectionInitializationParams) (*Db,
 	error) {
 	// TODO: generate a span for the database connection attempt
+	if params == nil {
+		return nil, service_errors.ErrInvalidInputArguments
+	}
+
 	if params.ConnectionParams == nil || params.Logger == nil {
 		return nil, errors.New(fmt.Sprintf("%s - invalid connection params objects or logger", service_errors.ErrInvalidInputArguments))
 	}

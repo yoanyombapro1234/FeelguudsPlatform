@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -15,69 +16,43 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-var (
-	db       *Db
-	host     = "localhost"
-	port     = 5433
-	user     = "postgres"
-	password = "postgres"
-	dbname   = "postgres"
+const (
+	DefaultMaxConnectionAttempts  int           = 3
+	DefaultMaxRetriesPerOperation int           = 3
+	DefaultRetryTimeout           time.Duration = 50 * time.Millisecond
+	DefaultRetrySleepInterval     time.Duration = 25 * time.Millisecond
 )
 
 var (
-	testBusinessAccount = &models.MerchantAccount{
-		Id:                       0,
-		Owners:                   nil,
-		BusinessName:             "",
-		BusinessEmail:            "",
-		EmployerId:               0,
-		EstimateAnnualRevenue:    "",
-		Address:                  nil,
-		ItemsOrServicesSold:      nil,
-		FulfillmentOptions:       nil,
-		ShopSettings:             nil,
-		SupportedCauses:          nil,
-		Bio:                      "",
-		Headline:                 "",
-		PhoneNumber:              "",
-		Tags:                     nil,
-		StripeConnectedAccountId: "",
-		StripeAccountId:          0,
-		AuthnAccountId:           0,
-		AccountOnboardingDetails: 0,
-		AccountOnboardingState:   0,
-		AccountType:              0,
-		IsActive:                 false,
+	Conn                *Db
+	Port                int    = 6000
+	Host                string = "localhost"
+	User                string = "merchant_component"
+	Password            string = "merchant_component"
+	Dbname              string = "merchant_component"
+	DefaultDbConnParams        = helper.DatabaseConnectionParams{
+		Host:         Host,
+		User:         User,
+		Password:     Password,
+		DatabaseName: Dbname,
+		Port:         Port,
+	}
+
+	DefaultConnInitializationParams = ConnectionInitializationParams{
+		ConnectionParams:       &DefaultDbConnParams,
+		Logger:                 zap.L(),
+		MaxConnectionAttempts:  DefaultMaxConnectionAttempts,
+		MaxRetriesPerOperation: DefaultMaxRetriesPerOperation,
+		RetryTimeOut:           DefaultRetryTimeout,
+		RetrySleepInterval:     DefaultRetrySleepInterval,
 	}
 )
 
-func TestMain(m *testing.M) {
-	const serviceName string = "test"
+// SetupTestDbConn sets up a database connection to the test db node
+func SetupTestDbConn() {
 	ctx := context.Background()
-
-	// initiate logging client
-	logger := InitializeLoggingEngine(ctx)
-
-	params := &helper.DatabaseConnectionParams{
-		Host:         host,
-		User:         user,
-		Password:     password,
-		DatabaseName: dbname,
-		Port:         port,
-	}
-
-	// connect to db
-	db, _ = New(ctx, ConnectionInitializationParams{
-		ConnectionParams:       params,
-		Logger:                 logger,
-		MaxConnectionAttempts:  4,
-		MaxRetriesPerOperation: 4,
-		RetryTimeOut:           3 * time.Second,
-		RetrySleepInterval:     50 * time.Millisecond,
-	})
-
-	_ = m.Run()
-	return
+	// setup database connection before tests
+	Conn, _ = New(ctx, &DefaultConnInitializationParams)
 }
 
 // InitializeLoggingEngine initializes a logging object
@@ -137,9 +112,76 @@ func ExpectCannotUpdatePasswordError(t *testing.T, err error, account *models.Me
 
 // GenerateRandomizedAccount generates a random account
 func GenerateRandomizedAccount() *models.MerchantAccount {
-	randStr := helper.GenerateRandomString(150)
-	account := testBusinessAccount
-	account.BusinessName = account.BusinessEmail + randStr
-	account.BusinessName = account.BusinessName + randStr
-	return account
+	randStr := helper.GenerateRandomString(5)
+
+	return &models.MerchantAccount{
+		Owners: []*models.Owner{
+			{
+				FirstName: "yoan",
+				LastName:  "yomba",
+				Email:     fmt.Sprintf("%s@gmail.com", randStr),
+				Country:   "USA",
+			},
+		},
+		BusinessName:          randStr,
+		BusinessEmail:         fmt.Sprintf("%s@gmail.com", randStr),
+		EmployerId:            13450,
+		EstimateAnnualRevenue: "1000000",
+		Address: &models.Address{
+			Address:   "340 Clifton Pl",
+			Unit:      "3B",
+			ZipCode:   "10013",
+			City:      "Brooklyn",
+			State:     "NYC",
+			Longitude: "40.7131° N",
+			Lattitude: "74.0338° W",
+		},
+		ItemsOrServicesSold: []*models.ItemSold{
+			{
+				Type: models.ItemSold_SERVICES,
+			},
+			{
+				Type: models.ItemSold_PHYSICAL_ITEMS,
+			},
+		},
+		FulfillmentOptions: []models.FulfillmentOptions{
+			models.FulfillmentOptions_SHIP_ITEMS,
+			models.FulfillmentOptions_ALLOW_DELIVERY,
+		},
+		ShopSettings: &models.Settings{
+			PaymentDetails: &models.Settings_PaymentDetails{
+				AcceptableCreditCardTypes: []models.Settings_PaymentDetails_CreditCardBrand{
+					models.Settings_PaymentDetails_VISA,
+					models.Settings_PaymentDetails_DISCOVER,
+				},
+				PrimaryCurrencyCode: models.Settings_PaymentDetails_USD,
+				EnabledCurrencyCodes: []models.Settings_PaymentDetails_CurrencyCode{
+					models.Settings_PaymentDetails_USD,
+					models.Settings_PaymentDetails_GBP,
+				},
+				SupportedDigitalWallets: []models.Settings_PaymentDetails_DigitalWallets{
+					models.Settings_PaymentDetails_APPLE_PAY,
+					models.Settings_PaymentDetails_GOOGLE_PAY,
+				},
+			},
+			ShopPolicy:     nil,
+			PrivacyPolicy:  nil,
+			ReturnPolicy:   nil,
+			ShippingPolicy: nil,
+		},
+		SupportedCauses: []models.Causes{
+			models.Causes_EDUCATION,
+		},
+		Bio:                      "",
+		Headline:                 "Creating a better online shopping experience for you",
+		PhoneNumber:              "551-778-1002",
+		Tags:                     nil,
+		StripeConnectedAccountId: "sample_platform_account",
+		StripeAccountId:          100,
+		AuthnAccountId:           40,
+		AccountOnboardingDetails: models.OnboardingStatus_OnboardingNotStarted,
+		AccountOnboardingState:   models.MerchantAccountState_PendingOnboardingCompletion,
+		AccountType:              models.MerchantAccountType_Company,
+		IsActive:                 true,
+	}
 }

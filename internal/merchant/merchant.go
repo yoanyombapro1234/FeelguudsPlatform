@@ -30,7 +30,7 @@ func NewMerchantAccountComponent(params *helper.DatabaseConnectionParams, log *z
 		log.Fatal("failed to initialize merchant account component due to invalid input arguments")
 	}
 
-	dbInstance, err := database.New(context.Background(), database.ConnectionInitializationParams{
+	dbInstance, err := database.New(context.Background(), &database.ConnectionInitializationParams{
 		ConnectionParams:       params,
 		Logger:                 log,
 		MaxConnectionAttempts:  2,

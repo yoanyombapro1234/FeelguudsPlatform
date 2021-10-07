@@ -20,12 +20,12 @@ func (db *Db) FindMerchantAccountByEmail(ctx context.Context, email string) (boo
 		return true, err
 	}
 
-	status, ok := result.(*bool)
+	status, ok := result.(bool)
 	if !ok {
 		return true, service_errors.ErrFailedToCastToType
 	}
 
-	return *status, nil
+	return status, nil
 }
 
 // findMerchantAccountByEmailTxFunc wraps the logic in a db tx and returns it
@@ -44,7 +44,7 @@ func (db *Db) findMerchantAccountByEmailTxFunc(email string) func(ctx context.Co
 		}
 
 		if ok := db.AccountActive(&account); !ok {
-			return false, service_errors.ErrAccountDoesNotExist
+			return true, service_errors.ErrAccountExistButInactive
 		}
 
 		return true, nil

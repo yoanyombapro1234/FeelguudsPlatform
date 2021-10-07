@@ -17,7 +17,7 @@ func (db *Db) FindMerchantAccountById(ctx context.Context, id uint64) (bool, err
 	tx := db.findMerchantAccountByIdTxFunc(id)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 
 	status, ok := result.(*bool)
