@@ -17,7 +17,7 @@ func (db *Db) FindMerchantAccountByEmail(ctx context.Context, email string) (boo
 	tx := db.findMerchantAccountByEmailTxFunc(email)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 
 	status, ok := result.(bool)
@@ -44,7 +44,7 @@ func (db *Db) findMerchantAccountByEmailTxFunc(email string) func(ctx context.Co
 		}
 
 		if ok := db.AccountActive(&account); !ok {
-			return true, service_errors.ErrAccountExistButInactive
+			return false, service_errors.ErrAccountExistButInactive
 		}
 
 		return true, nil

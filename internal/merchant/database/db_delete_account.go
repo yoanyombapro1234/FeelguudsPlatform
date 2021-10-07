@@ -46,9 +46,7 @@ func (db *Db) deactivateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 			return nil, service_errors.ErrAccountDoesNotExist
 		}
 
-		account.IsActive = false
-		if err := db.SaveAccountRecord(tx, account); err != nil {
-			db.Logger.Error(err.Error())
+		if err := db.Conn.Engine.Model(&account).Update("is_active", "false").Error; err != nil {
 			return false, err
 		}
 
