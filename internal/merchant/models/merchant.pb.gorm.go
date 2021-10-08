@@ -21,6 +21,9 @@ type MerchantAccountORM struct {
 	Bio                      string
 	BusinessEmail            string
 	BusinessName             string
+	BusinessType             string
+	Country                  string
+	DefaultCurrency          string
 	EmployerId               uint64
 	EstimateAnnualRevenue    string
 	Headline                 string
@@ -114,6 +117,9 @@ func (m *MerchantAccount) ToORM(ctx context.Context) (MerchantAccountORM, error)
 	to.AccountOnboardingState = int32(m.AccountOnboardingState)
 	to.AccountType = int32(m.AccountType)
 	to.IsActive = m.IsActive
+	to.BusinessType = m.BusinessType
+	to.Country = m.Country
+	to.DefaultCurrency = m.DefaultCurrency
 	if posthook, ok := interface{}(m).(MerchantAccountWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -194,6 +200,9 @@ func (m *MerchantAccountORM) ToPB(ctx context.Context) (MerchantAccount, error) 
 	to.AccountOnboardingState = MerchantAccountState(m.AccountOnboardingState)
 	to.AccountType = MerchantAccountType(m.AccountType)
 	to.IsActive = m.IsActive
+	to.BusinessType = m.BusinessType
+	to.Country = m.Country
+	to.DefaultCurrency = m.DefaultCurrency
 	if posthook, ok := interface{}(m).(MerchantAccountWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -1060,6 +1069,18 @@ func DefaultApplyFieldMaskMerchantAccount(ctx context.Context, patchee *Merchant
 		}
 		if f == prefix+"IsActive" {
 			patchee.IsActive = patcher.IsActive
+			continue
+		}
+		if f == prefix+"BusinessType" {
+			patchee.BusinessType = patcher.BusinessType
+			continue
+		}
+		if f == prefix+"Country" {
+			patchee.Country = patcher.Country
+			continue
+		}
+		if f == prefix+"DefaultCurrency" {
+			patchee.DefaultCurrency = patcher.DefaultCurrency
 			continue
 		}
 	}

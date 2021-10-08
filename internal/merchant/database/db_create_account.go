@@ -52,7 +52,7 @@ func (db *Db) createAccountTxFunc(account *models.MerchantAccount) core_database
 		}
 
 		// check if merchant account already exist
-		if ok, err := db.FindMerchantAccountByEmail(ctx, acctOrm.BusinessEmail); ok && err == nil {
+		if _, err := db.FindMerchantAccountByEmail(ctx, acctOrm.BusinessEmail); err == nil {
 			return nil, service_errors.ErrAccountAlreadyExist
 		}
 

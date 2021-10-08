@@ -47,12 +47,10 @@ func (db *Db) activateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 		}
 
 		if account.IsActive {
-			return nil, service_errors.ErrAccountAlreadyActive
+			return account, nil
 		}
 
-		account.IsActive = true
-		err = db.SaveAccountRecord(tx, account)
-		if err != nil {
+		if err := db.Conn.Engine.Model(&account).Update("is_active", "true").Error; err != nil {
 			return nil, err
 		}
 

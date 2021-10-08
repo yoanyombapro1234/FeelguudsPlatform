@@ -129,12 +129,24 @@ func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) err
 
 // ExtractIdFromRequest takes as input a request object
 // and extracts an id from it
-func ExtractIDFromRequest(r *http.Request) (uint32, error) {
+func ExtractIDFromRequest(r *http.Request) (uint64, error) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		return 0, err
 	}
-	processedID := uint32(id)
+
+	processedID := uint64(id)
 	return processedID, nil
+}
+
+// ExtractStripeConnectedAccountIdFromRequest extracts a stripe connected account Id from a connected object
+func ExtractStripeConnectedAccountIdFromRequest(r *http.Request) (string, error) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	if id == EMPTY {
+		return EMPTY, errors.New("no stripe connected account id provided")
+	}
+
+	return id, nil
 }

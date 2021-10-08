@@ -51,6 +51,9 @@ message MerchantAccount {
 	// type of merchant account
 	MerchantAccountType account_type = 21;
 	bool isActive = 22;
+	string businessType = 23;
+	string country = 24;
+	string defaultCurrency = 25;
 }
 
 // represents the type of merchant account
@@ -78,10 +81,14 @@ enum FulfillmentOptions {
 // represents the stage in the onboarding flow the merchant account is in
 enum OnboardingStatus {
 	OnboardingNotStarted = 0;
-	FeelGuudOnboarding = 1;
-	StripeOnboarding = 2;
-	CatalogueOnboarding = 3;
-	BCorpOnboarding = 4;
+	FeelGuudOnboardingStarted = 1;
+	FeelGuudOnboardingCompleted = 2;
+	StripeOnboardingStarted = 3;
+	StripeOnboardingCompleted = 4;
+	CatalogueOnboardingStarted = 5;
+	CatalogueOnboardingCompleted = 6;
+	BCorpOnboardingStarted = 7;
+	BCorpOnboardingCompleted = 8;
 }
 
 // set of causes a merchant may opt to support

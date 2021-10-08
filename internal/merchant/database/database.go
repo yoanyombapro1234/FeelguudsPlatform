@@ -28,7 +28,7 @@ type DbOperations interface {
 	GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccountORM, error)
 	CheckAccountExistenceStatus(ctx context.Context, id uint64) (bool, error)
 	ActivateAccount(ctx context.Context, id uint64) (bool, error)
-	UpdateAccountOnboardingStatus(ctx context.Context, id uint64, status models.MerchantAccountState) (*models.MerchantAccountORM, error)
+	FindMerchantAccountByStripeAccountId(ctx context.Context, stripeConnectedAccountId string) (*models.MerchantAccount, error)
 }
 
 // Db withholds connection to a postgres database as well as a logging handler

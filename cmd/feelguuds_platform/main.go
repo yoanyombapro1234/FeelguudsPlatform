@@ -102,6 +102,8 @@ func main() {
 	fs.String("SHOPPER_COMPONENT_PASSWORD", "shopper_component", "database password string")
 	fs.String("SHOPPER_COMPONENT_DB_NAME", "shopper_component", "database name")
 
+	fs.String("STRIPE_API_KEY", "", "stripe api key")
+
 	// capture goroutines waiting on synchronization primitives
 	runtime.SetBlockProfileRate(1)
 	versionFlag := fs.BoolP("ENABLE_VERSION_FROM_FILE", "v", false, "get version number")
@@ -118,6 +120,12 @@ func main() {
 	defer logInstance.ConfigureLogger()
 	log := logInstance.Logger
 
+	// initialize authentication's account component's dependencies
+	var authenticationComponent *authentication_handler.AuthenticationComponent
+	{
+		authenticationComponent = InitializeAuthenticationComponent(log, serviceName)
+	}
+
 	var merchantAccountComponent *merchant.MerchantAccountComponent
 	// initialize merchant account component's dependencies
 	{
@@ -126,21 +134,16 @@ func main() {
 		user := viper.GetString("MERCHANT_COMPONENT_USER")
 		password := viper.GetString("MERCHANT_COMPONENT_PASSWORD")
 		dbname := viper.GetString("MERCHANT_COMPONENT_DB_NAME")
+		stripeApiKey := viper.GetString("STRIPE_API_KEY")
 		merchantAccountComponent = merchant.NewMerchantAccountComponent(&helper.DatabaseConnectionParams{
 			Host:         host,
 			User:         user,
 			Password:     password,
 			DatabaseName: dbname,
 			Port:         port,
-		}, log)
+		}, log, stripeApiKey, authenticationComponent)
 
 		log.Info("successfully initialized merchant account component")
-	}
-
-	// initialize authentication's account component's dependencies
-	var authenticationComponent *authentication_handler.AuthenticationComponent
-	{
-		authenticationComponent = InitializeAuthenticationComponent(log, serviceName)
 	}
 
 	// start stress tests if any
@@ -183,6 +186,7 @@ func LoadServerConfigs(log *zap.Logger) (grpc.Config, api.Config) {
 	if err := viper.Unmarshal(&srvCfg); err != nil {
 		log.Panic("config unmarshal failed", zap.Error(err))
 	}
+
 	return grpcCfg, srvCfg
 }
 

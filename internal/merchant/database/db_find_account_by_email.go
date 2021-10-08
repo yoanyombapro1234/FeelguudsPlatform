@@ -22,7 +22,7 @@ func (db *Db) FindMerchantAccountByEmail(ctx context.Context, email string) (boo
 
 	status, ok := result.(bool)
 	if !ok {
-		return true, service_errors.ErrFailedToCastToType
+		return false, service_errors.ErrFailedToCastToType
 	}
 
 	return status, nil

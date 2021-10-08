@@ -75,6 +75,7 @@ type Config struct {
 	JWTSecret                 string        `mapstructure:"JWT_SECRET"`
 	CacheServer               string        `mapstructure:"CACHE_SERVER_ADDRESS"`
 	ServiceName               string        `mapstructure:"GRPC_SERVICE_NAME"`
+	StripeApiKey              string        `mapstructure:"STRIPE_API_KEY"`
 }
 
 type Server struct {
@@ -148,6 +149,15 @@ func (s *Server) registerHandlers() {
 	s.router.HandleFunc("/v1/auth/account/unlock/{id:[0-9]+}", protected(s.authComponent.UnLockAccountHandler)).Methods("POST")
 	s.router.HandleFunc("/v1/auth/account/{id:[0-9]+}", protected(s.authComponent.GetAccountHandler)).Methods("GET")
 	s.router.HandleFunc("/v1/auth/account/logout", protected(s.authComponent.LogoutAccountHandler)).Methods("POST")
+
+	s.router.HandleFunc("/v1/merchant-account/create", s.merchantAccountComponent.CreateMerchantAccountHandler).Methods("POST")
+	s.router.HandleFunc("/v1/merchant-account/refresh-url/{id:[0-9]+}", s.merchantAccountComponent.CreateMerchantAccountRefreshUrlHandler).Methods("POST")
+	s.router.HandleFunc("/v1/merchant-account/return-url/{id:[0-9]+}", s.merchantAccountComponent.CreateMerchantAccountReturnUrlHandler).Methods("POST")
+
+	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", protected(s.merchantAccountComponent.DeleteMerchantAccountHandler)).Methods("DELETE")
+	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", s.merchantAccountComponent.GetMerchantAccountHandler).Methods("GET")
+	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", s.merchantAccountComponent.UpdateMerchantAccountHandler).Methods("POST")
+
 }
 
 func (s *Server) registerMiddlewares() {

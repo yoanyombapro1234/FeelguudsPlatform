@@ -52,7 +52,7 @@ func (db *Db) updateMerchantAccountTxFunc(acct *models.MerchantAccount, id uint6
 			return nil, service_errors.ErrAccountDoesNotExist
 		}
 
-		if err := db.SaveAccountRecord(tx, &account); err != nil {
+		if err := db.SaveAccountRecord(ctx, acct); err != nil {
 			return nil, err
 		}
 
