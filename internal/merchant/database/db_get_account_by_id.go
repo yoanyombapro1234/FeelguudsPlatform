@@ -8,7 +8,6 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 // GetMerchantAccountById finds a merchant account by id
@@ -40,8 +39,8 @@ func (db *Db) getMerchantAccountByIdTxFunc(id uint64) core_database.CmplxTx {
 		}
 
 		var account models.MerchantAccountORM
-		if err := tx.Preload(clause.Associations).Where(&models.MerchantAccountORM{Id: id}).First(&account).Error; err != nil {
-			return nil, service_errors.ErrAccountDoesNotExist
+		if err := tx.Where(&models.MerchantAccountORM{Id: id}).First(&account).Error; err != nil {
+			return false, service_errors.ErrAccountDoesNotExist
 		}
 
 		if ok := db.AccountActive(&account); !ok {

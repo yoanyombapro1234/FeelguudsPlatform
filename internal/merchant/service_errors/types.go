@@ -54,6 +54,7 @@ var (
 	ErrUnableToObtainBusinessAccounts           = errors.New("unable to obtain business accounts")
 	ErrUnauthorizedRequest                      = errors.New("unauthorized request")
 	ErrFailedToCreateAccountInAuthHdlrSvc       = errors.New("failed to create an account in authentication handler service")
+	ErrAccountAlreadyActive = errors.New("account exists and is already active")
 )
 
 func NewError(msg string) error {

@@ -110,6 +110,12 @@ func ExpectCannotUpdatePasswordError(t *testing.T, err error, account *models.Me
 	assert.Nil(t, account)
 }
 
+func GenerateRandomizedAccountWithRandomId() *models.MerchantAccount {
+	acct := GenerateRandomizedAccount()
+	acct.Id = uint64(GenerateRandomId(10000, 3000000))
+	return acct
+}
+
 // GenerateRandomizedAccount generates a random account
 func GenerateRandomizedAccount() *models.MerchantAccount {
 	randStr := helper.GenerateRandomString(5)
