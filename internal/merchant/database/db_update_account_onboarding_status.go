@@ -34,7 +34,7 @@ func (db *Db) updateMerchantAccountOnboardingStatusTxFunc(id uint64, status mode
 		const operationType = "update_business_account_onboarding_status_db_tx"
 		db.Logger.Info("starting transaction")
 
-		acct, err := db.GetMerchantAccountById(ctx, id)
+		acct, err := db.GetMerchantAccountById(ctx, id, true)
 		if err != nil {
 			return nil, err
 		}

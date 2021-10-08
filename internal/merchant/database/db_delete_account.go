@@ -41,7 +41,7 @@ func (db *Db) deactivateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 			return false, service_errors.ErrInvalidInputArguments
 		}
 
-		account, err := db.GetMerchantAccountById(ctx, id)
+		account, err := db.GetMerchantAccountById(ctx, id, false)
 		if err != nil {
 			return nil, service_errors.ErrAccountDoesNotExist
 		}

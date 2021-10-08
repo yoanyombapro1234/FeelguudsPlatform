@@ -41,13 +41,13 @@ func (db *Db) activateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 			return nil, service_errors.ErrInvalidInputArguments
 		}
 
-		account, err := db.GetMerchantAccountById(ctx, id)
+		account, err := db.GetMerchantAccountById(ctx, id, false)
 		if err != nil {
-			return nil, service_errors.ErrAccountDoesNotExist
+			return nil, err
 		}
 
 		if account.IsActive {
-			return &account, nil
+			return nil, service_errors.ErrAccountAlreadyActive
 		}
 
 		account.IsActive = true

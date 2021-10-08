@@ -24,7 +24,7 @@ type DbOperations interface {
 	CreateMerchantAccount(ctx context.Context, account *models.MerchantAccount) (*models.MerchantAccount, error)
 	UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccount) (*models.MerchantAccount, error)
 	DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, error)
-	GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccountORM, error)
+	GetMerchantAccountById(ctx context.Context, id uint64, checkAccountActivationStatus bool) (*models.MerchantAccountORM, error)
 	GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccountORM, error)
 	CheckAccountExistenceStatus(ctx context.Context, id uint64) (bool, error)
 	ActivateAccount(ctx context.Context, id uint64) (bool, error)

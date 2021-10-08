@@ -4,18 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
 )
 
 // GetMerchantAccountById finds a merchant account by id
-func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64) (*models.MerchantAccountORM, error) {
+func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64, checkAccountActivationStatus bool) (*models.MerchantAccountORM, error) {
 	const operation = "get_business_account_by_id_db_op"
 	db.Logger.Info(fmt.Sprintf("get business account by id database operation. id : %d", id))
 
-	tx := db.getMerchantAccountByIdTxFunc(id)
+	tx := db.getMerchantAccountByIdTxFunc(id, checkAccountActivationStatus)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
 	if err != nil {
 		return nil, err
@@ -29,10 +28,12 @@ func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64) (*models.Me
 	return acc, nil
 }
 
-// getMerchantAccountByIdTxFunc gets the merchant account by id operation wrapped in a database transaction.
-func (db *Db) getMerchantAccountByIdTxFunc(id uint64) core_database.CmplxTx {
-	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
-		const operation = "get_business_account_by_id_db_tx"
+// getMerchantAccountByIdTxFunc finds the merchant account by id and wraps it in a db tx.
+func (db *Db) getMerchantAccountByIdTxFunc(id uint64, checkAccountActivationStatus bool) func(ctx context.Context, tx *gorm.DB) (interface{},
+	error) {
+	return func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
+		const operation = "merchant_account_exists_by_id_tx"
+		db.Logger.Info(fmt.Sprintf("get business account by id database tx."))
 
 		if id == 0 {
 			return nil, service_errors.ErrInvalidInputArguments
@@ -40,14 +41,15 @@ func (db *Db) getMerchantAccountByIdTxFunc(id uint64) core_database.CmplxTx {
 
 		var account models.MerchantAccountORM
 		if err := tx.Where(&models.MerchantAccountORM{Id: id}).First(&account).Error; err != nil {
-			return false, service_errors.ErrAccountDoesNotExist
+			return nil, service_errors.ErrAccountDoesNotExist
 		}
 
-		if ok := db.AccountActive(&account); !ok {
-			return false, service_errors.ErrAccountDoesNotExist
+		if checkAccountActivationStatus {
+			if ok := db.AccountActive(&account); !ok {
+				return nil, service_errors.ErrAccountExistButInactive
+			}
 		}
 
 		return &account, nil
 	}
-	return tx
 }

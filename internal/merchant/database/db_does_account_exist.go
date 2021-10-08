@@ -37,7 +37,7 @@ func (db *Db) doesMerchantAccountExistTxFunc(id uint64) core_database.CmplxTx {
 			return false, service_errors.ErrInvalidInputArguments
 		}
 
-		if ok, err := db.FindMerchantAccountById(ctx, id); !ok && err != nil {
+		if _, err := db.GetMerchantAccountById(ctx, id, true); err != nil {
 			return false, service_errors.ErrAccountDoesNotExist
 		}
 

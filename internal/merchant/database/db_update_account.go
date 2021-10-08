@@ -48,7 +48,7 @@ func (db *Db) updateMerchantAccountTxFunc(acct *models.MerchantAccount, id uint6
 			return nil, err
 		}
 
-		if ok, err := db.FindMerchantAccountById(ctx, id); !ok && err != nil {
+		if _, err := db.GetMerchantAccountById(ctx, id, true); err != nil {
 			return nil, service_errors.ErrAccountDoesNotExist
 		}
 
