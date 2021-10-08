@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/account"
-	"github.com/stripe/stripe-go/accountlink"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/account"
+	"github.com/stripe/stripe-go/v72/accountlink"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
@@ -61,4 +61,13 @@ func (c *StripeComponent) CreateNewAccountLink(stripeConnectedAccountId, refresh
 	}
 
 	return acc, nil
+}
+
+// GetConnectedAccountDashboard returns a set of connected account specific parameters
+func (c *StripeComponent) GetConnectedAccountDashboard(stripeConnectedAccountId *string) error {
+	if stripeConnectedAccountId == nil {
+		return errors.New(fmt.Sprintf("%s - stripe connected account id cannot be nil", service_errors.ErrInvalidInputArguments.Error()))
+	}
+
+	return nil
 }

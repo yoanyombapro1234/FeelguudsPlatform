@@ -38,7 +38,7 @@ func (c *AuthenticationComponent) UnLockAccountHandler(w http.ResponseWriter, r 
 	}
 
 	// invoke authentication service
-	if err = c.UnLockAccount(ctx, Id); err != nil {
+	if err = c.UnLockAccount(ctx, uint32(Id)); err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}

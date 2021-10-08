@@ -44,7 +44,7 @@ func (c *AuthenticationComponent) GetAccountHandler(w http.ResponseWriter, r *ht
 	}
 
 	// invoke authentication service
-	account, err = c.GetAccount(ctx, Id)
+	account, err = c.GetAccount(ctx, uint32(Id))
 	if err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return

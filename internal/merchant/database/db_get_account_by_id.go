@@ -10,7 +10,7 @@ import (
 )
 
 // GetMerchantAccountById finds a merchant account by id
-func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64, checkAccountActivationStatus bool) (*models.MerchantAccountORM, error) {
+func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64, checkAccountActivationStatus bool) (*models.MerchantAccount, error) {
 	const operation = "get_business_account_by_id_db_op"
 	db.Logger.Info(fmt.Sprintf("get business account by id database operation. id : %d", id))
 
@@ -20,7 +20,7 @@ func (db *Db) GetMerchantAccountById(ctx context.Context, id uint64, checkAccoun
 		return nil, err
 	}
 
-	acc, ok := result.(*models.MerchantAccountORM)
+	acc, ok := result.(*models.MerchantAccount)
 	if !ok {
 		return nil, service_errors.ErrFailedToCastToType
 	}
@@ -50,6 +50,11 @@ func (db *Db) getMerchantAccountByIdTxFunc(id uint64, checkAccountActivationStat
 			}
 		}
 
-		return &account, nil
+		acct, err := account.ToPB(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &acct, nil
 	}
 }

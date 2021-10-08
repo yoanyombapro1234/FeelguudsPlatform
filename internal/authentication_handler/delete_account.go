@@ -39,7 +39,7 @@ func (c *AuthenticationComponent) DeleteAccountHandler(w http.ResponseWriter, r 
 	}
 
 	// invoke authentication service
-	if err := c.DeleteAccount(ctx, Id); err != nil {
+	if err := c.DeleteAccount(ctx, uint32(Id)); err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}

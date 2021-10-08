@@ -150,13 +150,19 @@ func (s *Server) registerHandlers() {
 	s.router.HandleFunc("/v1/auth/account/{id:[0-9]+}", protected(s.authComponent.GetAccountHandler)).Methods("GET")
 	s.router.HandleFunc("/v1/auth/account/logout", protected(s.authComponent.LogoutAccountHandler)).Methods("POST")
 
-	s.router.HandleFunc("/v1/merchant-account/create", s.merchantAccountComponent.CreateMerchantAccountHandler).Methods("POST")
-	s.router.HandleFunc("/v1/merchant-account/refresh-url/{id:[0-9]+}", s.merchantAccountComponent.CreateMerchantAccountRefreshUrlHandler).Methods("POST")
-	s.router.HandleFunc("/v1/merchant-account/return-url/{id:[0-9]+}", s.merchantAccountComponent.CreateMerchantAccountReturnUrlHandler).Methods("POST")
+	// merchant account routes
+	s.router.HandleFunc("/v1/merchant-account/create", s.merchantAccountComponent.CreateAccountHandler).Methods("POST")
+	s.router.HandleFunc("/v1/merchant-account/refresh-url/{id:[0-9]+}", s.merchantAccountComponent.CreateAccountRefreshUrlHandler).Methods("POST")
+	s.router.HandleFunc("/v1/merchant-account/return-url/{id:[0-9]+}", s.merchantAccountComponent.CreateAccountReturnUrlHandler).Methods("POST")
 
-	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", protected(s.merchantAccountComponent.DeleteMerchantAccountHandler)).Methods("DELETE")
-	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", s.merchantAccountComponent.GetMerchantAccountHandler).Methods("GET")
-	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", s.merchantAccountComponent.UpdateMerchantAccountHandler).Methods("POST")
+	s.router.HandleFunc("/v1/merchant-account/deactivate/{id:[0-9]+}", protected(s.merchantAccountComponent.DeactivateMerchantAccountHandler)).
+		Methods(
+			"POST")
+	s.router.HandleFunc("/v1/merchant-account/activate/{id:[0-9]+}", protected(s.merchantAccountComponent.ReactivateMerchantAccountHandler)).
+		Methods(
+			"POST")
+	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", protected(s.merchantAccountComponent.GetMerchantAccountHandler)).Methods("GET")
+	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", protected(s.merchantAccountComponent.UpdateMerchantAccountHandler)).Methods("POST")
 
 }
 

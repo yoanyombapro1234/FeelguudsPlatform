@@ -60,7 +60,7 @@ func (c *AuthenticationComponent) UpdateEmailHandler(w http.ResponseWriter, r *h
 	}
 
 	// invoke authentication service
-	if err = c.UpdateAccount(ctx, Id, email); err != nil {
+	if err = c.UpdateAccount(ctx, uint32(Id), email); err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
