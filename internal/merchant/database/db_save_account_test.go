@@ -10,23 +10,23 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type SaveAccountScenario struct {
-	scenarioName     string
-	shouldErrorOccur bool
-	account          *models.MerchantAccount
-	expectedError    error
+type saveAccountScenario struct {
+	scenarioName        string
+	shouldErrorOccur    bool
+	account             *models.MerchantAccount
+	expectedError       error
 	shouldCreateAccount bool
 }
 
 // saveAccountTestScenarios returns a set of scenarios to test the save account operation
-func saveAccountTestScenarios() []SaveAccountScenario {
-	return []SaveAccountScenario{
+func saveAccountTestScenarios() []saveAccountScenario {
+	return []saveAccountScenario{
 		{
 			// success condition - save a new merchant account
-			scenarioName:     "save new merchant account",
-			shouldErrorOccur: false,
-			account:          GenerateRandomizedAccount(),
-			expectedError:    nil,
+			scenarioName:        "save new merchant account",
+			shouldErrorOccur:    false,
+			account:             GenerateRandomizedAccount(),
+			expectedError:       nil,
 			shouldCreateAccount: true,
 		},
 		{

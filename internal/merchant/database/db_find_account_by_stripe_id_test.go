@@ -53,7 +53,7 @@ func findAccountByStripeIdScenarios() []findAccountByStripeIdScenario {
 	}
 }
 
-func  TestFindAccountByStripeIdOperation(t *testing.T) {
+func TestFindAccountByStripeIdOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 

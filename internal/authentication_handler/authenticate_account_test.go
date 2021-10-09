@@ -13,7 +13,7 @@ import (
 var authCmp = InitializeMockAuthenticationComponent()
 
 func TestAuthenticateAccount(t *testing.T) {
-	randomstringLength := 15
+	randomstringLength := 30
 	var scenarios = getAuthenticationTestScenarios(randomstringLength)
 
 	for _, data := range scenarios {

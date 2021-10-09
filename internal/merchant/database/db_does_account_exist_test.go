@@ -9,7 +9,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type dbDoesAccountExistScenario struct {
+type doesAccountExistScenario struct {
 	scenarioName        string
 	shouldErrorOccur    bool
 	account             *models.MerchantAccount
@@ -17,11 +17,11 @@ type dbDoesAccountExistScenario struct {
 	expectedError       error
 }
 
-func TestDbAccountExists(t *testing.T) {
+func TestDoesAccountExistsOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 
-	scenarios := getDbDoesAccountExistTestScenarios()
+	scenarios := doesAccountExistTestScenarios()
 	for _, scenario := range scenarios {
 		var merchantAcct = scenario.account
 
@@ -53,13 +53,13 @@ func TestDbAccountExists(t *testing.T) {
 	}
 }
 
-// getDbDoesAccountExistTestScenarios returns a set of scenarios to test the check account existence operation
-func getDbDoesAccountExistTestScenarios() []dbDoesAccountExistScenario {
+// doesAccountExistTestScenarios returns a set of scenarios to test the check account existence operation
+func doesAccountExistTestScenarios() []doesAccountExistScenario {
 	testAccount := GenerateRandomizedAccount()
 	nonExistentAccount := GenerateRandomizedAccount()
 	nonExistentAccount.Id = 10000
 
-	return []dbDoesAccountExistScenario{
+	return []doesAccountExistScenario{
 		{
 			// success condition: account exists
 			scenarioName:        "account exists",

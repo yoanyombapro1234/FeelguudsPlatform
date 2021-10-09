@@ -190,7 +190,7 @@ ci-test: ci-setup-deps
 	go tool cover -html=cover.out
 
 .PHONY: test
-test: start-local-deps
+test: start-local
 	echo "starting unit tests and integration tests"
 	docker ps -a
 	docker logs authentication-service

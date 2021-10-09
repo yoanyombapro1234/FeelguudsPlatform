@@ -9,7 +9,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type dbActivateAccountScenario struct {
+type activateAccountScenario struct {
 	scenarioName            string
 	shouldErrorOccur        bool
 	account                 *models.MerchantAccount
@@ -18,9 +18,9 @@ type dbActivateAccountScenario struct {
 	expectedError           error
 }
 
-// getDbActivateAccountTestScenarios returns a set of scenarios to test the activate account operation
-func getDbActivateAccountTestScenarios() []dbActivateAccountScenario {
-	return []dbActivateAccountScenario{
+// activateAccountTestScenarios returns a set of scenarios to test the activate account operation
+func activateAccountTestScenarios() []activateAccountScenario {
+	return []activateAccountScenario{
 		{ // failure condition - attempt to deactivate non-existent account
 			scenarioName:            "activate non-existent account",
 			shouldErrorOccur:        true,
@@ -50,11 +50,11 @@ func getDbActivateAccountTestScenarios() []dbActivateAccountScenario {
 	}
 }
 
-func TestDbActivateAccount(t *testing.T) {
+func TestActivateAccountOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 
-	scenarios := getDbActivateAccountTestScenarios()
+	scenarios := activateAccountTestScenarios()
 
 	var (
 		acct *models.MerchantAccount

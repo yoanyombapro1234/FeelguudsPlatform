@@ -70,8 +70,8 @@ func GenerateRandomizedAccount() *models.MerchantAccount {
 	return &models.MerchantAccount{
 		Owners: []*models.Owner{
 			{
-				FirstName: "yoan",
-				LastName:  "yomba",
+				FirstName: helper.GenerateRandomString(8),
+				LastName:  helper.GenerateRandomString(8),
 				Email:     fmt.Sprintf("%s@gmail.com", randStr),
 				Country:   "USA",
 			},

@@ -9,7 +9,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type dbFindAccountByEmailScenario struct {
+type findAccountByEmailScenario struct {
 	scenarioName        string
 	shouldErrorOccur    bool
 	account             *models.MerchantAccount
@@ -18,9 +18,9 @@ type dbFindAccountByEmailScenario struct {
 	deactivateAccount   bool
 }
 
-// getDbFindAccountByEmailScenarios returns a set of scenarios to test the account's existence based on provided email
-func getDbFindAccountByEmailScenarios() []dbFindAccountByEmailScenario {
-	return []dbFindAccountByEmailScenario{
+// findAccountByEmailScenarios returns a set of scenarios to test the account's existence based on provided email
+func findAccountByEmailScenarios() []findAccountByEmailScenario {
+	return []findAccountByEmailScenario{
 		{
 			// success condition: account exists
 			scenarioName:        "account exists",
@@ -49,11 +49,11 @@ func getDbFindAccountByEmailScenarios() []dbFindAccountByEmailScenario {
 	}
 }
 
-func TestDbFindAccountByEmail(t *testing.T) {
+func TestFindAccountByEmailOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 
-	scenarios := getDbFindAccountByEmailScenarios()
+	scenarios := findAccountByEmailScenarios()
 	for _, scenario := range scenarios {
 		var merchantAcct = scenario.account
 

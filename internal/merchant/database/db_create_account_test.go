@@ -9,18 +9,18 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type dbCreateAccountScenario struct {
+type createAccountScenario struct {
 	scenarioName     string
 	shouldErrorOccur bool
 	account          *models.MerchantAccount
 	expectedError    error
 }
 
-func TestDbCreateAccount(t *testing.T) {
+func TestCreateAccountOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 
-	scenarios := getDbCreateAccountTestScenarios()
+	scenarios := createAccountTestScenarios()
 	for _, scenario := range scenarios {
 		account, err := Conn.CreateMerchantAccount(ctx, scenario.account)
 		if err != nil {
@@ -41,11 +41,11 @@ func TestDbCreateAccount(t *testing.T) {
 	}
 }
 
-// getDbCreateAccountTestScenarios returns a set of scenarios to test the create account operation
-func getDbCreateAccountTestScenarios() []dbCreateAccountScenario {
+// createAccountTestScenarios returns a set of scenarios to test the create account operation
+func createAccountTestScenarios() []createAccountScenario {
 	testAccount := GenerateRandomizedAccount()
 
-	return []dbCreateAccountScenario{
+	return []createAccountScenario{
 		{
 			// success condition - create a new merchant account
 			scenarioName:     "create new merchant account",

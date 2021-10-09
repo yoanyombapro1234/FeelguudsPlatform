@@ -9,7 +9,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type GetAccountByIdScenario struct {
+type getAccountByIdScenario struct {
 	scenarioName        string
 	shouldErrorOccur    bool
 	account             *models.MerchantAccount
@@ -19,8 +19,8 @@ type GetAccountByIdScenario struct {
 }
 
 // getAccountByIdScenarios returns a set of scenarios to test the account's existence based on provided id
-func getAccountByIdScenarios() []GetAccountByIdScenario {
-	return []GetAccountByIdScenario{
+func getAccountByIdScenarios() []getAccountByIdScenario {
+	return []getAccountByIdScenario{
 		{
 			// success condition: account exists
 			scenarioName:        "account exists",
@@ -57,7 +57,7 @@ func getAccountByIdScenarios() []GetAccountByIdScenario {
 	}
 }
 
-func TestDbGetAccountById(t *testing.T) {
+func TestGetAccountByIdOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 
@@ -103,4 +103,3 @@ func TestDbGetAccountById(t *testing.T) {
 		}
 	}
 }
-

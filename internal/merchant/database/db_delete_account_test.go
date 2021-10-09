@@ -47,7 +47,7 @@ func deleteAccountScenarios() []deleteAccountScenario {
 	}
 }
 
-func TestDeleteAccount(t *testing.T) {
+func TestDeleteAccountOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 

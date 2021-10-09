@@ -82,9 +82,9 @@ func main() {
 
 	// retry specific configurations
 	fs.Int("HTTP_MAX_RETRIES", 5, "max retries to perform on failed http calls")
-	fs.Duration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS", 50*time.Millisecond, "minimum time to wait between failed calls for retry")
-	fs.Duration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS", 100*time.Millisecond, "maximum time to wait between failed calls for retry")
-	fs.Duration("HTTP_REQUEST_TIMEOUT_IN_MS", 300*time.Millisecond, "time until a request is seen as timing out")
+	fs.Duration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS", 150*time.Millisecond, "minimum time to wait between failed calls for retry")
+	fs.Duration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS", 300*time.Millisecond, "maximum time to wait between failed calls for retry")
+	fs.Duration("HTTP_REQUEST_TIMEOUT_IN_MS", 500*time.Millisecond, "time until a request is seen as timing out")
 	// logging specific configurations
 	fs.String("SERVICE_NAME", "FEELGUUDS_PLATFORM", "service name")
 	fs.Int("DOWNSTREAM_SERVICE_CONNECTION_LIMIT", 8, "max retries to perform while attempting to connect to downstream services")
@@ -95,8 +95,8 @@ func main() {
 	fs.String("MERCHANT_COMPONENT_USER", "merchant_component", "database user string")
 	fs.String("MERCHANT_COMPONENT_PASSWORD", "merchant_component", "database password string")
 	fs.String("MERCHANT_COMPONENT_DB_NAME", "merchant_component", "database name")
-	fs.String("REFRESH_URL", "http://localhost/v1/merchant-account/return-url", "refresh url used as part of stripe onboarding")
-	fs.String("RETURN_URL", "http://localhost/v1/merchant-account/refresh-url", "return url used as part of stripe onboarding")
+	fs.String("REFRESH_URL", "http://localhost/v1/merchant-account/refresh-url", "refresh url used as part of stripe onboarding")
+	fs.String("RETURN_URL", "http://localhost/v1/merchant-account/return-url", "return url used as part of stripe onboarding")
 	fs.Int("MAX_DB_CONNECTION_ATTEMPTS", 2, "max database connection attempts")
 	fs.Int("MAX_DB_CONNECTION_ATTEMPTS_RETRIES", 2, "max database connection attempts")
 	fs.Duration("MAX_DB_RETRY_TIMEOUT", 500*time.Millisecond, "max time until a db connection request is seen as timing out")
@@ -244,9 +244,9 @@ func InitializeAuthenticationComponent(log *zap.Logger, serviceName string) *aut
 		},
 		AuthConnectionConfig: &core_auth_sdk.RetryConfig{
 			MaxRetries:       viper.GetInt("HTTP_MAX_RETRIES"),
-			MinRetryWaitTime: 150 * time.Millisecond, // viper.GetDuration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS"),
-			MaxRetryWaitTime: 300 * time.Millisecond, //viper.GetDuration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS"),
-			RequestTimeout:   500 * time.Millisecond, // viper.GetDuration("HTTP_REQUEST_TIMEOUT_IN_MS"),
+			MinRetryWaitTime: viper.GetDuration("HTTP_MIN_RETRY_WAIT_TIME_IN_MS"),
+			MaxRetryWaitTime: viper.GetDuration("HTTP_MAX_RETRY_WAIT_TIME_IN_MS"),
+			RequestTimeout:   viper.GetDuration("HTTP_REQUEST_TIMEOUT_IN_MS"),
 		},
 		Logger: log,
 		Origin: origin,
