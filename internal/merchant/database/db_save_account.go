@@ -42,6 +42,10 @@ func (db *Db) saveMerchantAccountTxFunc(acct *models.MerchantAccountORM) func(ct
 			return service_errors.ErrInvalidInputArguments
 		}
 
+		if err := db.ValidateAccount(ctx, acct); err != nil {
+			return err
+		}
+
 		if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Save(&acct).Error; err != nil {
 			return err
 		}

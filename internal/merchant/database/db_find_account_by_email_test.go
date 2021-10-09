@@ -18,6 +18,37 @@ type dbFindAccountByEmailScenario struct {
 	deactivateAccount   bool
 }
 
+// getDbFindAccountByEmailScenarios returns a set of scenarios to test the account's existence based on provided email
+func getDbFindAccountByEmailScenarios() []dbFindAccountByEmailScenario {
+	return []dbFindAccountByEmailScenario{
+		{
+			// success condition: account exists
+			scenarioName:        "account exists",
+			shouldErrorOccur:    false,
+			account:             GenerateRandomizedAccount(),
+			shouldCreateAccount: true,
+			expectedError:       nil,
+		},
+		{
+			// failure condition: account does not exist
+			scenarioName:        "account does not exist",
+			shouldErrorOccur:    true,
+			account:             GenerateRandomizedAccount(),
+			shouldCreateAccount: false,
+			expectedError:       service_errors.ErrAccountDoesNotExist,
+		},
+		{
+			// failure condition: account does not exist .. account not active
+			scenarioName:        "account does not exists ... account not active",
+			shouldErrorOccur:    true,
+			account:             GenerateRandomizedAccount(),
+			shouldCreateAccount: true,
+			expectedError:       service_errors.ErrAccountExistButInactive,
+			deactivateAccount:   true,
+		},
+	}
+}
+
 func TestDbFindAccountByEmail(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
@@ -62,36 +93,5 @@ func TestDbFindAccountByEmail(t *testing.T) {
 		if !scenario.shouldErrorOccur {
 			assert.True(t, accountExists)
 		}
-	}
-}
-
-// getDbFindAccountByEmailScenarios returns a set of scenarios to test the account's existence based on provided email
-func getDbFindAccountByEmailScenarios() []dbFindAccountByEmailScenario {
-	return []dbFindAccountByEmailScenario{
-		{
-			// success condition: account exists
-			scenarioName:        "account exists",
-			shouldErrorOccur:    false,
-			account:             GenerateRandomizedAccount(),
-			shouldCreateAccount: true,
-			expectedError:       nil,
-		},
-		{
-			// failure condition: account does not exist
-			scenarioName:        "account does not exist",
-			shouldErrorOccur:    true,
-			account:             GenerateRandomizedAccount(),
-			shouldCreateAccount: false,
-			expectedError:       service_errors.ErrAccountDoesNotExist,
-		},
-		{
-			// failure condition: account does not exist .. account not active
-			scenarioName:        "account does not exists ... account not active",
-			shouldErrorOccur:    true,
-			account:             GenerateRandomizedAccount(),
-			shouldCreateAccount: true,
-			expectedError:       service_errors.ErrAccountExistButInactive,
-			deactivateAccount:   true,
-		},
 	}
 }

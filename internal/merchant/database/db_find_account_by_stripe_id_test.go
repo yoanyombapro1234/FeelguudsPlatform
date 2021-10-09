@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type GetAccountByIdScenario struct {
+type findAccountByStripeIdScenario struct {
 	scenarioName        string
 	shouldErrorOccur    bool
 	account             *models.MerchantAccount
@@ -18,30 +19,25 @@ type GetAccountByIdScenario struct {
 	deactivateAccount   bool
 }
 
-// getAccountByIdScenarios returns a set of scenarios to test the account's existence based on provided id
-func getAccountByIdScenarios() []GetAccountByIdScenario {
-	return []GetAccountByIdScenario{
+// findAccountByStripeIdScenarios returns a set of scenarios to test the account's existence based on provided email
+func findAccountByStripeIdScenarios() []findAccountByStripeIdScenario {
+	acctWithNoStripeId := GenerateRandomizedAccount()
+	acctWithNoStripeId.StripeConnectedAccountId = helper.EMPTY
+
+	return []findAccountByStripeIdScenario{
 		{
 			// success condition: account exists
-			scenarioName:        "account exists",
+			scenarioName:        "find an account by stripe id that already exists",
 			shouldErrorOccur:    false,
 			account:             GenerateRandomizedAccount(),
 			shouldCreateAccount: true,
 			expectedError:       nil,
 		},
 		{
-			// failure condition: account does not exist - id (0)
-			scenarioName:        "account does not exist - id (0)",
+			// failure condition: account does not exist
+			scenarioName:        "account does not exist",
 			shouldErrorOccur:    true,
 			account:             GenerateRandomizedAccount(),
-			shouldCreateAccount: false,
-			expectedError:       service_errors.ErrInvalidInputArguments,
-		},
-		{
-			// failure condition: account does not exist - id (non-existent)
-			scenarioName:        "account does not exist - id non-existent",
-			shouldErrorOccur:    true,
-			account:             GenerateRandomizedAccountWithRandomId(),
 			shouldCreateAccount: false,
 			expectedError:       service_errors.ErrAccountDoesNotExist,
 		},
@@ -57,11 +53,11 @@ func getAccountByIdScenarios() []GetAccountByIdScenario {
 	}
 }
 
-func TestDbGetAccountById(t *testing.T) {
+func  TestFindAccountByStripeIdOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 
-	scenarios := getAccountByIdScenarios()
+	scenarios := findAccountByStripeIdScenarios()
 	for _, scenario := range scenarios {
 		var merchantAcct = scenario.account
 
@@ -85,7 +81,7 @@ func TestDbGetAccountById(t *testing.T) {
 			merchantAcct = acct
 		}
 
-		account, err := Conn.GetMerchantAccountById(ctx, merchantAcct.Id, true)
+		acct, err := Conn.FindMerchantAccountByStripeAccountId(ctx, merchantAcct.StripeConnectedAccountId)
 		if err != nil {
 			if scenario.shouldErrorOccur {
 				assert.Equal(t, err, scenario.expectedError)
@@ -99,8 +95,7 @@ func TestDbGetAccountById(t *testing.T) {
 		}
 
 		if !scenario.shouldErrorOccur {
-			assert.NotNil(t, account)
+			assert.NotNil(t, acct)
 		}
 	}
 }
-

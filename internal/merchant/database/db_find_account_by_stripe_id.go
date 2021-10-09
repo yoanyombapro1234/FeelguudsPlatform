@@ -44,7 +44,16 @@ func (db *Db) findMerchantAccountByStripeConnectedAccountIdTxFunc(stripeAcctId s
 			return nil, service_errors.ErrAccountDoesNotExist
 		}
 
-		return account, nil
+		if !account.IsActive {
+			return nil, service_errors.ErrAccountExistButInactive
+		}
+
+		acct, err := account.ToPB(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &acct, nil
 	}
 	return tx
 }

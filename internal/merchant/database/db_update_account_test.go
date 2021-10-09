@@ -11,7 +11,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type dbUpdateAccountScenario struct {
+type updateAccountScenario struct {
 	scenarioName        string
 	account             *models.MerchantAccount
 	shouldCreateAccount bool
@@ -19,11 +19,11 @@ type dbUpdateAccountScenario struct {
 	expectedError       error
 }
 
-func TestDbUpdateAccount(t *testing.T) {
+func TestUpdateAccountOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
 
-	scenarios := getDbUpdateAccountScenarios()
+	scenarios := updateAccountScenarios()
 	for _, scenario := range scenarios {
 		var merchantAcct = scenario.account
 
@@ -54,19 +54,19 @@ func TestDbUpdateAccount(t *testing.T) {
 		}
 
 		if !scenario.shouldErrorOccur {
+			assert.NotNil(t, updatedAcct)
 			assert.Equal(t, updatedAcct.BusinessEmail, updatedEmail)
 			assert.Equal(t, updatedAcct.Id, merchantAcct.Id)
-			assert.NotNil(t, updatedAcct)
 		}
 	}
 }
 
-func getDbUpdateAccountScenarios() []dbUpdateAccountScenario {
+func updateAccountScenarios() []updateAccountScenario {
 	testAcct := GenerateRandomizedAccount()
 	nonExistentAcct := GenerateRandomizedAccount()
 	nonExistentAcct.Id = 10000
 
-	return []dbUpdateAccountScenario{
+	return []updateAccountScenario{
 		{
 			// success condition - update existing merchant account
 			scenarioName:        "update existing account",

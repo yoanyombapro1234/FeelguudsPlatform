@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
 )
@@ -46,7 +47,7 @@ func (db *Db) deactivateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 			return nil, service_errors.ErrAccountDoesNotExist
 		}
 
-		if err := db.Conn.Engine.Model(&account).Update("is_active", "false").Error; err != nil {
+		if err := db.Conn.Engine.Model(&models.MerchantAccountORM{}).Where("id", account.Id).Update("is_active", "false").Error; err != nil {
 			return false, err
 		}
 

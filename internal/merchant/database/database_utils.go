@@ -66,7 +66,7 @@ func (db *Db) ValidateAccountIds(ctx context.Context, account *models.MerchantAc
 		return err
 	}
 
-	if account.AuthnAccountId == 0 || account.StripeAccountId == 0 || account.StripeConnectedAccountId == EMPTY || account.EmployerId == 0 {
+	if account.AuthnAccountId == 0 || account.StripeConnectedAccountId == EMPTY || account.EmployerId == 0 {
 		return service_errors.ErrMisconfiguredIds
 	}
 

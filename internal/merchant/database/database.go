@@ -19,13 +19,12 @@ type TxFunc func(ctx context.Context, tx *gorm.DB) (interface{}, error)
 
 type OperationType string
 
-// DbOperations provides an interface which any database tied to this service should implement
-type DbOperations interface {
+// Database provides an interface which any database tied to this service should implement
+type Database interface {
 	CreateMerchantAccount(ctx context.Context, account *models.MerchantAccount) (*models.MerchantAccount, error)
 	UpdateMerchantAccount(ctx context.Context, id uint64, account *models.MerchantAccount) (*models.MerchantAccount, error)
 	DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, error)
 	GetMerchantAccountById(ctx context.Context, id uint64, checkAccountActivationStatus bool) (*models.MerchantAccount, error)
-	GetMerchantAccountsById(ctx context.Context, ids []uint64) ([]*models.MerchantAccount, error)
 	CheckAccountExistenceStatus(ctx context.Context, id uint64) (bool, error)
 	ActivateAccount(ctx context.Context, id uint64) (bool, error)
 	FindMerchantAccountByStripeAccountId(ctx context.Context, stripeConnectedAccountId string) (*models.MerchantAccount, error)
@@ -42,7 +41,7 @@ type Db struct {
 	OperationSleepInterval time.Duration
 }
 
-var _ DbOperations = (*Db)(nil)
+var _ Database = (*Db)(nil)
 
 type ConnectionInitializationParams struct {
 	ConnectionParams       *helper.DatabaseConnectionParams

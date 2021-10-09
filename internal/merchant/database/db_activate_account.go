@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 	"gorm.io/gorm"
 )
@@ -14,7 +15,7 @@ import (
 // the assumption from the context of the database is that all account should have the proper set of parameters in order prior
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
 func (db *Db) ActivateAccount(ctx context.Context, id uint64) (bool, error) {
-	const operationType = "active_business_account_db_op"
+	const operationType = "activate_business_account_db_op"
 	db.Logger.Info(fmt.Sprintf("active business account database operation. id: %d", id))
 
 	tx := db.activateMerchantAccountTxFunc(id)
@@ -34,27 +35,27 @@ func (db *Db) ActivateAccount(ctx context.Context, id uint64) (bool, error) {
 // activateMerchantAccountTxFunc wraps the update operation in a database tx.
 func (db *Db) activateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
-		const operationType = "update_business_account_db_tx"
+		const operationType = "activate_business_account_db_tx"
 		db.Logger.Info("starting transaction")
 
 		if id == 0 {
-			return nil, service_errors.ErrInvalidInputArguments
+			return false, service_errors.ErrInvalidInputArguments
 		}
 
 		account, err := db.GetMerchantAccountById(ctx, id, false)
 		if err != nil {
-			return nil, err
+			return false, err
 		}
 
 		if account.IsActive {
-			return account, nil
+			return true, nil
 		}
 
-		if err := db.Conn.Engine.Model(&account).Update("is_active", "true").Error; err != nil {
-			return nil, err
+		if err := db.Conn.Engine.Model(&models.MerchantAccountORM{}).Where("id", account.Id).Update("is_active", "true").Error; err != nil {
+			return false, err
 		}
 
-		return &account, nil
+		return true, nil
 	}
 	return tx
 }
