@@ -29,10 +29,10 @@ jobs:
         with:
           version: ${{ matrix.helm-version }}
       - name: Deploy
-        run: ./test/install_charts.sh
+        run: ./scripts/install_charts.sh
       - name: Run integration tests
         run: ./test/test.sh
       - name: Debug failure
         if: failure()
         run: |
-          kubectl logs -l app=podinfo || true
+          kubectl logs -l app=feelguuds_platform || true
