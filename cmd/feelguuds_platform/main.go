@@ -30,6 +30,98 @@ import (
 func main() {
 	// flags definition
 	fs := pflag.NewFlagSet("default", pflag.ContinueOnError)
+	configureEnvironmentVariables(fs)
+
+	// capture goroutines waiting on synchronization primitives
+	runtime.SetBlockProfileRate(1)
+	versionFlag := fs.BoolP("ENABLE_VERSION_FROM_FILE", "v", false, "get version number")
+
+	// parse flags
+	ParseFlags(fs, versionFlag)
+	LoadEnvVariables(fs)
+	LoadServiceConfigsFromFile()
+
+	serviceName := viper.GetString("SERVICE_NAME")
+	logLevel := viper.GetString("LOG_LEVEL")
+
+	logInstance := core_logging.New(logLevel)
+	defer logInstance.ConfigureLogger()
+	log := logInstance.Logger
+
+	authenticationComponent := InitializeAuthenticationComponent(log, serviceName)
+	merchantAccountComponent := InitializeMerchantAccountComponent(log, authenticationComponent)
+
+	// start stress tests if any
+	numStressedCpus := viper.GetInt("NUMBER_OF_STRESSED_CPU")
+	dataInMemForStressTestInMb := viper.GetInt("DATA_LOADED_IN_MEMORY_FOR_STRESS_TEST_IN_MB")
+	beginStressTest(numStressedCpus, dataInMemForStressTestInMb, log)
+	ValidatePorts(fs)
+	ValidateDelayOptions(log)
+	grpcCfg, srvCfg := LoadServerConfigs(log)
+
+	// start gRPC server
+	if grpcCfg.Port > 0 {
+		grpcSrv, _ := grpc.NewServer(&grpcCfg, log)
+		go grpcSrv.ListenAndServe()
+	}
+
+	// log version and port
+	log.Info(fmt.Sprintf("Starting %s", serviceName),
+		zap.String("version", viper.GetString("VERSION")),
+		zap.String("revision", viper.GetString("REVISION")),
+		zap.String("port", srvCfg.Port),
+	)
+
+	// start HTTP server
+	srv, _ := api.NewServer(&srvCfg, log, authenticationComponent, merchantAccountComponent)
+	stopCh := signals.SetupSignalHandler()
+	srv.ListenAndServe(stopCh)
+}
+
+func InitializeMerchantAccountComponent(log *zap.Logger, authenticationComponent *authentication_handler.AuthenticationComponent) *merchant.
+	MerchantAccountComponent {
+	host := viper.GetString("MERCHANT_COMPONENT_HOST")
+	port := viper.GetInt("MERCHANT_COMPONENT_PORT")
+	user := viper.GetString("MERCHANT_COMPONENT_USER")
+	password := viper.GetString("MERCHANT_COMPONENT_PASSWORD")
+	dbname := viper.GetString("MERCHANT_COMPONENT_DB_NAME")
+	stripeApiKey := viper.GetString("STRIPE_API_KEY")
+	httpTimeout := viper.GetDuration("HTTP_REQUEST_TIMEOUT_IN_MS")
+	refreshUrl := viper.GetString("REFRESH_URL")
+	returnUrl := viper.GetString("REFRESH_URL")
+
+	maxDBConnAttempts := viper.GetInt("MAX_DB_CONNECTION_ATTEMPTS")
+	maxRetriesPerDBConnectionAttempt := viper.GetInt("MAX_DB_CONNECTION_ATTEMPTS_RETRIES")
+	maxDBRetryTimeout := viper.GetDuration("MAX_DB_RETRY_TIMEOUT")
+	maxDBSleepInterval := viper.GetDuration("DB_RETRY_SLEEP_INTERVAL")
+
+	params := merchant.AccountParams{
+		AuthenticationComponent: authenticationComponent,
+		DatabaseConnectionParams: &helper.DatabaseConnectionParams{
+			Host:         host,
+			User:         user,
+			Password:     password,
+			DatabaseName: dbname,
+			Port:         port,
+		},
+		DatabaseConnectionMetadataParams: &merchant.DatabaseConnectionMetadataParams{
+			MaxDatabaseConnectionAttempts:  maxDBConnAttempts,
+			MaxRetriesPerConnectionAttempt: maxRetriesPerDBConnectionAttempt,
+			RetryTimeout:                   maxDBRetryTimeout,
+			RetrySleepInterval:             maxDBSleepInterval,
+		},
+		Logger:       log,
+		StripeApiKey: &stripeApiKey,
+		RefreshUrl:   &refreshUrl,
+		ReturnUrl:    &returnUrl,
+		HttpTimeout:  httpTimeout,
+	}
+
+	log.Info("successfully initialized merchant account component")
+	return merchant.NewMerchantAccountComponent(&params)
+}
+
+func configureEnvironmentVariables(fs *pflag.FlagSet) {
 	fs.Int("HTTP_PORT", 9897, "HTTP port")
 	fs.Int("HTTPS_PORT", 9898, "HTTPS port")
 	fs.Int("METRICS_PORT", 9899, "metrics port")
@@ -111,98 +203,6 @@ func main() {
 
 	// stripe specific secrets
 	fs.String("STRIPE_API_KEY", "", "stripe api key")
-
-	// capture goroutines waiting on synchronization primitives
-	runtime.SetBlockProfileRate(1)
-	versionFlag := fs.BoolP("ENABLE_VERSION_FROM_FILE", "v", false, "get version number")
-	// parse flags
-	ParseFlags(fs, versionFlag)
-	// BindFlagsToEnvironmentVariables(fs)
-	LoadEnvVariables(fs)
-	LoadServiceConfigsFromFile()
-
-	serviceName := viper.GetString("SERVICE_NAME")
-	logLevel := viper.GetString("LOG_LEVEL")
-
-	logInstance := core_logging.New(logLevel)
-	defer logInstance.ConfigureLogger()
-	log := logInstance.Logger
-
-	// initialize authentication's account component's dependencies
-	var authenticationComponent *authentication_handler.AuthenticationComponent
-	{
-		authenticationComponent = InitializeAuthenticationComponent(log, serviceName)
-	}
-
-	var merchantAccountComponent *merchant.MerchantAccountComponent
-	// initialize merchant account component's dependencies
-	{
-		host := viper.GetString("MERCHANT_COMPONENT_HOST")
-		port := viper.GetInt("MERCHANT_COMPONENT_PORT")
-		user := viper.GetString("MERCHANT_COMPONENT_USER")
-		password := viper.GetString("MERCHANT_COMPONENT_PASSWORD")
-		dbname := viper.GetString("MERCHANT_COMPONENT_DB_NAME")
-		stripeApiKey := viper.GetString("STRIPE_API_KEY")
-		httpTimeout := viper.GetDuration("HTTP_REQUEST_TIMEOUT_IN_MS")
-		refreshUrl := viper.GetString("REFRESH_URL")
-		returnUrl := viper.GetString("REFRESH_URL")
-
-		maxDBConnAttempts := viper.GetInt("MAX_DB_CONNECTION_ATTEMPTS")
-		maxRetriesPerDBConnectionAttempt := viper.GetInt("MAX_DB_CONNECTION_ATTEMPTS_RETRIES")
-		maxDBRetryTimeout := viper.GetDuration("MAX_DB_RETRY_TIMEOUT")
-		maxDBSleepInterval := viper.GetDuration("DB_RETRY_SLEEP_INTERVAL")
-
-		params := merchant.AccountParams{
-			AuthenticationComponent: authenticationComponent,
-			DatabaseConnectionParams: &helper.DatabaseConnectionParams{
-				Host:         host,
-				User:         user,
-				Password:     password,
-				DatabaseName: dbname,
-				Port:         port,
-			},
-			DatabaseConnectionMetadataParams: &merchant.DatabaseConnectionMetadataParams{
-				MaxDatabaseConnectionAttempts:  maxDBConnAttempts,
-				MaxRetriesPerConnectionAttempt: maxRetriesPerDBConnectionAttempt,
-				RetryTimeout:                   maxDBRetryTimeout,
-				RetrySleepInterval:             maxDBSleepInterval,
-			},
-			Logger:       log,
-			StripeApiKey: &stripeApiKey,
-			RefreshUrl:   &refreshUrl,
-			ReturnUrl:    &returnUrl,
-			HttpTimeout:  httpTimeout,
-		}
-
-		merchantAccountComponent = merchant.NewMerchantAccountComponent(&params)
-		log.Info("successfully initialized merchant account component")
-	}
-
-	// start stress tests if any
-	numStressedCpus := viper.GetInt("NUMBER_OF_STRESSED_CPU")
-	dataInMemForStressTestInMb := viper.GetInt("DATA_LOADED_IN_MEMORY_FOR_STRESS_TEST_IN_MB")
-	beginStressTest(numStressedCpus, dataInMemForStressTestInMb, log)
-	ValidatePorts(fs)
-	ValidateDelayOptions(log)
-	grpcCfg, srvCfg := LoadServerConfigs(log)
-
-	// start gRPC server
-	if grpcCfg.Port > 0 {
-		grpcSrv, _ := grpc.NewServer(&grpcCfg, log)
-		go grpcSrv.ListenAndServe()
-	}
-
-	// log version and port
-	log.Info(fmt.Sprintf("Starting %s", serviceName),
-		zap.String("version", viper.GetString("VERSION")),
-		zap.String("revision", viper.GetString("REVISION")),
-		zap.String("port", srvCfg.Port),
-	)
-
-	// start HTTP server
-	srv, _ := api.NewServer(&srvCfg, log, authenticationComponent, merchantAccountComponent)
-	stopCh := signals.SetupSignalHandler()
-	srv.ListenAndServe(stopCh)
 }
 
 // LoadServerConfigs loads server configurations (grpc and http)
