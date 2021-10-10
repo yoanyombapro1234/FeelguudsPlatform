@@ -21,3 +21,5 @@ gcloud/
 dist/
 bin/
 */data/
+.env
+service.env
