@@ -3,9 +3,9 @@ entries:
   authentication-service:
   - apiVersion: v1
     appVersion: 0.0.1
-    created: "2021-10-12T06:12:31.570323495Z"
+    created: "2021-10-12T06:17:16.537145216Z"
     description: Authentication Service Helm chart for Kubernetes
-    digest: 98971328958387c0657afb854dbd91abcb1fe51df93ae3b622cec83b0f64e2d9
+    digest: 601667ec2e39e62590952f0310fd226e46677fc83c2f7753fbeaf36cab838890
     home: https://github.com/yoanyombapro1234/FeelGuuds
     keywords:
     - docker-compose.keratin_authn
@@ -22,9 +22,9 @@ entries:
   feelguuds-platform:
   - apiVersion: v1
     appVersion: 0.0.1
-    created: "2021-10-12T06:12:31.571827303Z"
+    created: "2021-10-12T06:17:16.538576242Z"
     description: Feelguuds Platforn Helm chart for Kubernetes
-    digest: 754c07f60a8e7cf09ff310ef49da8abfc7a5f902d2d58c79be9aa3ae843b60f9
+    digest: 47cabe784f5ab65e278ca92567025d5b3bc385d93bd2fa66be91bf8db679e4d9
     home: https://github.com/yoanyombapro1234/FeelGuuds
     icon: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif
     keywords:
@@ -39,4 +39,4 @@ entries:
     urls:
     - https://yoanyombapro1234.github.io/FeelguudsPlatform/charts/feelguuds-platform-0.0.1.tgz
     version: 0.0.1
-generated: "2021-10-12T06:12:31.568863486Z"
+generated: "2021-10-12T06:17:16.535810791Z"
