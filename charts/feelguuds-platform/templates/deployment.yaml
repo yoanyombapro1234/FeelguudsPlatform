@@ -171,8 +171,6 @@ spec:
                 - localhost:{{ .Values.service.httpPort | default 9897 }}/readyz
             initialDelaySeconds: 1
             timeoutSeconds: 5
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
