@@ -2,596 +2,216 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.merchant.dep.yaml
-      -f docker-compose.shopper.dep.yaml convert
+    kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f docker-compose.merchant.dep.yaml -f docker-compose.shopper.dep.yamlconvert
     kompose.version: 1.19.0 (f63a961c)
+  name: {{ include "platform.fullname" . }}
   labels:
-	{{- include "platform.labels" . | nindent 4 }}
+    {{- include "platform.labels" . | nindent 4 }}
     io.kompose.service: {{ template "platform.fullname" . }}
-  name: {{ template "platform.fullname" . }}
 spec:
-  progressDeadlineSeconds: {{ .Values.progressDeadlineInSeconds }}
-  {{- if not .Values.hpa.enabled }}
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
+  progressDeadlineSeconds: {{ .Values.progressDeadlineInSeconds }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  strategy:
+    type: {{ .Values.deploymentStrategy.type }}
   selector:
     matchLabels:
       io.kompose.service: {{ template "platform.fullname" . }}
       {{- include "platform.selectorLabels" . | nindent 6 }}
-  strategy:
-    type: {{ .Values.deploymentStrategy.type }}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
       annotations:
-        kompose.cmd: kompose -f docker-compose.yaml -f docker-compose.authn.yaml -f
-          docker-compose.merchant.dep.yaml -f docker-compose.shopper.dep.yaml convert
-        kompose.version: 1.19.0 (f63a961c)
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "{{ .Values.service.httpPort }}"
-	    {{- range $key, $value := .Values.podAnnotations }}}
-	    {{ $key }}: {{ $value | quote }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-	    io.kompose.service: {{ template "platform.fullname" . }}
+        {{- include "platform.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "platform.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - env:
+        - name: {{ .Chart.Name }}
+          {{- if .Values.securityContext }}
+          securityContext:
+		  {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- else if (or .Values.service.hostPort .Values.tls.hostPort) }}
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+		  {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
             - name: AUTHN_ACCESS_TOKEN_TTL
-			  valueFrom:
+              valueFrom:
                 configMapKeyRef:
                   key: AUTHN_ACCESS_TOKEN_TTL
                   name: feelguuds-platform-env
             - name: AUTHN_APP_PASSWORD_CHANGED_URL
-			  valueFrom:
+              valueFrom:
                 configMapKeyRef:
                   key: AUTHN_APP_PASSWORD_CHANGED_URL
                   name: feelguuds-platform-env
             - name: AUTHN_APP_PASSWORD_RESET_URL
-			  valueFrom:
+              valueFrom:
                 configMapKeyRef:
                   key: AUTHN_APP_PASSWORD_RESET_URL
                   name: feelguuds-platform-env
             - name: AUTHN_DATABASE_URL
-			  valueFrom:
+              valueFrom:
                 configMapKeyRef:
                   key: AUTHN_DATABASE_URL
                   name: feelguuds-platform-env
             - name: AUTHN_DB_ENCRYPTION_KEY_SALT
-			  valueFrom:
+              valueFrom:
                 configMapKeyRef:
                   key: AUTHN_DB_ENCRYPTION_KEY_SALT
                   name: feelguuds-platform-env
             - name: AUTHN_DOMAINS
-			  valueFrom:
+              valueFrom:
                 configMapKeyRef:
                   key: AUTHN_DOMAINS
                   name: feelguuds-platform-env
             - name: AUTHN_ENABLE_SIGNUP
-			  valueFrom:
+              valueFrom:
                 configMapKeyRef:
                   key: AUTHN_ENABLE_SIGNUP
                   name: feelguuds-platform-env
-            - name: AUTHN_EXTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_EXTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_INTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_INTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_ISSUER_BASE_URL
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_ISSUER_BASE_URL
-                  name: feelguuds-platform-env
-            - name: AUTHN_MYSQL_EXTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_MYSQL_EXTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_MYSQL_INTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_MYSQL_INTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_MYSQL_NAME
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_MYSQL_NAME
-                  name: feelguuds-platform-env
-            - name: AUTHN_ORIGIN
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_ORIGIN
-                  name: feelguuds-platform-env
-            - name: AUTHN_PASSWORD
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_PASSWORD
-                  name: feelguuds-platform-env
-            - name: AUTHN_PASSWORD_CHANGE_LOGOUT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_PASSWORD_CHANGE_LOGOUT
-                  name: feelguuds-platform-env
-            - name: AUTHN_PASSWORD_POLICY_SCORE
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_PASSWORD_POLICY_SCORE
-                  name: feelguuds-platform-env
-            - name: AUTHN_PASSWORD_RESET_TOKEN_TTL
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_PASSWORD_RESET_TOKEN_TTL
-                  name: feelguuds-platform-env
-            - name: AUTHN_PORT
-			  value: "8000"
-            - name: AUTHN_POSTGRES_CONTAINER
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_POSTGRES_CONTAINER
-                  name: feelguuds-platform-env
-            - name: AUTHN_POSTGRES_DB_NAME
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_POSTGRES_DB_NAME
-                  name: feelguuds-platform-env
-            - name: AUTHN_POSTGRES_EXTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_POSTGRES_EXTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_POSTGRES_INTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_POSTGRES_INTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_POSTGRES_PASSWORD
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_POSTGRES_PASSWORD
-                  name: feelguuds-platform-env
-            - name: AUTHN_POSTGRES_USER
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_POSTGRES_USER
-                  name: feelguuds-platform-env
-            - name: AUTHN_PRIVATE_BASE_URL
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_PRIVATE_BASE_URL
-                  name: feelguuds-platform-env
-            - name: AUTHN_PUBLIC_BASE_URL
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_PUBLIC_BASE_URL
-                  name: feelguuds-platform-env
-            - name: AUTHN_REDIS_EXTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_REDIS_EXTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_REDIS_INTERNAL_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_REDIS_INTERNAL_PORT
-                  name: feelguuds-platform-env
-            - name: AUTHN_REDIS_NAME
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_REDIS_NAME
-                  name: feelguuds-platform-env
-            - name: AUTHN_REDIS_URL
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_REDIS_URL
-                  name: feelguuds-platform-env
-            - name: AUTHN_REFRESH_TOKEN_TTL
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_REFRESH_TOKEN_TTL
-                  name: feelguuds-platform-env
-            - name: AUTHN_SECRET
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_SECRET
-                  name: feelguuds-platform-env
-            - name: AUTHN_SERVICE_NAME
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_SERVICE_NAME
-                  name: feelguuds-platform-env
-            - name: AUTHN_SESSION_KEY_SALT
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_SESSION_KEY_SALT
-                  name: feelguuds-platform-env
-            - name: AUTHN_USERNAME
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_USERNAME
-                  name: feelguuds-platform-env
-            - name: AUTHN_USERNAME_IS_EMAIL
-			  valueFrom:
-                configMapKeyRef:
-                  key: AUTHN_USERNAME_IS_EMAIL
-                  name: feelguuds-platform-env
-            - name: BACKEND_SERVICE_URLS
-			  valueFrom:
-                configMapKeyRef:
-                  key: BACKEND_SERVICE_URLS
-                  name: feelguuds-platform-env
-            - name: CACHE_SERVER_ADDRESS
-			  valueFrom:
-                configMapKeyRef:
-                  key: CACHE_SERVER_ADDRESS
-                  name: feelguuds-platform-env
-            - name: CERT_PATH
-			  valueFrom:
-                configMapKeyRef:
-                  key: CERT_PATH
-                  name: feelguuds-platform-env
-            - name: CONFIG_FILE
-			  valueFrom:
-                configMapKeyRef:
-                  key: CONFIG_FILE
-                  name: feelguuds-platform-env
-            - name: CONFIG_PATH
-			  valueFrom:
-                configMapKeyRef:
-                  key: CONFIG_PATH
-                  name: feelguuds-platform-env
-            - name: DATA_LOADED_IN_MEMORY_FOR_STRESS_TEST_IN_MB
-			  valueFrom:
-                configMapKeyRef:
-                  key: DATA_LOADED_IN_MEMORY_FOR_STRESS_TEST_IN_MB
-                  name: feelguuds-platform-env
-            - name: DATA_PATH
-			  valueFrom:
-                configMapKeyRef:
-                  key: DATA_PATH
-                  name: feelguuds-platform-env
-            - name: DOWNSTREAM_SERVICE_CONNECTION_LIMIT
-			  valueFrom:
-                configMapKeyRef:
-                  key: DOWNSTREAM_SERVICE_CONNECTION_LIMIT
-                  name: feelguuds-platform-env
-            - name: ENABLE_AUTHN_PRIVATE_INTEGRATION
-			  valueFrom:
-                configMapKeyRef:
-                  key: ENABLE_AUTHN_PRIVATE_INTEGRATION
-                  name: feelguuds-platform-env
-            - name: ENABLE_CPU_STRESS_TEST
-			  valueFrom:
-                configMapKeyRef:
-                  key: ENABLE_CPU_STRESS_TEST
-                  name: feelguuds-platform-env
-            - name: ENABLE_H2C
-			  valueFrom:
-                configMapKeyRef:
-                  key: ENABLE_H2C
-                  name: feelguuds-platform-env
-            - name: ENABLE_MEMORY_STRESS_TEST
-			  valueFrom:
-                configMapKeyRef:
-                  key: ENABLE_MEMORY_STRESS_TEST
-                  name: feelguuds-platform-env
-            - name: ENABLE_RANDOM_DELAY
-			  valueFrom:
-                configMapKeyRef:
-                  key: ENABLE_RANDOM_DELAY
-                  name: feelguuds-platform-env
-            - name: ENABLE_RANDOM_ERROR
-			  valueFrom:
-                configMapKeyRef:
-                  key: ENABLE_RANDOM_ERROR
-                  name: feelguuds-platform-env
-            - name: ENABLE_VERSION_FROM_FILE
-			  valueFrom:
-                configMapKeyRef:
-                  key: ENABLE_VERSION_FROM_FILE
-                  name: feelguuds-platform-env
-            - name: GRPC_CERT_PATH
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_CERT_PATH
-                  name: feelguuds-platform-env
-            - name: GRPC_ENABLE_TLS
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_ENABLE_TLS
-                  name: feelguuds-platform-env
-            - name: GRPC_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_PORT
-                  name: feelguuds-platform-env
-            - name: GRPC_RPC_DEADLINE_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_RPC_DEADLINE_IN_MS
-                  name: feelguuds-platform-env
-            - name: GRPC_RPC_RETRIES
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_RPC_RETRIES
-                  name: feelguuds-platform-env
-            - name: GRPC_RPC_RETRY_BACKOFF_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_RPC_RETRY_BACKOFF_IN_MS
-                  name: feelguuds-platform-env
-            - name: GRPC_RPC_RETRY_TIMEOUT_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_RPC_RETRY_TIMEOUT_IN_MS
-                  name: feelguuds-platform-env
-            - name: GRPC_SERVICE_NAME
-			  valueFrom:
-                configMapKeyRef:
-                  key: GRPC_SERVICE_NAME
-                  name: feelguuds-platform-env
-            - name: HTTPS_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTPS_PORT
-                  name: feelguuds-platform-env
-            - name: HTTP_CLIENT_TIMEOUT_IN_MINUTES
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_CLIENT_TIMEOUT_IN_MINUTES
-                  name: feelguuds-platform-env
-            - name: HTTP_MAX_RETRIES
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_MAX_RETRIES
-                  name: feelguuds-platform-env
-            - name: HTTP_MAX_RETRY_WAIT_TIME_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_MAX_RETRY_WAIT_TIME_IN_MS
-                  name: feelguuds-platform-env
-            - name: HTTP_MIN_RETRY_WAIT_TIME_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_MIN_RETRY_WAIT_TIME_IN_MS
-                  name: feelguuds-platform-env
-            - name: HTTP_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_PORT
-                  name: feelguuds-platform-env
-            - name: HTTP_REQUEST_TIMEOUT_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_REQUEST_TIMEOUT_IN_MS
-                  name: feelguuds-platform-env
-            - name: HTTP_SERVER_SHUTDOWN_TIMEOUT_IN_SECONDS
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_SERVER_SHUTDOWN_TIMEOUT_IN_SECONDS
-                  name: feelguuds-platform-env
-            - name: HTTP_SERVER_TIMEOUT_IN_SECONDS
-			  valueFrom:
-                configMapKeyRef:
-                  key: HTTP_SERVER_TIMEOUT_IN_SECONDS
-                  name: feelguuds-platform-env
-            - name: LOG_LEVEL
-			  valueFrom:
-                configMapKeyRef:
-                  key: LOG_LEVEL
-                  name: feelguuds-platform-env
-            - name: METRICS_PORT
-			  valueFrom:
-                configMapKeyRef:
-                  key: METRICS_PORT
-                  name: feelguuds-platform-env
-            - name: METRIC_CONNECTION_ADDRESS
-			  valueFrom:
-                configMapKeyRef:
-                  key: METRIC_CONNECTION_ADDRESS
-                  name: feelguuds-platform-env
-            - name: NUMBER_OF_STRESSED_CPU
-			  valueFrom:
-                configMapKeyRef:
-                  key: NUMBER_OF_STRESSED_CPU
-                  name: feelguuds-platform-env
-            - name: PRIVATE_BASE_URL
-			  valueFrom:
-                configMapKeyRef:
-                  key: PRIVATE_BASE_URL
-                  name: feelguuds-platform-env
-            - name: RANDOM_DELAY_MAX_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: RANDOM_DELAY_MAX_IN_MS
-                  name: feelguuds-platform-env
-            - name: RANDOM_DELAY_MIN_IN_MS
-			  valueFrom:
-                configMapKeyRef:
-                  key: RANDOM_DELAY_MIN_IN_MS
-                  name: feelguuds-platform-env
-            - name: RANDOM_DELAY_UNIT
-			  valueFrom:
-                configMapKeyRef:
-                  key: RANDOM_DELAY_UNIT
-                  name: feelguuds-platform-env
-            - name: SERVICE_NAME
-			  valueFrom:
-                configMapKeyRef:
-                  key: SERVICE_NAME
-                  name: feelguuds-platform-env
-            - name: SET_SERVICE_UNHEALTHY
-			  valueFrom:
-                configMapKeyRef:
-                  key: SET_SERVICE_UNHEALTHY
-                  name: feelguuds-platform-env
-            - name: SET_SERVICE_UNREADY
-			  valueFrom:
-                configMapKeyRef:
-                  key: SET_SERVICE_UNREADY
-                  name: feelguuds-platform-env
-            - name: UI_COLOR
-			  valueFrom:
-                configMapKeyRef:
-                  key: UI_COLOR
-                  name: feelguuds-platform-env
-            - name: UI_LOGO
-			  valueFrom:
-                configMapKeyRef:
-                  key: UI_LOGO
-                  name: feelguuds-platform-env
-            - name: UI_MESSAGE
-			  valueFrom:
-                configMapKeyRef:
-                  key: UI_MESSAGE
-                  name: feelguuds-platform-env
-            - name: UI_PATH
-			  valueFrom:
-                configMapKeyRef:
-                  key: UI_PATH
-                  name: feelguuds-platform-env
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          name: {{ template "platform.fullname" . }}
-		  {{- if .Values.securityContext }}
-		  securityContext:
-		  {{- toYaml .Values.securityContext | nindent 12 }}
-		  {{- else if (or .Values.service.hostPort .Values.tls.hostPort) }}
-		  securityContext:
-			allowPrivilegeEscalation: true
-			capabilities:
-			  drop:
-				- ALL
-			  add:
-				- NET_BIND_SERVICE
-		  {{- end }}
-		  livenessProbe:
-			exec:
-			  command:
-				- podcli
-				- check
-				- http
-				- localhost:{{ .Values.service.httpPort | default 9897 }}/healthz
-			initialDelaySeconds: 1
-			timeoutSeconds: 5
-		  readinessProbe:
-			exec:
-			  command:
-				- podcli
-				- check
-				- http
-				- localhost:{{ .Values.service.httpPort | default 9897 }}/readyz
-			initialDelaySeconds: 1
-			timeoutSeconds: 5
-		  command:
-			- ./podinfo
-			- --port={{ .Values.service.httpPort | default 9897 }}
-			{{- if .Values.host }}
-			- --host={{ .Values.host }}
-			{{- end }}
-			{{- if .Values.tls.enabled }}
-			- --secure-port={{ .Values.tls.port }}
-			{{- end }}
-			{{- if .Values.tls.certPath }}
-			- --cert-path={{ .Values.tls.certPath }}
-			{{- end }}
-			{{- if .Values.service.metricsPort }}
-			- --port-metrics={{ .Values.service.metricsPort }}
-			{{- end }}
-			{{- if .Values.service.grpcPort }}
-			- --grpc-port={{ .Values.service.grpcPort }}
-			{{- end }}
-			{{- if .Values.service.grpcService }}
-			- --grpc-service-name={{ .Values.service.grpcService }}
-			{{- end }}
-			{{- range .Values.backends }}
-			- --backend-url={{ . }}
-			{{- end }}
-			{{- if .Values.cache }}
-			- --cache-server={{ .Values.cache }}
-			{{- else if .Values.redis.enabled }}
-			- --cache-server={{ template "platform.fullname" . }}-redis:6379
-			{{- end }}
-			- --level={{ .Values.logLevel }}
-			- --random-delay={{ .Values.faults.delay }}
-			- --random-error={{ .Values.faults.error }}
-			{{- if .Values.faults.unhealthy }}
-			- --unhealthy
-			{{- end }}
-			{{- if .Values.faults.unready }}
-			- --unready
-			{{- end }}
-			{{- if .Values.h2c.enabled }}
-			- --h2c
-			{{- end }}
+          command:
+            - ./podinfo
+            - --port={{ .Values.service.httpPort | default 9897 }}
+            {{- if .Values.host }}
+            - --host={{ .Values.host }}
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - --secure-port={{ .Values.tls.port }}
+            {{- end }}
+            {{- if .Values.tls.certPath }}
+            - --cert-path={{ .Values.tls.certPath }}
+            {{- end }}
+            {{- if .Values.service.metricsPort }}
+            - --port-metrics={{ .Values.service.metricsPort }}
+            {{- end }}
+            {{- if .Values.service.grpcPort }}
+            - --grpc-port={{ .Values.service.grpcPort }}
+            {{- end }}
+            {{- if .Values.service.grpcService }}
+            - --grpc-service-name={{ .Values.service.grpcService }}
+            {{- end }}
+            {{- range .Values.backends }}
+            - --backend-url={{ . }}
+            {{- end }}
+            {{- if .Values.cache }}
+            - --cache-server={{ .Values.cache }}
+            {{- else if .Values.redis.enabled }}
+            - --cache-server={{ template "platform.fullname" . }}-redis:6379
+            {{- end }}
+            - --level={{ .Values.logLevel }}
+            - --random-delay={{ .Values.faults.delay }}
+            - --random-error={{ .Values.faults.error }}
+            {{- if .Values.faults.unhealthy }}
+            - --unhealthy
+            {{- end }}
+            {{- if .Values.faults.unready }}
+            - --unready
+            {{- end }}
+            {{- if .Values.h2c.enabled }}
+            - --h2c
+            {{- end }}
           ports:
             - containerPort: {{ .Values.service.httpPort | default 9897 }}
               protocol: TCP
-			  {{- if .Values.service.hostPort }}
-			  hostPort: {{ .Values.service.hostPort }}
-			  {{- end }}
-			{{- if .Values.tls.enabled }}
-			- name: https
-			  containerPort: {{ .Values.tls.port | default 9899 }}
-			  protocol: TCP
-			  {{- if .Values.tls.hostPort }}
-			  hostPort: {{ .Values.tls.hostPort }}
-			{{- end }}
-			{{- end }}
-			{{- if .Values.service.metricsPort }}
-			- name: http-metrics
-			  containerPort: {{ .Values.service.metricsPort }}
-			  protocol: TCP
-			{{- end }}
-			{{- if .Values.service.grpcPort }}
-			- name: grpc
-			  containerPort: {{ .Values.service.grpcPort }}
-			  protocol: TCP
-			{{- end }}
-          resources: {}
+		      {{- if .Values.service.hostPort }}
+              hostPort: {{ .Values.service.hostPort }}
+		      {{- end }}
+		   {{- if .Values.tls.enabled }}
+            - name: https
+              containerPort: {{ .Values.tls.port | default 9899 }}
+              protocol: TCP
+              {{- if .Values.tls.hostPort }}
+              hostPort: {{ .Values.tls.hostPort }}
+              {{- end }}
+          {{- end }}
+	      {{- if .Values.service.metricsPort }}
+            - name: http-metrics
+              containerPort: {{ .Values.service.metricsPort }}
+              protocol: TCP
+	      {{- end }}
+          {{- if .Values.service.grpcPort }}
+            - name: grpc
+              containerPort: {{ .Values.service.grpcPort }}
+              protocol: TCP
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - podcli
+                - check
+                - http
+                - localhost:{{ .Values.service.httpPort | default 9897 }}/healthz
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - podcli
+                - check
+                - http
+                - localhost:{{ .Values.service.httpPort | default 9897 }}/readyz
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
             - mountPath: /go/src/github.com/yoanyombapro1234/FeelguudsPlatform
               name: feelguuds-platform-claim0
-			- name: data
-			  mountPath: /data
-			{{- if .Values.tls.enabled }}
-			- name: tls
-			  mountPath: {{ .Values.tls.certPath | default "/data/cert" }}
-			  readOnly: true
-		   {{- end }}
+            - name: data
+              mountPath: /data
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: {{ .Values.tls.certPath | default "/data/cert" }}
+              readOnly: true
+            {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy }}
       restartPolicy: {{ .Values.restartPolicy }}
       schedulerName: {{ .Values.schedulerName }}
       securityContext: {{ .Values.securityContext }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       volumes:
+        - name: data
+          emptyDir: {}
         - name: feelguuds-platform-claim0
           persistentVolumeClaim:
             claimName: feelguuds-platform-claim0
-		- name: data
-		  emptyDir: {}
-		  {{- if .Values.tls.enabled }}
-		- name: tls
-		  secret:
-			secretName: {{ template "platform.tlsSecretName" . }}
-		{{- end }}
-        resources:
+	  {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ template "platform.tlsSecretName" . }}
+	  {{- end }}
+
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
-	  nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-	    affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-	    tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-  {{- end }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

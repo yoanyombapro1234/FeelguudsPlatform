@@ -1,6 +1,6 @@
 # Default values for Feelguuds Platform.
 nameOverride: feelguuds-platform
-fullnameOverride: feelguuds-platform
+fullnameOverride:
 replicaCount: 2
 progressDeadlineInSeconds: 600
 revisionHistoryLimit: 3
@@ -161,3 +161,10 @@ failures:
   timeoutSeconds: 10
   initialDelaySeconds: 30
 
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80

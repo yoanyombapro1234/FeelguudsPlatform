@@ -160,4 +160,3 @@ failures:
   successThresholds: 1
   timeoutSeconds: 10
   initialDelaySeconds: 30
-

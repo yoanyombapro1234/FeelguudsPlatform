@@ -6,7 +6,7 @@ description: Feelguuds Platforn Helm chart for Kubernetes
 home: https://github.com/yoanyombapro1234/FeelGuuds
 icon: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif
 maintainers:
-  - email: yaonyombapro@gmail.com
+  - email: yoanyombapro@gmail.com
     name: yoanyomba
 sources:
   - https://github.com/yoanyombapro1234/FeelGuuds

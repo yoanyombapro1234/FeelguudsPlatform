@@ -4,6 +4,7 @@ appVersion: 0.0.1
 name: feelguuds-platform
 description: Feelguuds Platforn Helm chart for Kubernetes
 home: https://github.com/yoanyombapro1234/FeelGuuds
+icon: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif
 maintainers:
   - email: yoanyombapro@gmail.com
     name: yoanyomba

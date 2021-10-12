@@ -4,11 +4,11 @@ metadata:
   annotations:
     kompose.cmd: kompose --file docker-compose.yaml convert
     kompose.version: 1.19.0 (f63a961c)
-  creationTimestamp: null
   labels:
     io.kompose.service: feelguuds-platform
   name: feelguuds-platform
 spec:
+  type: {{ .Values.service.type }}
   ports:
   - name: "9898"
     port: 9898
