@@ -10,7 +10,7 @@ import (
 )
 
 type LockAccountResponse struct {
-	Code  int    `json:"code"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 
@@ -38,7 +38,7 @@ func (c *AuthenticationComponent) LockAccountHandler(w http.ResponseWriter, r *h
 	}
 
 	// invoke authentication service
-	if err = c.LockAccount(ctx, Id); err != nil {
+	if err = c.LockAccount(ctx, uint32(Id)); err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}

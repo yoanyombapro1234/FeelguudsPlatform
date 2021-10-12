@@ -67,14 +67,15 @@ type Config struct {
 	H2C                       bool          `mapstructure:"H2C"`
 	RandomDelay               bool          `mapstructure:"ENABLE_RANDOM_DELAY"`
 	RandomDelayUnit           string        `mapstructure:"RANDOM_DELAY_UNIT"`
-	RandomDelayMin            int           `mapstructure:"RANDOM_DELAY_MIN_IN_MS"`
-	RandomDelayMax            int           `mapstructure:"RANDOM_DELAY_MAX_IN_MS"`
+	RandomDelayMin            int           `mapstructure:"RANDOM_DELAY_MIN"`
+	RandomDelayMax            int           `mapstructure:"RANDOM_DELAY_MAX"`
 	RandomError               bool          `mapstructure:"ENABLE_RANDOM_ERROR"`
 	Unhealthy                 bool          `mapstructure:"SET_SERVICE_UNHEALTHY"`
 	Unready                   bool          `mapstructure:"SET_SERVICE_UNREADY"`
 	JWTSecret                 string        `mapstructure:"JWT_SECRET"`
 	CacheServer               string        `mapstructure:"CACHE_SERVER_ADDRESS"`
 	ServiceName               string        `mapstructure:"GRPC_SERVICE_NAME"`
+	StripeApiKey              string        `mapstructure:"STRIPE_API_KEY"`
 }
 
 type Server struct {
@@ -84,10 +85,10 @@ type Server struct {
 	pool                     *redis.Pool
 	handler                  http.Handler
 	authComponent            *authentication_handler.AuthenticationComponent
-	merchantAccountComponent *merchant.MerchantAccountComponent
+	merchantAccountComponent *merchant.AccountComponent
 }
 
-func NewServer(config *Config, logger *zap.Logger, authCmp *authentication_handler.AuthenticationComponent, merchantCmp *merchant.MerchantAccountComponent) (*Server, error) {
+func NewServer(config *Config, logger *zap.Logger, authCmp *authentication_handler.AuthenticationComponent, merchantCmp *merchant.AccountComponent) (*Server, error) {
 	srv := &Server{
 		router:                   mux.NewRouter(),
 		logger:                   logger,
@@ -111,6 +112,7 @@ func (s *Server) registerHandlers() {
 			EnableOpenMetrics: true,
 		},
 	))
+
 	s.router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	s.router.HandleFunc("/", s.indexHandler).HeadersRegexp("User-Agent", "^Mozilla.*").Methods("GET")
 	s.router.HandleFunc("/", s.infoHandler).Methods("GET")
@@ -147,6 +149,21 @@ func (s *Server) registerHandlers() {
 	s.router.HandleFunc("/v1/auth/account/unlock/{id:[0-9]+}", protected(s.authComponent.UnLockAccountHandler)).Methods("POST")
 	s.router.HandleFunc("/v1/auth/account/{id:[0-9]+}", protected(s.authComponent.GetAccountHandler)).Methods("GET")
 	s.router.HandleFunc("/v1/auth/account/logout", protected(s.authComponent.LogoutAccountHandler)).Methods("POST")
+
+	// merchant account routes
+	s.router.HandleFunc("/v1/merchant-account/create", s.merchantAccountComponent.CreateAccountHandler).Methods("POST")
+	s.router.HandleFunc("/v1/merchant-account/refresh-url/{id:[0-9]+}", s.merchantAccountComponent.CreateAccountRefreshUrlHandler).Methods("POST")
+	s.router.HandleFunc("/v1/merchant-account/return-url/{id:[0-9]+}", s.merchantAccountComponent.CreateAccountReturnUrlHandler).Methods("POST")
+
+	s.router.HandleFunc("/v1/merchant-account/deactivate/{id:[0-9]+}", protected(s.merchantAccountComponent.DeactivateMerchantAccountHandler)).
+		Methods(
+			"POST")
+	s.router.HandleFunc("/v1/merchant-account/activate/{id:[0-9]+}", protected(s.merchantAccountComponent.ReactivateMerchantAccountHandler)).
+		Methods(
+			"POST")
+	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", protected(s.merchantAccountComponent.GetMerchantAccountHandler)).Methods("GET")
+	s.router.HandleFunc("/v1/merchant-account/{id:[0-9]+}", protected(s.merchantAccountComponent.UpdateMerchantAccountHandler)).Methods("POST")
+
 }
 
 func (s *Server) registerMiddlewares() {

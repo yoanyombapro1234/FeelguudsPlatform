@@ -16,6 +16,9 @@ TMP_BASE := .tmp
 TMP_COVERAGE := $(TMP_BASE)/coverage
 IP := $(minikube ip)
 
+PROTO_VER = 3.7.0
+PROTO_ROOT_DIR = $(shell brew --prefix)/Cellar/protobuf/$(PROTO_VER)/include
+
 # runs an instance of the service locally
 .PHONY: run
 run:
@@ -42,11 +45,11 @@ build-charts:
 	helm package charts/*
 
 .PHONY: minikube_start
-mk_start:
+mk-start:
 	minikube start
 
 .PHONY: setup-minikube-docker-daemon
-mkd_push_image:
+mkd-push-image:
 	eval $(minikube docker-env)
 	make build-container
 
@@ -119,7 +122,6 @@ swagger:
 kill-containers:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-					  docker-compose.jaeger.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml down
 
@@ -130,35 +132,30 @@ ci-setup-authn-deps:
 .PHONY: ci-start-deps
 ci-setup-deps: ci-setup-authn-deps
 	docker-compose -f docker-compose.yaml -f \
-				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
 # start docker containers in the backgound
-.PHONY: start-local-deps
-start-local-deps:
+.PHONY: start-local
+start-local:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-					  docker-compose.jaeger.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml config
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans --detach
 
 # start docker containers with logs running in the foreground
 .PHONY: start-local-deps-live
-start-local-deps-live:
+start-local-live:
 	docker-compose -f docker-compose.yaml -f \
 					  docker-compose.authn.yaml -f \
-					  docker-compose.jaeger.yaml -f \
 					  docker-compose.merchant.dep.yaml -f \
 					  docker-compose.shopper.dep.yaml config
 	docker-compose -f docker-compose.yaml -f \
 				  	  docker-compose.authn.yaml -f \
-				   	  docker-compose.jaeger.yaml -f \
 				   	  docker-compose.merchant.dep.yaml -f \
 				   	  docker-compose.shopper.dep.yaml up --remove-orphans
 
@@ -193,10 +190,10 @@ ci-test: ci-setup-deps
 	go tool cover -html=cover.out
 
 .PHONY: test
-test: start-local-deps
+test: start-local
 	echo "starting unit tests and integration tests"
 	docker ps -a
-	docker logs authentication_service
+	docker logs authentication-service
 	go get github.com/mfridman/tparse
 	go test -v -race ./... -json -cover  -coverprofile cover.out | tparse -all -top
 	go tool cover -html=cover.out
@@ -239,3 +236,15 @@ kube-deploy: start-minikube
 	minikube dashboard
 
 # kubectl convert -f ./my-deployment.yaml --output-version apps/v1
+gen:
+	@echo "setting up grpc service schema definition via protobuf"
+	protoc -I/usr/local/include \
+		   -I. \
+		   -I$(GOPATH)/src \
+		   -I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm \
+		   -I=$(GOPATH)/src/github.com/infobloxopen/atlas-app-toolkit \
+		   -I=$(GOPATH)/src/github.com/lyft/protoc-gen-validate/validate/validate.proto \
+		   -I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm/options \
+		   --proto_path=${GOPATH}/src/github.com/gogo/protobuf/protobuf \
+		   --govalidators_out=./internal/merchant/ \
+		   --go_out="plugins=grpc:./internal/merchant" --gorm_out="engine=postgres:./internal/merchant/" ./internal/merchant/merchant.proto

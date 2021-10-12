@@ -12,7 +12,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 )
 
-func TestLockAccount(t *testing.T){
+func TestLockAccount(t *testing.T) {
 	randomstringLength := 15
 	var scenarios = getLockAccountTestScenarios(randomstringLength)
 	ctx := context.Background()
@@ -100,12 +100,12 @@ func TestLockAccountHandler(t *testing.T) {
 }
 
 type LockAccountHandlerTestMetadata struct {
-	email                        string
-	password                     string
-	responseCode                 int
-	shouldErrorOccur             bool
-	shouldCreateAccountFirst     bool
-	doubleLockScenario          bool
+	email                    string
+	password                 string
+	responseCode             int
+	shouldErrorOccur         bool
+	shouldCreateAccountFirst bool
+	doubleLockScenario       bool
 }
 
 // getLockAccountTestScenarios returns a set of test scenarios for the lock account test case
@@ -113,7 +113,7 @@ func getLockAccountTestScenarios(randomstringLength int) []LockAccountHandlerTes
 	email := helper.GenerateRandomString(randomstringLength)
 	password := helper.GenerateRandomString(randomstringLength)
 
-	return []LockAccountHandlerTestMetadata {
+	return []LockAccountHandlerTestMetadata{
 		// test success scenario. create an account first then successfully get it
 		{
 			email,
@@ -150,12 +150,11 @@ func LockAccountInAuthSvc(accountId uint32, cmp *AuthenticationComponent,
 	var result LockAccountResponse
 
 	id := fmt.Sprint(accountId)
-	req, err := http.NewRequest("POST", "//v1/auth/account/lock/" + id, nil)
+	req, err := http.NewRequest("POST", "//v1/auth/account/lock/"+id, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	req = mux.SetURLVars(req, map[string]string{"id": id})
-
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(cmp.LockAccountHandler)

@@ -1,0 +1,285 @@
+syntax = "proto3";
+
+option go_package = "/models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+// MerchantAccount represents a business account in the context of feelguuds
+message MerchantAccount {
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64  id = 1;
+	// set of owners who are responsible for this merchant account
+	repeated Owner owners = 2 [(gorm.field).has_many.preload = true];
+	// business name of the merchant account
+	string business_name = 3;
+	// business email of the merchant account
+	string business_email = 4;
+	// employer identification number
+	uint64 employer_id = 5;
+	// estimated annual revenue pre-tax of the merchant account
+	string estimate_annual_revenue = 6;
+	// merchant account address
+	Address address = 7 [(gorm.field).has_one.preload = true];
+	// types of item this merchant is selling
+	repeated ItemSold items_or_services_sold = 8 [(gorm.field).has_many.preload = true];
+	// ways in which the merchant aims to fulfill purchases
+	repeated FulfillmentOptions fulfillment_options = 9;
+	// shop settings
+	Settings ShopSettings = 10 [(gorm.field).has_one.preload = true];
+	// set of supported causes the merchant adheres to
+	repeated Causes supported_causes = 11 [(gorm.field).has_many.preload = true];
+	// merchant account bio
+	string bio = 12;
+	// merchant account headline
+	string headline = 13;
+	// merchant account phone number
+	string phone_number = 14;
+	// set of tags associated with a merchant
+	repeated Tags tags = 15 [(gorm.field).has_many.preload = true];
+	// stripe connect account id
+	string stripe_connected_account_id = 16;
+	// id of the associated stripe account this merchant account is tied to
+	uint64 stripe_account_id = 17;
+	// id of the merchant account from the context of the auth service
+	uint64 authn_account_id = 18;
+	// merchant account onboarding step
+	OnboardingStatus account_onboarding_details = 19;
+	// merchant account state
+	MerchantAccountState account_onboarding_state = 20;
+	// type of merchant account
+	MerchantAccountType account_type = 21;
+	bool isActive = 22;
+	string businessType = 23;
+	string country = 24;
+	string defaultCurrency = 25;
+}
+
+// represents the type of merchant account
+enum MerchantAccountType {
+	Individual = 0;
+	Company = 1;
+	NonProfit = 2;
+	GovernmentEntity = 3;
+}
+
+// Represents the state of the merchant account
+enum MerchantAccountState {
+	ActiveAndOnboarded = 0;
+	PendingOnboardingCompletion = 1;
+}
+
+// Represents the manner in which merchant accounts will deliver their service offerings to customers
+enum FulfillmentOptions {
+	SHIP_ITEMS = 0;
+	ALLOW_PICKUP = 1;
+	ALLOW_DELIVERY = 2;
+	ALLOW_SELF_SERVICE = 3;
+}
+
+// represents the stage in the onboarding flow the merchant account is in
+enum OnboardingStatus {
+	OnboardingNotStarted = 0;
+	FeelGuudOnboardingStarted = 1;
+	FeelGuudOnboardingCompleted = 2;
+	StripeOnboardingStarted = 3;
+	StripeOnboardingCompleted = 4;
+	CatalogueOnboardingStarted = 5;
+	CatalogueOnboardingCompleted = 6;
+	BCorpOnboardingStarted = 7;
+	BCorpOnboardingCompleted = 8;
+}
+
+// set of causes a merchant may opt to support
+enum Causes {
+	VOTING_RIGHTS = 0;
+	CLIMATE_JUSTICE = 1;
+	HEALTHCARE = 2;
+	REFUGEE_CRISIS = 3;
+	RACIAL_JUSTICE = 4;
+	INCOME_GAP = 5;
+	GUN_VIOLENCE = 6;
+	HUNGER_FOOD_INSECURITY = 7;
+	EQUALITY = 8;
+	LBGTQ = 9;
+	EDUCATION = 10;
+	FORCED_CHILD_LABOR = 11;
+	CHILD_ABUSE_NEGLECT = 12;
+	CIVIL_RIGHTS = 13;
+	POVERTY = 14;
+}
+
+// Represents all configurable settings for a given merchant account
+message Settings {
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1;
+
+	// Represents the various details associated with a payment type
+	message PaymentDetails {
+		option (gorm.opts) = {
+			ormable: true,
+		};
+		uint64 id = 1;
+
+		// Credit card type
+		enum CreditCardBrand {
+			VISA = 0;
+			MASTERCARD = 1;
+			DISCOVER = 2;
+		}
+
+		// set of acceptable credit card types
+		repeated CreditCardBrand acceptable_credit_card_types = 2;
+
+		// currency in which this business aims to transact
+		enum CurrencyCode {
+			USD = 0;
+			GBP = 1;
+		}
+
+		// primary currency this business aims to transact in
+		CurrencyCode primary_currency_code = 3;
+
+		// set of currencies the merchant can support
+		repeated CurrencyCode enabled_currency_codes = 4;
+
+		// Represents the set of supported digital wallets
+		enum DigitalWallets {
+			ANDROID_PAY = 0;
+			APPLE_PAY = 1;
+			GOOGLE_PAY = 2;
+			SHOPIFY_PAY = 3;
+		}
+
+		// set of supported digital wallets
+		repeated DigitalWallets supported_digital_wallets = 5;
+	}
+
+	// merchant account payment details
+	PaymentDetails payment_details = 2 [(gorm.field).has_one.preload = true];
+
+	// set of policies a merchant account can define on it's shop profile
+	repeated Policy ShopPolicy = 3 [(gorm.field).has_many.preload = true];
+	// set of policies a merchant account can define with respect to privacy on it's shop profile
+	repeated Policy PrivacyPolicy = 4 [(gorm.field).has_many.preload = true];
+	// set of return policies a merchant account can define with respect to issuing refunds on its shop profile
+	ReturnPolicy ReturnPolicy = 5 [(gorm.field).has_one.preload = true];
+	// set of shipping policies a merchant account can define on to its shop profile
+	ShippingPolicy ShippingPolicy = 6 [(gorm.field).has_one.preload = true];
+}
+
+// Represents the types of items a merchant account sells
+message ItemSold {
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1;
+
+	// Represents the types of services/items the merchant account will sell to customers
+	enum ItemsType {
+		PHYSICAL_ITEMS = 0;
+		MENU_ITEMS = 1;
+		DONATIONS = 2;
+		TICKETS = 3;
+		MEMBERSHIPS = 4;
+		SERVICES = 5;
+	}
+
+	ItemsType type = 2;
+}
+
+// business address
+message Address {
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1;
+
+	// the address field
+	string Address = 2;
+	// the unit if the address is an apartment
+	string Unit = 3;
+	// the address zipcode
+	string ZipCode = 4;
+	// the city
+	string City = 5;
+	// the state/municipality
+	string State = 6;
+	// longitude
+	string longitude = 7;
+	// latittude
+	string lattitude = 8;
+}
+
+// Represents the merchant account owner
+message Owner {
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1;
+
+	string FirstName=2;
+	string LastName=3;
+	string Email=4;
+	string Country=5;
+}
+
+// represents a sample tag
+message Tags {
+	option (gorm.opts) = {
+		ormable: true,
+	};
+	uint64 id = 1;
+
+	string tag_name = 2;
+	string tag_description = 3;
+	repeated string metadata = 4;
+}
+
+// Represents various policies a merchant account can declare for various use cases
+message Policy {
+	uint64 id = 1;
+
+	enum PolicyType {
+		SHIPPING_POLICY = 0;
+		RETURN_POLICY = 1;
+	}
+
+	string Body = 2;
+	string Handle = 3;
+	string Title = 4;
+	repeated Tags tags = 5 [(gorm.field).has_many.preload = true];
+}
+
+// ReturnPolicy represent a sample shop return policy
+message ReturnPolicy {
+	uint64 id = 1;
+
+	Policy policy_meta = 2;
+	uint32 contact_within_days_of_delivery = 3;
+	uint32 ship_with_days_of_delivery = 4;
+	uint32 request_cancellation_within_days_of_delivery = 5;
+	repeated string items_not_to_be_returned = 6;
+	repeated string conditions_of_return = 7;
+	string details = 8;
+}
+
+// ShippingPolicy represents a sample shop shipping policy
+message ShippingPolicy {
+	uint64 id = 1;
+
+	Policy policy_meta = 2;
+	enum PostalService {
+		USPS = 0;
+		FEDEX = 1;
+		DHL = 2;
+		UPS = 3;
+		BLUE_DART = 4;
+	}
+	PostalService postal_service = 3 [(gorm.field).has_one.preload = true];
+	uint32 days_order_ships_in = 4;
+	string details = 5;
+}

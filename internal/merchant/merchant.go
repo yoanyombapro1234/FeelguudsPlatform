@@ -2,66 +2,134 @@ package merchant
 
 import (
 	"context"
+	"log"
+	"net/http"
+	"time"
 
-	core_database "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-database"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/authentication_handler"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/database"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/saga"
+	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/stripe"
 	"go.uber.org/zap"
 )
 
-type MerchantServiceInterface interface {
-	// CreateMerchantAccount(ctx context.Context, merchantAccount *MerchantAccount)
-	// UpdateMerchantAccount(ctx context.Context, merchantAccount *MerchantAccount)
-	DeleteMerchantAccount(ctx context.Context, merchantAccountID uint32)
-	GetMerchantAccount(ctx context.Context, merchantAccountID uint32)
-	GetMerchantAccounts(ctx context.Context, merchantAccountIDs []uint32)
-	StartMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32)
-	StopMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32)
-	FinalizeMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32)
+type ServiceInterface interface {
+	CreateAccountHandler(w http.ResponseWriter, r *http.Request)
+	CreateAccountRefreshUrlHandler(w http.ResponseWriter, r *http.Request)
+	CreateAccountReturnUrlHandler(w http.ResponseWriter, r *http.Request)
+	DeactivateMerchantAccountHandler(w http.ResponseWriter, r *http.Request)
+	GetMerchantAccountHandler(w http.ResponseWriter, r *http.Request)
+	UpdateMerchantAccountHandler(w http.ResponseWriter, r *http.Request)
+	ReactivateMerchantAccountHandler(w http.ResponseWriter, r *http.Request)
 }
 
-type MerchantAccountComponent struct {
+// AccountComponent encompasess the suite of merchant account features
+type AccountComponent struct {
+	// Represents the logging entity which this component uses
 	Logger *zap.Logger
-	Conn   *core_database.DatabaseConn
+	// Represents the database connection object this entity utilizes for storage purposes
+	Db *database.Db
+	// Represents the object used to interact with the stripe api
+	StripeComponent *stripe.Component
+	// Used to perform operations against the authentication service
+	AuthenticationComponent *authentication_handler.AuthenticationComponent
+	// Duration of any expected http call
+	HttpTimeout time.Duration
+	// Base Refresh url used as part of stripe onboarding process
+	BaseRefreshUrl string
+	// Base Return url use as part of stripe onboarding process
+	BaseReturnUrl string
+	// Coordinates distributed tx as a set of saga (compensating and non-compensating tx)
+	SagaCoordinater *saga.SagaCoordinator
 }
 
-func NewMerchantAccountComponent(params *helper.DatabaseConnectionParams, log *zap.Logger) *MerchantAccountComponent {
-	if log == nil || params == nil {
+// DatabaseConnectionMetadataParams encompasses connection specific retries and all other associated parameters
+type DatabaseConnectionMetadataParams struct {
+	// Max number of connection attempts to perform against the database on initial connection initiation
+	MaxDatabaseConnectionAttempts int
+	// Max number of retries per failed connection attempt
+	MaxRetriesPerConnectionAttempt int
+	// Max time for a retry to take
+	RetryTimeout time.Duration
+	// Max time to wait in between retry attempts
+	RetrySleepInterval time.Duration
+}
+
+// AccountParams encompasses necessary fields to boostrap the merchant account component
+type AccountParams struct {
+	// Object enables operations against the authentication service
+	AuthenticationComponent *authentication_handler.AuthenticationComponent
+	// Parameters necessary to initiate a database connection
+	DatabaseConnectionParams *helper.DatabaseConnectionParams
+	// Parameters necessary to configure database connection retry logic
+	DatabaseConnectionMetadataParams *DatabaseConnectionMetadataParams
+	// Logging utility
+	Logger *zap.Logger
+	// Api key used to interact with stripe
+	StripeApiKey *string
+	// Refresh url used as part of the stripe onboarding process
+	RefreshUrl *string
+	// Return url used as part of the stripe onboarding process
+	ReturnUrl *string
+	// Maximum timeout value for all operations
+	HttpTimeout time.Duration
+}
+
+// NewMerchantAccountComponent returns a new instance of the merchant account component
+func NewMerchantAccountComponent(params *AccountParams) *AccountComponent {
+	if params == nil {
 		log.Fatal("failed to initialize merchant account component due to invalid input arguments")
 	}
 
-	conn := helper.ConnectToDatabase(params, log)
-	if conn == nil {
-		log.Fatal("failed to connect to database")
+	if params.Logger == nil {
+		log.Fatal("invalid input argument - log object cannot be nil")
 	}
 
-	return &MerchantAccountComponent{
-		Logger: log,
-		Conn:   conn,
+	if params.DatabaseConnectionParams == nil {
+		log.Fatal("invalid input arguments - db connection params cannot be nil")
+	}
+
+	if params.StripeApiKey == nil {
+		log.Fatal("invalid input argument - stripe api key cannot be nil")
+	}
+
+	if params.RefreshUrl == nil || params.ReturnUrl == nil {
+		log.Fatal("invalid input argument - refresh url or return url cannot be nil")
+	}
+
+	if params.HttpTimeout == 0 {
+		log.Fatal("invalid input argument - http timeout value must be set")
+	}
+
+	dbInstance, err := database.New(context.Background(), &database.ConnectionInitializationParams{
+		ConnectionParams:       params.DatabaseConnectionParams,
+		Logger:                 params.Logger,
+		MaxConnectionAttempts:  params.DatabaseConnectionMetadataParams.MaxDatabaseConnectionAttempts,
+		MaxRetriesPerOperation: params.DatabaseConnectionMetadataParams.MaxRetriesPerConnectionAttempt,
+		RetryTimeOut:           params.DatabaseConnectionMetadataParams.RetryTimeout,
+		RetrySleepInterval:     params.DatabaseConnectionMetadataParams.RetrySleepInterval,
+	})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	stripeComponent, err := stripe.NewStripeComponent(*params.StripeApiKey)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	sagaCoordinator := saga.NewSagaCoordinator(params.Logger)
+
+	return &AccountComponent{
+		Logger:                  params.Logger,
+		Db:                      dbInstance,
+		StripeComponent:         stripeComponent,
+		AuthenticationComponent: params.AuthenticationComponent,
+		BaseReturnUrl:           *params.RefreshUrl,
+		BaseRefreshUrl:          *params.ReturnUrl,
+		SagaCoordinater:         sagaCoordinator,
 	}
 }
 
-func (m MerchantAccountComponent) DeleteMerchantAccount(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) GetMerchantAccount(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) GetMerchantAccounts(ctx context.Context, merchantAccountIDs []uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) StartMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) StopMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-func (m MerchantAccountComponent) FinalizeMerchantAccountOnboarding(ctx context.Context, merchantAccountID uint32) {
-	panic("implement me")
-}
-
-var _ MerchantServiceInterface = (*MerchantAccountComponent)(nil)
+var _ ServiceInterface = (*AccountComponent)(nil)

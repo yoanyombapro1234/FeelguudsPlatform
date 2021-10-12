@@ -11,9 +11,9 @@ import (
 )
 
 type GetAccountResponse struct {
-	Account *core_auth_sdk.Account `json:"account"`
-	Code  int    `json:"code"`
-	ErrorMessage string `json:"message"`
+	Account      *core_auth_sdk.Account `json:"account"`
+	Code         int                    `json:"code"`
+	ErrorMessage string                 `json:"message"`
 }
 
 // GetAccountHandler godoc
@@ -44,7 +44,7 @@ func (c *AuthenticationComponent) GetAccountHandler(w http.ResponseWriter, r *ht
 	}
 
 	// invoke authentication service
-	account, err = c.GetAccount(ctx, Id)
+	account, err = c.GetAccount(ctx, uint32(Id))
 	if err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
@@ -52,7 +52,6 @@ func (c *AuthenticationComponent) GetAccountHandler(w http.ResponseWriter, r *ht
 
 	helper.JSONResponse(w, GetAccountResponse{Account: account})
 }
-
 
 // GetAccount obtains a user account from the context of the authentications service (authn) based on a provided user id
 func (c *AuthenticationComponent) GetAccount(ctx context.Context, Id uint32) (*core_auth_sdk.Account, error) {

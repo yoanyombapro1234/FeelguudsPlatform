@@ -12,7 +12,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 )
 
-func TestGetAccount(t *testing.T){
+func TestGetAccount(t *testing.T) {
 	randomstringLength := 15
 	var scenarios = getDeleteAccountTestScenarios(randomstringLength)
 	ctx := context.Background()
@@ -82,10 +82,10 @@ func TestGetAccountHandler(t *testing.T) {
 }
 
 type GetAccountHandlerTestMetadata struct {
-	email                        string
-	password                     string
-	responseCode                 int
-	shouldErrorOccur             bool
+	email                    string
+	password                 string
+	responseCode             int
+	shouldErrorOccur         bool
 	shouldCreateAccountFirst bool
 }
 
@@ -94,7 +94,7 @@ func getGetAccountTestScenarios(randomstringLength int) []GetAccountHandlerTestM
 	email := helper.GenerateRandomString(randomstringLength)
 	password := helper.GenerateRandomString(randomstringLength)
 
-	return []GetAccountHandlerTestMetadata {
+	return []GetAccountHandlerTestMetadata{
 		// test success scenario. create an account first then successfully get it
 		{
 			email,
@@ -120,12 +120,11 @@ func GetAccountInAuthSvc(accountId uint32, cmp *AuthenticationComponent,
 	var result GetAccountResponse
 
 	id := fmt.Sprint(accountId)
-	req, err := http.NewRequest("GET", "//v1/auth/account/" + id, nil)
+	req, err := http.NewRequest("GET", "//v1/auth/account/"+id, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	req = mux.SetURLVars(req, map[string]string{"id": id})
-
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(cmp.GetAccountHandler)

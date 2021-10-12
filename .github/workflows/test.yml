@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Restore Go cache
+      - name: Restore Go Cache
         uses: actions/cache@v1
         with:
           path: ~/go/pkg/mod
@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.16.x
-      - name: Run unit tests
+      - name: Run Unit Tests
         run: make ci-test
       - name: Check if working tree is dirty
         run: |
@@ -30,14 +30,14 @@ jobs:
             echo 'run make test and commit changes'
             exit 1
           fi
-      - name: Validate Helm chart
+      - name: Validate Helm Chart
         uses: stefanprodan/kube-tools@v1
         with:
           kubectl: 1.19.11
           helm: 2.17.0
           helmv3: 3.6.0
           command: |
-            helmv3 template ./charts/feelguuds_platform | kubeval --strict --kubernetes-version 1.19.11 --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master
+            helmv3 template ./charts/feelguuds-platform | kubeval --strict --kubernetes-version 1.19.11 --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master
       - name: Validate kustomization
         uses: stefanprodan/kube-tools@v1
         with:

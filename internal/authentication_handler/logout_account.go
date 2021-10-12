@@ -8,7 +8,7 @@ import (
 )
 
 type LogoutAccountResponse struct {
-	Code  int    `json:"code"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 
@@ -36,7 +36,7 @@ func (c *AuthenticationComponent) LogoutAccountHandler(w http.ResponseWriter, r 
 	}
 
 	// invoke authentication service
-	if err = c.LogoutAccount(ctx, Id); err != nil {
+	if err = c.LogoutAccount(ctx, uint32(Id)); err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}

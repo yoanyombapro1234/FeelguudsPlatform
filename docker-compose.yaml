@@ -16,11 +16,10 @@ services:
       - AUTHN_PORT=8000
     networks:
       - monitor-net
-      - web
     volumes:
       - '.:/go/src/github.com/yoanyombapro1234/FeelguudsPlatform'
     env_file:
-      - .env
+      - service.env
     #depends_on:
     #  - auth_service
 

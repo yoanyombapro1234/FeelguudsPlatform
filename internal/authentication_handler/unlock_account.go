@@ -10,7 +10,7 @@ import (
 )
 
 type UnLockAccountResponse struct {
-	Code  int    `json:"code"`
+	Code         int    `json:"code"`
 	ErrorMessage string `json:"message"`
 }
 
@@ -38,7 +38,7 @@ func (c *AuthenticationComponent) UnLockAccountHandler(w http.ResponseWriter, r 
 	}
 
 	// invoke authentication service
-	if err = c.UnLockAccount(ctx, Id); err != nil {
+	if err = c.UnLockAccount(ctx, uint32(Id)); err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -61,4 +61,3 @@ func (c *AuthenticationComponent) UnLockAccount(ctx context.Context, Id uint32) 
 	c.Logger.Info("Successfully unlocked user account", zap.Int("Id", int(Id)))
 	return nil
 }
-

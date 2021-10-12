@@ -12,7 +12,7 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 )
 
-func TestLogoutAccount(t *testing.T){
+func TestLogoutAccount(t *testing.T) {
 	randomstringLength := 15
 	var scenarios = getLogoutAccountTestScenarios(randomstringLength)
 	ctx := context.Background()
@@ -84,10 +84,10 @@ func TestLogoutAccountHandler(t *testing.T) {
 }
 
 type LogoutAccountHandlerTestMetadata struct {
-	email                        string
-	password                     string
-	responseCode                 int
-	shouldErrorOccur             bool
+	email                                   string
+	password                                string
+	responseCode                            int
+	shouldErrorOccur                        bool
 	shouldCreateAndAuthenticateAccountFirst bool
 }
 
@@ -96,7 +96,7 @@ func getLogoutAccountTestScenarios(randomstringLength int) []LogoutAccountHandle
 	email := helper.GenerateRandomString(randomstringLength)
 	password := helper.GenerateRandomString(randomstringLength)
 
-	return []LogoutAccountHandlerTestMetadata {
+	return []LogoutAccountHandlerTestMetadata{
 		// test success scenario. create an account first then authenticate and then successfully log out
 		{
 			email,
@@ -122,12 +122,11 @@ func LogoutAccountInAuthSvc(accountId uint32, cmp *AuthenticationComponent,
 	var result LogoutAccountResponse
 
 	id := fmt.Sprint(accountId)
-	req, err := http.NewRequest("POST", "//v1/auth/account/logout/" + id, nil)
+	req, err := http.NewRequest("POST", "//v1/auth/account/logout/"+id, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	req = mux.SetURLVars(req, map[string]string{"id": id})
-
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(cmp.LogoutAccountHandler)

@@ -97,10 +97,14 @@ func ConnectToAuthService(logger *zap.Logger, client *core_auth_sdk.Client, resp
 					logger.Error("failed to connect to authentication service", zap.Error(err))
 					return err
 				}
-				body, err := io.ReadAll(res.Body)
-				res.Body.Close()
 
-				logger.Info("data", zap.Any("result", body))
+				body, err := io.ReadAll(res.Body)
+				defer func(Body io.ReadCloser) {
+					err := Body.Close()
+					if err != nil {
+						logger.Error(err.Error())
+					}
+				}(res.Body)
 
 				response <- body
 				return nil
