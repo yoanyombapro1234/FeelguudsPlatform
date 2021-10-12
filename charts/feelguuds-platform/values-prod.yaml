@@ -1,6 +1,6 @@
 # Default values for Feelguuds Platform.
 nameOverride: feelguuds-platform
-fullnameOverride:
+fullnameOverride: feelguuds-platform
 replicaCount: 2
 progressDeadlineInSeconds: 600
 revisionHistoryLimit: 3

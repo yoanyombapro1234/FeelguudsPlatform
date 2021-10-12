@@ -45,11 +45,11 @@ build-charts:
 	helm package charts/*
 
 .PHONY: minikube_start
-mk_start:
+mk-start:
 	minikube start
 
 .PHONY: setup-minikube-docker-daemon
-mkd_push_image:
+mkd-push-image:
 	eval $(minikube docker-env)
 	make build-container
 

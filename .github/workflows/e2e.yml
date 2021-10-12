@@ -22,7 +22,7 @@ jobs:
           image: kindest/node:v1.19.11
       - name: Build Container Image
         run: |
-          ./test/build.sh
+          ./integration-tests/build.sh
           kind load docker-image test/feelguuds_platform:latest
       - name: Setup Helm
         uses: ./.github/actions/helm
