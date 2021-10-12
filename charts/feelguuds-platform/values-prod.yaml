@@ -135,7 +135,7 @@ serviceMonitor:
   additionalLabels: {}
 
 resources:
-  limits:
+  limits: {}
   requests:
     cpu: 1m
     memory: 16Mi

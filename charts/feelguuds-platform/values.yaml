@@ -134,11 +134,7 @@ serviceMonitor:
   interval: 15s
   additionalLabels: {}
 
-resources:
-  limits:
-  requests:
-    cpu: 1m
-    memory: 16Mi
+resources: {}
 
 nodeSelector: {}
 

@@ -33,11 +33,11 @@ jobs:
       - name: Validate Helm Chart
         uses: stefanprodan/kube-tools@v1
         with:
-          kubectl: 1.22.2
+          kubectl: 1.19.11
           helm: 2.17.0
           helmv3: 3.6.0
           command: |
-            helmv3 template ./charts/feelguuds-platform | kubeval --strict --kubernetes-version 1.22.2 --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master
+            helmv3 template ./charts/feelguuds-platform | kubeval --strict --kubernetes-version 1.19.11 --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master
       - name: Validate kustomization
         uses: stefanprodan/kube-tools@v1
         with:
