@@ -127,8 +127,7 @@ func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) err
 	return nil
 }
 
-// ExtractIdFromRequest takes as input a request object
-// and extracts an id from it
+// ExtractIDFromRequest takes as input a request object and extracts an id from it
 func ExtractIDFromRequest(r *http.Request) (uint64, error) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])

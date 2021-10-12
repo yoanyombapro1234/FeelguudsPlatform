@@ -16,7 +16,7 @@ import (
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
 func (db *Db) ActivateAccount(ctx context.Context, id uint64) (bool, error) {
 	const operationType = "activate_business_account_db_op"
-	db.Logger.Info(fmt.Sprintf("active business account database operation. id: %d", id))
+	db.Logger.Info(fmt.Sprintf("activate business account database operation. id: %d", id))
 
 	tx := db.activateMerchantAccountTxFunc(id)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)
@@ -34,7 +34,7 @@ func (db *Db) ActivateAccount(ctx context.Context, id uint64) (bool, error) {
 
 // activateMerchantAccountTxFunc wraps the update operation in a database tx.
 func (db *Db) activateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
-	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
+	return func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operationType = "activate_business_account_db_tx"
 		db.Logger.Info("starting transaction")
 
@@ -57,5 +57,4 @@ func (db *Db) activateMerchantAccountTxFunc(id uint64) core_database.CmplxTx {
 
 		return true, nil
 	}
-	return tx
 }

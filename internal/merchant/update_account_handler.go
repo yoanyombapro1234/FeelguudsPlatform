@@ -18,7 +18,14 @@ type UpdateMerchantAccountResponse struct {
 	MerchantAccount *models.MerchantAccount `json:"merchant_account"`
 }
 
-func (m *MerchantAccountComponent) UpdateMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
+// UpdateMerchantAccountHandler godoc
+// @Summary updares a merchant account
+// @Description coordinates interactions across multiple services to update a merchant account
+// @Tags HTTP API
+// @Produce html
+// @Router / [post]
+// @Success 200 {string} string "OK"
+func (m *AccountComponent) UpdateMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), m.HttpTimeout)
 	defer cancel()
 
@@ -62,38 +69,44 @@ func (m *MerchantAccountComponent) UpdateMerchantAccountHandler(w http.ResponseW
 		return
 	}
 
+	oldEmail := oldAcct.BusinessEmail
+	newEmail := updatedAcct.BusinessEmail
+
 	// we check is email is being updated and perform the update operation as a distributed tx
-	if oldAcct.BusinessEmail != updatedAcct.BusinessEmail {
-		oldEmail := oldAcct.BusinessEmail
-		newEmail := updatedAcct.BusinessEmail
-
-		// execute distributed tx
-		sagaSteps, err := m.updateMerchantAccountDtxSagaSteps(ctx, updatedAcct, newEmail, oldEmail)
-		if err != nil {
-			helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if err := m.SagaCoordinater.RunSaga(ctx, "update_merchant_account", sagaSteps...); err != nil {
+	if oldEmail != newEmail {
+		if err := updateEmailAsDtx(m, ctx, updatedAcct, newEmail, oldEmail); err != nil {
 			helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		helper.JSONResponse(w, UpdateMerchantAccountResponse{updatedAcct})
-		return
+	} else {
+		account, err := m.Db.UpdateMerchantAccount(ctx, id, updatedAcct)
+		if err != nil {
+			helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		helper.JSONResponse(w, UpdateMerchantAccountResponse{account})
+	}
+}
+
+// updateEmailAsDtx updates a merchant account's email as a distributed tx decoupled into a set of sagas
+func updateEmailAsDtx(m *AccountComponent, ctx context.Context, acct *models.MerchantAccount, newEmail string,
+	oldEmail string) error {
+
+	sagaSteps, err := m.updateMerchantAccountDtxSagaSteps(ctx, acct, newEmail, oldEmail)
+	if err != nil {
+		return err
 	}
 
-	// save the record locally
-	account, err := m.Db.UpdateMerchantAccount(ctx, id, updatedAcct)
-	if err != nil {
-		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
-		return
+	if err := m.SagaCoordinater.RunSaga(ctx, "update_merchant_account", sagaSteps...); err != nil {
+		return err
 	}
-	helper.JSONResponse(w, UpdateMerchantAccountResponse{account})
+	return nil
 }
 
 // updateMerchantAccountDtxSagaSteps returns saga encompassing numerous distributed tx used as part of account update process
-func (m *MerchantAccountComponent) updateMerchantAccountDtxSagaSteps(ctx context.Context, acct *models.MerchantAccount, newEmail,
+func (m *AccountComponent) updateMerchantAccountDtxSagaSteps(ctx context.Context, acct *models.MerchantAccount, newEmail,
 	oldEmail string) ([]*saga.Step,
 	error) {
 	var (

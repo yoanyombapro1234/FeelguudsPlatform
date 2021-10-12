@@ -19,6 +19,7 @@ const (
 	ErrorTypeInvalidRequest ErrorType = "invalid_request_error"
 	ErrorTypePermission     ErrorType = "more_permissions_required"
 	ErrorTypeRateLimit      ErrorType = "rate_limit_error"
+	ErrorTypeParameters     ErrorType = "parameter_configuration_error"
 )
 
 // ServiceError is the response returned when a call is unsuccessful.
@@ -126,5 +127,15 @@ type RatelimitError struct {
 
 // Error serializes the error object to JSON and returns it as a string.
 func (e *RatelimitError) Error() string {
+	return e.err.Error()
+}
+
+// DatabaseError occurs in the face of errors due faulty database operations
+type DatabaseError struct {
+	err *ServiceError
+}
+
+// Error serializes the error object to JSON and returns it as a string.
+func (e *DatabaseError) Error() string {
 	return e.err.Error()
 }

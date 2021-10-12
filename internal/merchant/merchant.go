@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type MerchantServiceInterface interface {
+type ServiceInterface interface {
 	CreateAccountHandler(w http.ResponseWriter, r *http.Request)
 	CreateAccountRefreshUrlHandler(w http.ResponseWriter, r *http.Request)
 	CreateAccountReturnUrlHandler(w http.ResponseWriter, r *http.Request)
@@ -24,14 +24,14 @@ type MerchantServiceInterface interface {
 	ReactivateMerchantAccountHandler(w http.ResponseWriter, r *http.Request)
 }
 
-// MerchantAccountComponent encompasess the suite of merchant account features
-type MerchantAccountComponent struct {
+// AccountComponent encompasess the suite of merchant account features
+type AccountComponent struct {
 	// Represents the logging entity which this component uses
 	Logger *zap.Logger
 	// Represents the database connection object this entity utilizes for storage purposes
 	Db *database.Db
 	// Represents the object used to interact with the stripe api
-	StripeComponent *stripe.StripeComponent
+	StripeComponent *stripe.Component
 	// Used to perform operations against the authentication service
 	AuthenticationComponent *authentication_handler.AuthenticationComponent
 	// Duration of any expected http call
@@ -77,7 +77,7 @@ type AccountParams struct {
 }
 
 // NewMerchantAccountComponent returns a new instance of the merchant account component
-func NewMerchantAccountComponent(params *AccountParams) *MerchantAccountComponent {
+func NewMerchantAccountComponent(params *AccountParams) *AccountComponent {
 	if params == nil {
 		log.Fatal("failed to initialize merchant account component due to invalid input arguments")
 	}
@@ -121,7 +121,7 @@ func NewMerchantAccountComponent(params *AccountParams) *MerchantAccountComponen
 
 	sagaCoordinator := saga.NewSagaCoordinator(params.Logger)
 
-	return &MerchantAccountComponent{
+	return &AccountComponent{
 		Logger:                  params.Logger,
 		Db:                      dbInstance,
 		StripeComponent:         stripeComponent,
@@ -132,4 +132,4 @@ func NewMerchantAccountComponent(params *AccountParams) *MerchantAccountComponen
 	}
 }
 
-var _ MerchantServiceInterface = (*MerchantAccountComponent)(nil)
+var _ ServiceInterface = (*AccountComponent)(nil)

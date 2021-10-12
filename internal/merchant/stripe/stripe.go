@@ -12,19 +12,35 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
 
-type StripeComponent struct{}
+type Interface interface {
+	// CreateNewStripeConnectedAccount invokes the stripe API to create a new connected account
+	// and returns the connected account ID
+	//
+	// A stripe connected account enables our merchant to accept payments and move funds to their bank account.
+	// Connected accounts represent our user in Stripe’s API and help facilitate the collection of onboarding
+	// requirements so Stripe can verify the user’s identity
+	CreateNewStripeConnectedAccount(merchantAcct *models.MerchantAccount) (string, error)
 
-func NewStripeComponent(apiKey string) (*StripeComponent, error) {
+	// CreateNewAccountLink invokes the stripe API an returns a set of redirect links which are crucial for
+	// merchant the account onboarding process
+	CreateNewAccountLink(stripeConnectedAccountId, refreshUrl, returnUrl string) (*stripe.AccountLink, error)
+}
+
+type Component struct{}
+
+var _ Interface = (*Component)(nil)
+
+func NewStripeComponent(apiKey string) (*Component, error) {
 	if apiKey == helper.EMPTY {
 		return nil, errors.New(fmt.Sprintf("%s - stripe api key cannot be empty", service_errors.ErrInvalidInputArguments.Error()))
 	}
 
 	stripe.Key = apiKey
-	return &StripeComponent{}, nil
+	return &Component{}, nil
 }
 
 // CreateNewStripeConnectedAccount creates a new stripe connected account for a given merchant
-func (c *StripeComponent) CreateNewStripeConnectedAccount(merchantAcct *models.MerchantAccount) (string, error) {
+func (c *Component) CreateNewStripeConnectedAccount(merchantAcct *models.MerchantAccount) (string, error) {
 	if merchantAcct == nil {
 		return helper.EMPTY, errors.New(fmt.Sprintf("%s - stripe param's nil", service_errors.ErrInvalidInputArguments.Error()))
 	}
@@ -47,7 +63,7 @@ func (c *StripeComponent) CreateNewStripeConnectedAccount(merchantAcct *models.M
 }
 
 // CreateNewAccountLink creates a new account link object for a given merchant account
-func (c *StripeComponent) CreateNewAccountLink(stripeConnectedAccountId, refreshUrl, returnUrl string) (*stripe.AccountLink, error) {
+func (c *Component) CreateNewAccountLink(stripeConnectedAccountId, refreshUrl, returnUrl string) (*stripe.AccountLink, error) {
 	params := &stripe.AccountLinkParams{
 		Account:    stripe.String(stripeConnectedAccountId),
 		RefreshURL: stripe.String(refreshUrl),
@@ -63,11 +79,11 @@ func (c *StripeComponent) CreateNewAccountLink(stripeConnectedAccountId, refresh
 	return acc, nil
 }
 
-// GetConnectedAccountDashboard returns a set of connected account specific parameters
-func (c *StripeComponent) GetConnectedAccountDashboard(stripeConnectedAccountId *string) error {
-	if stripeConnectedAccountId == nil {
-		return errors.New(fmt.Sprintf("%s - stripe connected account id cannot be nil", service_errors.ErrInvalidInputArguments.Error()))
+// GetStripeConnectedAccount returns a stripe connected account record
+func (c *Component) GetStripeConnectedAccount(acctId string, params *stripe.AccountParams) (*stripe.Account, error){
+	if acctId == helper.EMPTY {
+		return nil, service_errors.ConcatenateErrorMessages(service_errors.ErrInvalidInputArguments.Error(), "empty stripe connected account ID")
 	}
 
-	return nil
+	return account.GetByID(acctId, nil)
 }

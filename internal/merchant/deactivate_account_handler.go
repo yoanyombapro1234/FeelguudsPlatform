@@ -17,7 +17,7 @@ import (
 // @Produce html
 // @Router / [delete]
 // @Success 200 {string} string "OK"
-func (m *MerchantAccountComponent) DeactivateMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
+func (m *AccountComponent) DeactivateMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
 	/*
 		It is important to note that we never truly ever delete a merchant account. The only thing we do is mark the
 		account as deactivated. This enables for quick recovery in case a merchant wants to re-enable the account.
@@ -57,7 +57,7 @@ func (m *MerchantAccountComponent) DeactivateMerchantAccountHandler(w http.Respo
 }
 
 // deactivateMerchantAccountDtxSagaSteps returns saga encompassing numerous distributed tx used as part of account deactivation process
-func (m *MerchantAccountComponent) deactivateMerchantAccountDtxSagaSteps(ctx context.Context, acct *models.MerchantAccount) ([]*saga.Step, error) {
+func (m *AccountComponent) deactivateMerchantAccountDtxSagaSteps(ctx context.Context, acct *models.MerchantAccount) ([]*saga.Step, error) {
 	var (
 		sagaSteps      = make([]*saga.Step, 0)
 		authnAccountId uint32

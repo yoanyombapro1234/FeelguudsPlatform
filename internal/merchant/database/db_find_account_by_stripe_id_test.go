@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/service_errors"
 )
@@ -21,9 +20,6 @@ type findAccountByStripeIdScenario struct {
 
 // findAccountByStripeIdScenarios returns a set of scenarios to test the account's existence based on provided email
 func findAccountByStripeIdScenarios() []findAccountByStripeIdScenario {
-	acctWithNoStripeId := GenerateRandomizedAccount()
-	acctWithNoStripeId.StripeConnectedAccountId = helper.EMPTY
-
 	return []findAccountByStripeIdScenario{
 		{
 			// success condition: account exists

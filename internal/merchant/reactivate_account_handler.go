@@ -10,7 +10,14 @@ import (
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 )
 
-func (m *MerchantAccountComponent) ReactivateMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
+// ReactivateMerchantAccountHandler godoc
+// @Summary activates a merchant account
+// @Description coordinates interactions across multiple services to activate a merchant account
+// @Tags HTTP API
+// @Produce html
+// @Router / [post]
+// @Success 200 {string} string "OK"
+func (m *AccountComponent) ReactivateMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), m.HttpTimeout)
 	defer cancel()
 
@@ -44,8 +51,8 @@ func (m *MerchantAccountComponent) ReactivateMerchantAccountHandler(w http.Respo
 	return
 }
 
-// reactivateMerchantAccountDtxSagaSteps returns saga encompassing numerous distributed tx used as part of account reeactivation process
-func (m *MerchantAccountComponent) reactivateMerchantAccountDtxSagaSteps(ctx context.Context, acct *models.MerchantAccount) ([]*saga.Step, error) {
+// reactivateMerchantAccountDtxSagaSteps returns saga encompassing numerous distributed tx used as part of account re-activation process
+func (m *AccountComponent) reactivateMerchantAccountDtxSagaSteps(ctx context.Context, acct *models.MerchantAccount) ([]*saga.Step, error) {
 	var (
 		sagaSteps      = make([]*saga.Step, 0)
 		authnAccountId uint32
@@ -77,8 +84,8 @@ func (m *MerchantAccountComponent) reactivateMerchantAccountDtxSagaSteps(ctx con
 		},
 	}
 
-	deactivateAcctStep := &saga.Step{
-		Name: "deactivate_merchant_account_op",
+	activateAcctStep := &saga.Step{
+		Name: "activate_merchant_account_op",
 		Func: func(ctx context.Context) error {
 			if _, err := m.Db.ActivateAccount(ctx, accountId); err != nil {
 				return err
@@ -95,6 +102,6 @@ func (m *MerchantAccountComponent) reactivateMerchantAccountDtxSagaSteps(ctx con
 		},
 	}
 
-	sagaSteps = append(sagaSteps, dtxLockAcctStep, deactivateAcctStep)
+	sagaSteps = append(sagaSteps, dtxLockAcctStep, activateAcctStep)
 	return sagaSteps, nil
 }

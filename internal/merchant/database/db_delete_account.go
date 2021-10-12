@@ -15,8 +15,8 @@ import (
 // the assumption from the context of the database is that all account should have the proper set of parameters in order prior
 // to attempted storage. The client should handle any rpc operations to necessary prior to storage
 func (db *Db) DeactivateMerchantAccount(ctx context.Context, id uint64) (bool, error) {
-	const operation = "delete_business_account_db_op"
-	db.Logger.Info(fmt.Sprintf("delete business account database operation. id : %d", id))
+	const operation = "deactivate_business_account_db_op"
+	db.Logger.Info(fmt.Sprintf("deactivate business account database operation. id : %d", id))
 
 	tx := db.deactivateMerchantAccountTxFunc(id)
 	result, err := db.Conn.PerformComplexTransaction(ctx, tx)

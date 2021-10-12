@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/stripe/stripe-go/account"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/helper"
 	"github.com/yoanyombapro1234/FeelguudsPlatform/internal/merchant/models"
 )
@@ -20,7 +19,7 @@ type CreateAccountResponse struct {
 // @Produce html
 // @Router / [post]
 // @Success 200 {string} string "OK"
-func (m *MerchantAccountComponent) CreateAccountReturnUrlHandler(w http.ResponseWriter, r *http.Request) {
+func (m *AccountComponent) CreateAccountReturnUrlHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), m.HttpTimeout)
 	defer cancel()
 
@@ -31,13 +30,12 @@ func (m *MerchantAccountComponent) CreateAccountReturnUrlHandler(w http.Response
 		return
 	}
 
-	stripeAccount, err := account.GetByID(stripeConnectedAcctId, nil)
+	stripeAccount, err := m.StripeComponent.GetStripeConnectedAccount(stripeConnectedAcctId, nil)
 	if err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// pull the merchant account from the database
 	acct, err := m.Db.FindMerchantAccountByStripeAccountId(ctx, stripeConnectedAcctId)
 	if err != nil {
 		helper.ErrorResponse(w, err.Error(), http.StatusBadRequest)
@@ -63,5 +61,6 @@ func (m *MerchantAccountComponent) CreateAccountReturnUrlHandler(w http.Response
 		return
 	}
 
+	// TODO: redirect to merchant account admin page (think about how to do this)
 	helper.JSONResponse(w, &CreateAccountResponse{MerchantAccount: acct})
 }

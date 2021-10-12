@@ -10,11 +10,11 @@ import (
 )
 
 // getStripeRedirectURI returns the stripe redirect URI enabling end user to start onboarding flow through stripe
-func (m MerchantAccountComponent) getStripeRedirectURI(merchantAccount *models.MerchantAccount, connectedAcctId, refreshUrl,
+func (m AccountComponent) getStripeRedirectURI(merchantAccount *models.MerchantAccount, connectedAcctId, refreshUrl,
 	returnUrl string) (string, error) {
 
 	merchantAccount.StripeConnectedAccountId = connectedAcctId
-	link, err := m.StripeComponent.CreateNewAccountLink(merchantAccount.StripeConnectedAccountId, "", "")
+	link, err := m.StripeComponent.CreateNewAccountLink(merchantAccount.StripeConnectedAccountId, refreshUrl, returnUrl)
 	if err != nil {
 		return helper.EMPTY, err
 	}
@@ -23,7 +23,7 @@ func (m MerchantAccountComponent) getStripeRedirectURI(merchantAccount *models.M
 }
 
 // getConnectedAccountId returns the stripe connected account id
-func (m MerchantAccountComponent) getConnectedAccountId(merchantAccount *models.MerchantAccount) (string, error) {
+func (m AccountComponent) getConnectedAccountId(merchantAccount *models.MerchantAccount) (string, error) {
 	connectedAcctId, err := m.StripeComponent.CreateNewStripeConnectedAccount(merchantAccount)
 	if err != nil {
 		return helper.EMPTY, err
@@ -32,7 +32,7 @@ func (m MerchantAccountComponent) getConnectedAccountId(merchantAccount *models.
 }
 
 // validateMerchantAccount validates a merchant account and ensures all required fields are present
-func (m MerchantAccountComponent) validateMerchantAccount(acc *models.MerchantAccount) error {
+func (m AccountComponent) validateMerchantAccount(acc *models.MerchantAccount) error {
 	if acc == nil {
 		return errors.New(fmt.Sprintf("%s - nil merchant account object", service_errors.ErrInvalidInputArguments.Error()))
 	}

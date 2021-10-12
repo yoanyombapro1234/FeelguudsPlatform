@@ -28,21 +28,18 @@ func (s *SagaCoordinator) RunSaga(ctx context.Context, operationName string, ste
 		// first operation is to perform a distributed transaction and unlock the account if possible
 		if err := tx.AddStep(step); err != nil {
 			s.Logger.Error(service_errors.ErrFailedToConfigureSaga.Error())
-			return service_errors.ErrFailedToConfigureSaga
+			return service_errors.ConcatenateErrorMessages(service_errors.ErrFailedToConfigureSaga.Error(), err.Error())
 		}
 	}
 
 	coordinator := saga.NewCoordinator(ctx, ctx, tx, store)
 	if result := coordinator.Play(); result != nil && (len(result.CompensateErrors) > 0 || result.ExecutionError != nil) {
-		// log the saga operation errors
 		s.Logger.Error(service_errors.ErrSagaFailedToExecuteSuccessfully.Error(),
 			zap.Errors("compensate error", result.CompensateErrors), zap.Error(result.ExecutionError))
 
-		// construct error
 		errMsg := fmt.Sprintf("compensate errors : %s , execution errors %s", zap.Errors("compensate error",
 			result.CompensateErrors).String, zap.Error(result.ExecutionError).String)
-		err := service_errors.NewError(errMsg)
-		return err
+		return service_errors.NewError(errMsg)
 	}
 
 	return nil

@@ -19,7 +19,7 @@ type GetMerchantAccountResponse struct {
 // @Produce html
 // @Router / [delete]
 // @Success 200 {string} string "OK"
-func (m *MerchantAccountComponent) GetMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
+func (m *AccountComponent) GetMerchantAccountHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), m.HttpTimeout)
 	defer cancel()
 

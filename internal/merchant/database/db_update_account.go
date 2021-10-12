@@ -31,7 +31,7 @@ func (db *Db) UpdateMerchantAccount(ctx context.Context, id uint64, account *mod
 
 // updateMerchantAccountTxFunc wraps the update operation in a database tx.
 func (db *Db) updateMerchantAccountTxFunc(acct *models.MerchantAccount, id uint64) core_database.CmplxTx {
-	tx := func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
+	return func(ctx context.Context, tx *gorm.DB) (interface{}, error) {
 		const operationType = "update_business_account_db_tx"
 		db.Logger.Info("starting transaction")
 
@@ -63,5 +63,4 @@ func (db *Db) updateMerchantAccountTxFunc(acct *models.MerchantAccount, id uint6
 
 		return &newAccount, nil
 	}
-	return tx
 }

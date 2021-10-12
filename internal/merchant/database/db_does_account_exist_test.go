@@ -17,6 +17,36 @@ type doesAccountExistScenario struct {
 	expectedError       error
 }
 
+// doesAccountExistTestScenarios returns a set of scenarios to test the check account existence operation
+func doesAccountExistTestScenarios() []doesAccountExistScenario {
+	return []doesAccountExistScenario{
+		{
+			// success condition: account exists
+			scenarioName:        "account exists",
+			shouldErrorOccur:    false,
+			account:             GenerateRandomizedAccount(),
+			shouldCreateAccount: true,
+			expectedError:       nil,
+		},
+		{
+			// failure condition: account does not exist - id (0)
+			scenarioName:        "account does not exist",
+			shouldErrorOccur:    true,
+			account:             GenerateRandomizedAccount(),
+			shouldCreateAccount: false,
+			expectedError:       service_errors.ErrInvalidInputArguments,
+		},
+		{
+			// failure condition: account does not exist - id(not found)
+			scenarioName:        "account does not exist",
+			shouldErrorOccur:    true,
+			account:             GenerateRandomizedAccountWithRandomId(),
+			shouldCreateAccount: false,
+			expectedError:       service_errors.ErrAccountDoesNotExist,
+		},
+	}
+}
+
 func TestDoesAccountExistsOperation(t *testing.T) {
 	ctx := context.Background()
 	SetupTestDbConn()
@@ -50,39 +80,5 @@ func TestDoesAccountExistsOperation(t *testing.T) {
 		if !scenario.shouldErrorOccur {
 			assert.True(t, accountExists)
 		}
-	}
-}
-
-// doesAccountExistTestScenarios returns a set of scenarios to test the check account existence operation
-func doesAccountExistTestScenarios() []doesAccountExistScenario {
-	testAccount := GenerateRandomizedAccount()
-	nonExistentAccount := GenerateRandomizedAccount()
-	nonExistentAccount.Id = 10000
-
-	return []doesAccountExistScenario{
-		{
-			// success condition: account exists
-			scenarioName:        "account exists",
-			shouldErrorOccur:    false,
-			account:             testAccount,
-			shouldCreateAccount: true,
-			expectedError:       nil,
-		},
-		{
-			// failure condition: account does not exist - id (0)
-			scenarioName:        "account does not exist",
-			shouldErrorOccur:    true,
-			account:             testAccount,
-			shouldCreateAccount: false,
-			expectedError:       service_errors.ErrInvalidInputArguments,
-		},
-		{
-			// failure condition: account does not exist - id(not found)
-			scenarioName:        "account does not exist",
-			shouldErrorOccur:    true,
-			account:             nonExistentAccount,
-			shouldCreateAccount: false,
-			expectedError:       service_errors.ErrAccountDoesNotExist,
-		},
 	}
 }

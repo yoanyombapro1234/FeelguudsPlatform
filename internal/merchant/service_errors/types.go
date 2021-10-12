@@ -2,6 +2,7 @@ package service_errors
 
 import (
 	"errors"
+	"fmt"
 )
 
 // List of values that ErrorCode can take.
@@ -57,6 +58,12 @@ var (
 	ErrAccountAlreadyActive                     = errors.New("account exists and is already active")
 )
 
+// NewError transforms a set of text into a usable error object
 func NewError(msg string) error {
 	return errors.New(msg)
+}
+
+// ConcatenateErrorMessages concatenates error messages
+func ConcatenateErrorMessages(msg1, msg2 string) error {
+	return errors.New(fmt.Sprintf("%s - %s", msg1, msg2))
 }

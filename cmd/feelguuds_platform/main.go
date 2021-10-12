@@ -79,7 +79,7 @@ func main() {
 }
 
 func InitializeMerchantAccountComponent(log *zap.Logger, authenticationComponent *authentication_handler.AuthenticationComponent) *merchant.
-	MerchantAccountComponent {
+AccountComponent {
 	host := viper.GetString("MERCHANT_COMPONENT_HOST")
 	port := viper.GetInt("MERCHANT_COMPONENT_PORT")
 	user := viper.GetString("MERCHANT_COMPONENT_USER")

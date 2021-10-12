@@ -85,10 +85,10 @@ type Server struct {
 	pool                     *redis.Pool
 	handler                  http.Handler
 	authComponent            *authentication_handler.AuthenticationComponent
-	merchantAccountComponent *merchant.MerchantAccountComponent
+	merchantAccountComponent *merchant.AccountComponent
 }
 
-func NewServer(config *Config, logger *zap.Logger, authCmp *authentication_handler.AuthenticationComponent, merchantCmp *merchant.MerchantAccountComponent) (*Server, error) {
+func NewServer(config *Config, logger *zap.Logger, authCmp *authentication_handler.AuthenticationComponent, merchantCmp *merchant.AccountComponent) (*Server, error) {
 	srv := &Server{
 		router:                   mux.NewRouter(),
 		logger:                   logger,
