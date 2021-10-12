@@ -200,7 +200,6 @@ spec:
             secretName: {{ template "platform.tlsSecretName" . }}
 	  {{- end }}
 
-{{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
