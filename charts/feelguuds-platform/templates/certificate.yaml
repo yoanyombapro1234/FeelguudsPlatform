@@ -2,15 +2,15 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ template "feelguuds-platform.fullname" . }}
+  name: {{ template "platform.fullname" . }}
   labels:
-    {{- include "feelguuds-platform.labels" . | nindent 4 }}
+    {{- include "platform.labels" . | nindent 4 }}
 spec:
   dnsNames:
   {{- range .Values.certificate.dnsNames }}
     - {{ . | quote }}
   {{- end }}
-  secretName: {{ template "feelguuds-platform.tlsSecretName" . }}
+  secretName: {{ template "platform.tlsSecretName" . }}
   issuerRef:
   {{- .Values.certificate.issuerRef | toYaml | trimSuffix "\n" | nindent 4 }}
 {{- end }}

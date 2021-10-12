@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ template "feelguuds-platform.fullname" . }}-grpc-test-{{ randAlphaNum 5 | lower }}
+  name: {{ template "platform.fullname" . }}-grpc-test-{{ randAlphaNum 5 | lower }}
   labels:
-    {{- include "feelguuds-platform.labels" . | nindent 4 }}
+    {{- include "platform.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test-success
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
@@ -15,5 +15,5 @@ spec:
     - name: grpc-health-probe
       image: stefanprodan/grpc_health_probe:v0.3.0
       command: ['grpc_health_probe']
-      args:  ['-addr={{ template "feelguuds-platform.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.grpcPort }}']
+      args:  ['-addr={{ template "platform.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.grpcPort }}']
   restartPolicy: Never

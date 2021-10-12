@@ -6,9 +6,9 @@ metadata:
       -f docker-compose.shopper.dep.yaml convert
     kompose.version: 1.19.0 (f63a961c)
   labels:
-	{{- include "feelguuds-platform.labels" . | nindent 4 }}
-    io.kompose.service: {{ template "feelguuds-platform.fullname" . }}
-  name: {{ template "feelguuds-platform.fullname" . }}
+	{{- include "platform.labels" . | nindent 4 }}
+    io.kompose.service: {{ template "platform.fullname" . }}
+  name: {{ template "platform.fullname" . }}
 spec:
   progressDeadlineSeconds: {{ .Values.progressDeadlineInSeconds }}
   {{- if not .Values.hpa.enabled }}
@@ -17,8 +17,8 @@ spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
-      io.kompose.service: {{ template "feelguuds-platform.fullname" . }}
-      {{- include "feelguuds-platform.selectorLabels" . | nindent 6 }}
+      io.kompose.service: {{ template "platform.fullname" . }}
+      {{- include "platform.selectorLabels" . | nindent 6 }}
   strategy:
     type: {{ .Values.deploymentStrategy.type }}
   template:
@@ -32,7 +32,7 @@ spec:
 	    {{- range $key, $value := .Values.podAnnotations }}}
 	    {{ $key }}: {{ $value | quote }}
       labels:
-	    io.kompose.service: {{ template "feelguuds-platform.fullname" . }}
+	    io.kompose.service: {{ template "platform.fullname" . }}
     spec:
       containers:
         - env:
@@ -455,7 +455,7 @@ spec:
                   name: feelguuds-platform-env
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          name: {{ template "feelguuds-platform.fullname" . }}
+          name: {{ template "platform.fullname" . }}
 		  {{- if .Values.securityContext }}
 		  securityContext:
 		  {{- toYaml .Values.securityContext | nindent 12 }}
@@ -513,7 +513,7 @@ spec:
 			{{- if .Values.cache }}
 			- --cache-server={{ .Values.cache }}
 			{{- else if .Values.redis.enabled }}
-			- --cache-server={{ template "feelguuds-platform.fullname" . }}-redis:6379
+			- --cache-server={{ template "platform.fullname" . }}-redis:6379
 			{{- end }}
 			- --level={{ .Values.logLevel }}
 			- --random-delay={{ .Values.faults.delay }}
@@ -578,7 +578,7 @@ spec:
 		  {{- if .Values.tls.enabled }}
 		- name: tls
 		  secret:
-			secretName: {{ template "feelguuds-platform.tlsSecretName" . }}
+			secretName: {{ template "platform.tlsSecretName" . }}
 		{{- end }}
         resources:
 {{ toYaml .Values.resources | indent 12 }}
