@@ -18,19 +18,20 @@ type createAccountScenario struct {
 
 // createAccountTestScenarios returns a set of scenarios to test the create account operation
 func createAccountTestScenarios() []createAccountScenario {
+	testAcct := GenerateRandomizedAccount()
 	return []createAccountScenario{
 		{
 			// success condition - create a new merchant account
 			scenarioName:     "create new merchant account",
 			shouldErrorOccur: false,
-			account:          GenerateRandomizedAccount(),
+			account:          testAcct,
 			expectedError:    nil,
 		},
 		{
 			// failure condition - attempt to create duplicate merchant account
 			scenarioName:     "create duplicate merchant account",
 			shouldErrorOccur: true,
-			account:          GenerateRandomizedAccount(),
+			account:          testAcct,
 			expectedError:    service_errors.ErrAccountAlreadyExist,
 		},
 		{
